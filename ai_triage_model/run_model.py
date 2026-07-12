@@ -7,13 +7,13 @@ import sys
 app = FastAPI()
 
 print("=====================================================")
-print("⏳ Loading AI Model (This might take a minute...)")
+print("Loading AI Model (This might take a minute...)")
 print("=====================================================")
 try:
     classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
-    print("✅ AI Model Loaded Successfully!")
+    print("AI Model Loaded Successfully!")
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
+    print(f"Error loading model: {e}")
     sys.exit(1)
 
 class MaintenanceRequestPayload(BaseModel):
@@ -24,7 +24,7 @@ class MaintenanceRequestPayload(BaseModel):
 @app.post("/predict")
 async def predict(payload: MaintenanceRequestPayload):
     text = payload.issueDescription
-    print(f"\n[AI Processing] Received Request: '{text}'")
+    print(f"\\n[AI Processing] Received Request: '{text}'")
     
     # Priority Prediction
     pri_res = classifier(text, ["High", "Medium", "Low"])
@@ -38,6 +38,6 @@ async def predict(payload: MaintenanceRequestPayload):
     return {"priority": priority, "issueCategory": category}
 
 if __name__ == "__main__":
-    print("\n🚀 AI Server starting on http://localhost:8000")
+    print("\\nAI Server starting on http://localhost:8000")
     print("Update your server/.env file to: AI_MODEL_URL=http://localhost:8000")
     uvicorn.run(app, host="0.0.0.0", port=8000)
