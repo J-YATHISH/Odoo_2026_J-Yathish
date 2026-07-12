@@ -14,6 +14,7 @@ import maintenanceRouter from './modules/maintenance/routes';
 import auditRouter from './modules/audit/routes';
 import reportsRouter from './modules/reports/routes';
 import notificationsRouter from './modules/notifications/routes';
+import intelligenceRouter from './modules/intelligence/routes';
 
 // ─── App configuration ────────────────────────────────────────────────────────
 
@@ -92,6 +93,7 @@ app.use('/maintenance', maintenanceRouter);
 app.use('/audit', auditRouter);
 app.use('/reports', reportsRouter);
 app.use('/notifications', notificationsRouter);
+app.use('/intelligence', intelligenceRouter);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 // Any request that didn't match a registered route lands here.
