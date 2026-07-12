@@ -19,12 +19,6 @@ datasource db {
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-enum Role {
-  ADMIN
-  ASSET_MANAGER
-  DEPARTMENT_HEAD
-  EMPLOYEE
-}
 
 enum AssetStatus {
   AVAILABLE
@@ -80,6 +74,7 @@ model Organization {
   // Relationships
   departments        Department[]
   categories         AssetCategory[]
+  roles              Role[]
   employees          Employee[]
   assets             Asset[]
   allocations        Allocation[]
@@ -110,6 +105,18 @@ model Department {
   @@unique([organizationId, name]) // Name must be unique per organization
 }
 
+model Role {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  name           String
+  permissions    String[]
+  employees      Employee[]
+
+  @@unique([organizationId, name])
+}
+
 model AssetCategory {
   id             Int          @id @default(autoincrement())
   organizationId Int
@@ -130,7 +137,8 @@ model Employee {
   name         String
   email        String       @unique // Email globally unique for easy login
   passwordHash String
-  role         Role         @default(EMPLOYEE)
+  roleId       Int
+  role         Role         @relation(fields: [roleId], references: [id])
   departmentId Int?
   department   Department?  @relation("EmployeeDept", fields: [departmentId], references: [id])
   status       Status       @default(ACTIVE)

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Role, Status } from '../../utils/constants';
+import { Status } from '../../utils/constants';
 
 export const createDepartmentSchema = z.object({
   name: z.string().min(1, 'Department name is required'),
@@ -19,5 +19,12 @@ export const createCategorySchema = z.object({
 export const updateCategorySchema = createCategorySchema.partial();
 
 export const promoteEmployeeSchema = z.object({
-  role: z.enum([Role.ADMIN, Role.ASSET_MANAGER, Role.DEPARTMENT_HEAD, Role.EMPLOYEE]),
+  roleId: z.number().int().positive(),
 });
+
+export const createRoleSchema = z.object({
+  name: z.string().min(1, 'Role name is required'),
+  permissions: z.array(z.string()).min(1, 'At least one permission is required'),
+});
+
+export const updateRoleSchema = createRoleSchema.partial();

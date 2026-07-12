@@ -77,20 +77,61 @@ export async function listEmployees(organizationId: number) {
       id: true,
       name: true,
       email: true,
-      role: true,
+      role: { select: { id: true, name: true } },
       status: true,
       department: { select: { id: true, name: true } },
     },
   });
 }
 
-export async function promoteEmployee(organizationId: number, id: number, role: z.infer<typeof t.promoteEmployeeSchema>['role']) {
+export async function promoteEmployee(organizationId: number, id: number, roleId: number) {
   const emp = await prisma.employee.findUnique({ where: { id } });
   if (!emp || emp.organizationId !== organizationId) throw new AppError('Not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
 
+  // Verify the role belongs to the organization
+  const role = await prisma.role.findUnique({ where: { id: roleId } });
+  if (!role || role.organizationId !== organizationId) throw new AppError('Invalid role', HTTP.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+
   return prisma.employee.update({
     where: { id },
-    data: { role },
-    select: { id: true, name: true, role: true },
+    data: { roleId },
+    select: { id: true, name: true, role: { select: { name: true } } },
   });
+}
+
+// ─── Roles ────────────────────────────────────────────────────────────────────
+
+export async function listRoles(organizationId: number) {
+  return prisma.role.findMany({
+    where: { organizationId },
+    include: { _count: { select: { employees: true } } },
+  });
+}
+
+export async function createRole(organizationId: number, data: z.infer<typeof t.createRoleSchema>) {
+  const existing = await prisma.role.findUnique({ where: { organizationId_name: { organizationId, name: data.name } } });
+  if (existing) throw new AppError('Role name already exists', HTTP.CONFLICT, ErrorCode.CONFLICT);
+
+  return prisma.role.create({ data: { ...data, organizationId } });
+}
+
+export async function updateRole(organizationId: number, id: number, data: z.infer<typeof t.updateRoleSchema>) {
+  const role = await prisma.role.findUnique({ where: { id } });
+  if (!role || role.organizationId !== organizationId) throw new AppError('Not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+
+  return prisma.role.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteRole(organizationId: number, id: number) {
+  const role = await prisma.role.findUnique({ where: { id }, include: { _count: { select: { employees: true } } } });
+  if (!role || role.organizationId !== organizationId) throw new AppError('Not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+
+  if (role._count.employees > 0) {
+    throw new AppError('Cannot delete a role that is assigned to employees', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
+  }
+
+  await prisma.role.delete({ where: { id } });
 }

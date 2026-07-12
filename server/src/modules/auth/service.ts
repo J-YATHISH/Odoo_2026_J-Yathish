@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import prisma from '../../prisma/client';
 import { SignupRequestBody, LoginRequestBody, LoginResult } from './types';
 import { AppError } from '../../utils/AppError';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { HTTP, ErrorCode, Permission } from '../../utils/constants';
 
 // ─── Auth service ─────────────────────────────────────────────────────────────
 
@@ -31,9 +31,40 @@ export async function signup(data: SignupRequestBody) {
       data: { name: data.organizationName }
     });
     isNewOrg = true;
+
+    // Seed default roles for the new organization
+    await prisma.role.createMany({
+      data: [
+        {
+          organizationId: org.id,
+          name: 'Admin',
+          permissions: Object.values(Permission),
+        },
+        {
+          organizationId: org.id,
+          name: 'Asset Manager',
+          permissions: [Permission.VIEW_ASSETS, Permission.MANAGE_ASSETS, Permission.MANAGE_MAINTENANCE],
+        },
+        {
+          organizationId: org.id,
+          name: 'Employee',
+          permissions: [Permission.VIEW_ASSETS, Permission.REQUEST_MAINTENANCE, Permission.BOOK_ASSETS],
+        }
+      ]
+    });
   }
 
-  // Create employee. If this is a brand new organization, the first user is an ADMIN.
+  // Determine role for new user
+  const targetRoleName = isNewOrg ? 'Admin' : 'Employee';
+  const targetRole = await prisma.role.findUnique({
+    where: { organizationId_name: { organizationId: org.id, name: targetRoleName } }
+  });
+
+  if (!targetRole) {
+    throw new AppError('Default role not found.', HTTP.SERVER_ERROR, ErrorCode.SERVER_ERROR);
+  }
+
+  // Create employee
   const employee = await prisma.employee.create({
     data: {
       name: data.name,
@@ -41,13 +72,13 @@ export async function signup(data: SignupRequestBody) {
       passwordHash,
       departmentId: data.departmentId,
       organizationId: org.id,
-      role: isNewOrg ? 'ADMIN' : 'EMPLOYEE',
+      roleId: targetRole.id,
     },
     select: {
       id: true,
       name: true,
       email: true,
-      role: true,
+      roleId: true,
       departmentId: true,
       organizationId: true,
       status: true,
@@ -60,6 +91,7 @@ export async function signup(data: SignupRequestBody) {
 export async function login(data: LoginRequestBody): Promise<LoginResult> {
   const employee = await prisma.employee.findUnique({
     where: { email: data.email },
+    include: { role: true },
   });
 
   if (!employee) {
@@ -82,7 +114,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
     {
       id: employee.id,
       email: employee.email,
-      role: employee.role,
+      permissions: employee.role.permissions,
       departmentId: employee.departmentId,
       organizationId: employee.organizationId,
     },
@@ -107,7 +139,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
       id: employee.id,
       name: employee.name,
       email: employee.email,
-      role: employee.role,
+      roleId: employee.roleId,
       departmentId: employee.departmentId,
       organizationId: employee.organizationId,
     },

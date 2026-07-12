@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import * as c from './controller';
 import { validate } from '../../middleware/validate';
-import { requireAuth, requireRole } from '../../middleware/auth';
-import { Role } from '../../utils/constants';
+import { requireAuth, requirePermission } from '../../middleware/auth';
+import { Permission } from '../../utils/constants';
 import * as t from './types';
 
 const router = Router();
@@ -15,16 +15,22 @@ router.use(requireAuth);
 
 // Departments
 router.get('/departments', c.listDepartments);
-router.post('/departments', requireRole([Role.ADMIN]), validate(t.createDepartmentSchema), c.createDepartment);
-router.patch('/departments/:id', requireRole([Role.ADMIN]), validate(t.updateDepartmentSchema), c.updateDepartment);
+router.post('/departments', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.createDepartmentSchema), c.createDepartment);
+router.patch('/departments/:id', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.updateDepartmentSchema), c.updateDepartment);
 
 // Categories
 router.get('/categories', c.listCategories);
-router.post('/categories', requireRole([Role.ADMIN, Role.ASSET_MANAGER]), validate(t.createCategorySchema), c.createCategory);
-router.patch('/categories/:id', requireRole([Role.ADMIN, Role.ASSET_MANAGER]), validate(t.updateCategorySchema), c.updateCategory);
+router.post('/categories', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.createCategorySchema), c.createCategory);
+router.patch('/categories/:id', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.updateCategorySchema), c.updateCategory);
 
 // Employees
 router.get('/employees', c.listEmployees);
-router.patch('/employees/:id/promote', requireRole([Role.ADMIN]), validate(t.promoteEmployeeSchema), c.promoteEmployee);
+router.patch('/employees/:id/promote', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.promoteEmployeeSchema), c.promoteEmployee);
+
+// Roles
+router.get('/roles', requirePermission([Permission.MANAGE_ORGANIZATION]), c.listRoles);
+router.post('/roles', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.createRoleSchema), c.createRole);
+router.patch('/roles/:id', requirePermission([Permission.MANAGE_ORGANIZATION]), validate(t.updateRoleSchema), c.updateRole);
+router.delete('/roles/:id', requirePermission([Permission.MANAGE_ORGANIZATION]), c.deleteRole);
 
 export default router;

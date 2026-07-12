@@ -53,7 +53,35 @@ export async function listEmployees(req: Request, res: Response, next: NextFunct
 
 export async function promoteEmployee(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.promoteEmployee(req.user!.organizationId, parseInt(req.params.id as string, 10), req.body.role);
+    const data = await service.promoteEmployee(req.user!.organizationId, parseInt(req.params.id as string, 10), req.body.roleId);
     res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
+}
+
+export async function listRoles(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listRoles(req.user!.organizationId);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
+}
+
+export async function createRole(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createRole(req.user!.organizationId, req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
+}
+
+export async function updateRole(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.updateRole(req.user!.organizationId, parseInt(req.params.id as string, 10), req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
+}
+
+export async function deleteRole(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    await service.deleteRole(req.user!.organizationId, parseInt(req.params.id as string, 10));
+    res.status(HTTP.NO_CONTENT).send();
   } catch (err) { next(err); }
 }

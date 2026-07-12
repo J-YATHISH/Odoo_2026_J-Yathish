@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Role } from '../../utils/constants';
+
 
 // ─── Auth module type definitions ─────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ export interface LoginResult {
     id: number;
     name: string;
     email: string;
-    role: Role;
+    roleId: number;
     departmentId: number | null;
     organizationId: number;
   };
