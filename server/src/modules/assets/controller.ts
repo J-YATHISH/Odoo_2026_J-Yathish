@@ -1,24 +1,31 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Assets controller ─────────────────────────────────────────────────────────
-//
-// Handles: asset CRUD, directory search, status overview.
-// Status changes are NEVER done here directly — only via transitionAssetStatus().
-// TODO: Implement in the Assets build step.
-
-export function listAssets(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Assets build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function createAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createAsset(req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function getAsset(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Assets build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listAssets(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listAssets(req.query as any);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function createAsset(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Assets build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function getAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.getAsset(parseInt(req.params.id, 10));
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function updateAsset(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Assets build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function updateAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.updateAsset(parseInt(req.params.id, 10), req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
