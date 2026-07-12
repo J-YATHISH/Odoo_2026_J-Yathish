@@ -43,41 +43,93 @@ flowchart LR
 
 ---
 
-## 🤖 Zero-Touch AI Triage Workflow
+## 🤖 Detailed Workflow Sequences
 
-This sequence diagram illustrates exactly how the AI seamlessly processes natural language into structured database tickets without user intervention.
+### 1. AI-Assisted Maintenance Triage
+This sequence demonstrates how the AI processes natural language into structured database tickets without user intervention, while allowing an Asset Manager to review the output.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Employee
-    participant React UI
-    participant Node Backend
+    participant Express API
+    participant AI Triage Service
     participant PostgreSQL
-    participant AI NLP Server
     
-    Employee->>React UI: Types: "My laptop battery is swelling!"
-    React UI->>Node Backend: POST /maintenance/zero-touch
+    Employee->>Express API: POST /maintenance-requests<br>{ issueDescription, assetCategory }
+    Express API->>PostgreSQL: create MaintenanceRequest (PENDING)
     
-    Note over Node Backend,PostgreSQL: Context Gathering Phase
-    Node Backend->>PostgreSQL: Query: Find active devices assigned to this Employee
-    PostgreSQL-->>Node Backend: Returns: [Dell XPS 13, iPhone 12]
-    Node Backend->>Node Backend: Fuzzy match text to Asset Category ("laptop" -> Dell XPS)
+    Express API->>AI Triage Service: POST /predict<br>{ issueDescription, assetCategoryName }
     
-    Note over Node Backend,AI NLP Server: AI Inference Phase
-    Node Backend->>AI NLP Server: POST /predict { text, category }
-    AI NLP Server->>AI NLP Server: HuggingFace Zero-Shot Classification
-    AI NLP Server-->>Node Backend: Returns: { category: "Hardware", priority: "High" }
+    Note right of AI Triage Service: zero-shot classify<br>Category: Hardware/Software/Network<br>Priority: High/Medium/Low
     
-    Note over Node Backend,PostgreSQL: Finalization Phase
-    Node Backend->>PostgreSQL: INSERT Maintenance Request (Priority: High)
-    PostgreSQL-->>Node Backend: Success
+    AI Triage Service-->>Express API: { issueCategory, priority }
+    Express API->>PostgreSQL: UPDATE MaintenanceRequest<br>SET issueCategory, priority, aiAssessed = true
     
-    Node Backend-->>React UI: Returns 201 Created ticket
-    React UI-->>Employee: Shows "Ticket Created (High Priority)"
+    Note over Express API,PostgreSQL: Asset Manager reviews AI-suggested<br>priority/category before approval
+    
+    Express API->>PostgreSQL: transitionAssetStatus(UNDER_MAINTENANCE) on approval
+```
+
+### 2. Allocation Conflict -> Transfer Request
+This sequence shows how the system prevents allocation conflicts by forcing a peer-to-peer Transfer Request if an asset is already owned by someone else.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Employee (Raj)
+    participant Express API
+    participant PostgreSQL
+    
+    Employee (Raj)->>Express API: POST /allocations (Asset AF-0114)
+    Express API->>PostgreSQL: check active allocation
+    PostgreSQL-->>Express API: already held by Priya
+    Express API-->>Employee (Raj): 409 Conflict + currentHolder
+    
+    Employee (Raj)->>Express API: POST /transfer-requests
+    Express API->>PostgreSQL: create TransferRequest (REQUESTED)
+    
+    Note over Express API,PostgreSQL: Asset Manager/Dept Head approves
+    
+    Express API->>PostgreSQL: transaction: deactivate old Allocation,<br>create new Allocation, mark COMPLETED
+    Express API->>PostgreSQL: write ActivityLog + Notification
+```
+
+### 3. Resource Booking Overlap Check
+This sequence illustrates how PostgreSQL mathematically prevents booking collisions at the database level.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Express API
+    participant PostgreSQL (EXCLUDE constraint)
+    
+    User->>Express API: POST /bookings (Room B2, 9:30-10:30)
+    Express API->>PostgreSQL (EXCLUDE constraint): app-level overlap pre-check query
+    
+    alt Overlap found
+        PostgreSQL (EXCLUDE constraint)-->>Express API: conflicting booking exists
+        Express API-->>User: 409 Rejected + suggested next open slots
+    else No overlap
+        Express API->>PostgreSQL (EXCLUDE constraint): INSERT booking
+        PostgreSQL (EXCLUDE constraint)-->>Express API: EXCLUDE constraint (gist) validates no race
+        Express API-->>User: 201 Confirmed
+    end
 ```
 
 ---
+
+## 🏢 Multi-Tenant & Role-Based Access Architecture (RBAC)
+
+The system is designed as a secure, multi-tenant B2B SaaS platform.
+
+1. **Multi-Organization Scoping:** Every single query in the Express API is strictly bound by an `organizationId`. An employee at "TechCorp" cannot read or write any assets, bookings, or tickets belonging to "DiagCorp". This isolation is guaranteed at the database schema level.
+2. **Strict RBAC Middleware:** Express middleware reads cryptographically signed JWTs to enforce Role-Based Access.
+   - **ADMIN:** Full system access.
+   - **ASSET_MANAGER:** Can approve Transfer Requests and AI Maintenance tickets.
+   - **DEPARTMENT_HEAD:** Can view and manage assets within their department hierarchy.
+   - **EMPLOYEE:** Can only view their own allocated assets and create maintenance tickets.
 
 ## 🗄️ Database Structure (ERD)
 
