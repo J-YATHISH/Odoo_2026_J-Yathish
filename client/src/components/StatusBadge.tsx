@@ -13,7 +13,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, type = 'neutral
     success: 'bg-success/10 border-success/20 text-success',
     warning: 'bg-warning/10 border-warning/20 text-warning',
     danger: 'bg-danger/10 border-danger/20 text-danger',
-    neutral: 'bg-slate-800/40 border-slate-700/40 text-neutral-muted',
+    neutral: 'bg-neutral-bg border-border text-neutral-muted',
   };
 
   return (

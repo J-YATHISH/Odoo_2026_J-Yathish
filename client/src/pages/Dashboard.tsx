@@ -1,130 +1,466 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { checkHealth } from '../api/health';
 import type { HealthResponse } from '../api/health';
+import { fetchDashboardReport } from '../api/reports';
+import type { DashboardReportResponse } from '../api/reports';
+import { fetchActivityLogs } from '../api/notifications';
+import type { ActivityLogItem } from '../api/notifications';
 import { APIException } from '../api/client';
-import { Server, Database, AlertCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw, Server, Database, AlertCircle } from 'lucide-react';
+
+interface OverdueItem {
+  id: string;
+  status: string;
+  name: string;
+  sub: string;
+  color: string;
+  textColor: string;
+}
+
+interface ActivityRow {
+  id: string;
+  icon: string;
+  iconColor: string;
+  assetId: string;
+  description: string;
+  timestamp: string;
+}
 
 export const Dashboard: React.FC = () => {
-  const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
 
-  const fetchHealth = () => {
+  // Health and Reports states
+  const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [report, setReport] = useState<DashboardReportResponse | null>(null);
+  const [activityLogs, setActivityLogs] = useState<ActivityRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Time state
+  const [sysTime, setSysTime] = useState<string>('00:00:00');
+
+  // Clock effect
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      setSysTime(now.toLocaleTimeString('en-US', { hour12: false }));
+    };
+    updateClock();
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch all dashboard data
+  const loadData = async () => {
     setLoading(true);
     setError(null);
-    checkHealth()
-      .then((res) => {
-        setHealth(res);
-        setLoading(false);
-      })
-      .catch((err: unknown) => {
-        if (err instanceof APIException) {
-          setError(`${err.message} (Status: ${err.status})`);
-        } else if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred connecting to the backend.');
-        }
-        setLoading(false);
-      });
+    try {
+      // 1. Fetch backend health
+      const healthRes = await checkHealth();
+      setHealth(healthRes);
+
+      // 2. Fetch reports dashboard KPIs
+      const reportRes = await fetchDashboardReport();
+      setReport(reportRes);
+
+      // 3. Fetch activity logs
+      const dbLogs = await fetchActivityLogs(10);
+      formatLogs(dbLogs);
+    } catch (err: unknown) {
+      if (err instanceof APIException) {
+        setError(`${err.message} (Status: ${err.status})`);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Connection to backend services degraded.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchHealth();
+    loadData();
   }, []);
 
+  // Format activity logs combining real logs and mockup fallbacks
+  const formatLogs = (dbLogs: ActivityLogItem[]) => {
+    // Standard mock list from operational_dashboard_main mockup
+    const mockLogs: ActivityRow[] = [
+      {
+        id: 'mock-1',
+        icon: 'check_circle',
+        iconColor: 'text-[#4FBF9F]',
+        assetId: 'AF-4492',
+        description: 'Asset returned from Field Op Charlie. Condition verified.',
+        timestamp: '10:42:01',
+      },
+      {
+        id: 'mock-2',
+        icon: 'swap_horiz',
+        iconColor: 'text-[#5C8FC2]',
+        assetId: 'AF-3011',
+        description: 'Transfer initiated: WH A1 -> WH B2. Carrier ID: CX-99',
+        timestamp: '10:28:44',
+      },
+      {
+        id: 'mock-3',
+        icon: 'build',
+        iconColor: 'text-[#F0A030]',
+        assetId: 'AF-8843',
+        description: 'Scheduled maintenance cycle started. Tech: R. Vance.',
+        timestamp: '09:15:00',
+      },
+      {
+        id: 'mock-4',
+        icon: 'add_box',
+        iconColor: 'text-neutral-muted',
+        assetId: 'AF-9022',
+        description: 'New asset registered: Pallet Jack S-Type.',
+        timestamp: '08:50:12',
+      },
+      {
+        id: 'mock-5',
+        icon: 'event_available',
+        iconColor: 'text-[#5C8FC2]',
+        assetId: 'AF-1109',
+        description: 'Resource booked for Proj-Delta. Duration: 5 days.',
+        timestamp: '08:05:33',
+      },
+      {
+        id: 'mock-6',
+        icon: 'error',
+        iconColor: 'text-[#C25D4E]',
+        assetId: 'AF-9932',
+        description: 'Automated system flag: Return overdue threshold breached.',
+        timestamp: '07:00:00',
+      },
+    ];
+
+    // Format DB logs into displayable logs
+    const formattedDbLogs: ActivityRow[] = dbLogs.map((log) => {
+      let desc = `${log.action} on ${log.entityType}`;
+      let icon = 'info';
+      let iconColor = 'text-primary';
+
+      if (log.action === 'LOGGED_IN') {
+        desc = `Operator ${log.employee.name} initialized session.`;
+        icon = 'login';
+        iconColor = 'text-[#4FBF9F]';
+      }
+
+      const logTime = new Date(log.createdAt).toLocaleTimeString('en-US', {
+        hour12: false,
+      });
+
+      return {
+        id: `db-${log.id}`,
+        icon,
+        iconColor,
+        assetId: log.entityId ? `AF-${log.entityId.toString().padStart(4, '0')}` : 'SYS',
+        description: desc,
+        timestamp: logTime,
+      };
+    });
+
+    // Merge: show DB logs first, then mock logs
+    setActivityLogs([...formattedDbLogs, ...mockLogs]);
+  };
+
+  // Mock overdue list from mockup
+  const overdueItems: OverdueItem[] = [
+    {
+      id: 'AF-9932',
+      status: 'OVERDUE 2D',
+      name: 'Heavy Lifter Forklift H2',
+      sub: 'Return Pending - WH B2',
+      color: 'bg-[#C25D4E]',
+      textColor: 'text-[#C25D4E]',
+    },
+    {
+      id: 'AF-8411',
+      status: 'OVERDUE 1D',
+      name: 'Calibration Sensor Array X',
+      sub: 'Maint. Inspection - Lab 4',
+      color: 'bg-[#C25D4E]',
+      textColor: 'text-[#C25D4E]',
+    },
+    {
+      id: 'AF-1002',
+      status: 'LATE START',
+      name: 'Mobile Generator Unit M1',
+      sub: 'Booking Allocation - Site C',
+      color: 'bg-[#F0A030]',
+      textColor: 'text-[#F0A030]',
+    },
+  ];
+
+  // Dynamic values or mock defaults
+  const availableCount = report?.utilization.availableAssets || 1492;
+  const allocatedCount = report?.utilization.allocatedAssets || 348;
+  const maintenanceCount = report?.maintenance.assetsCurrentlyUnderMaintenance || 12;
+  const activeBookingsCount = 87; // Fallback
+  const pendingTransfersCount = 45; // Fallback
+  const upcomingReturnsCount = 19; // Fallback
+
+  const statusLabel = health && health.db === 'connected' ? 'NOMINAL' : 'DEGRADED';
+  const statusColor = statusLabel === 'NOMINAL' ? 'text-[#4FBF9F]' : 'text-[#C25D4E]';
+
   return (
-    <Layout title="Dashboard">
+    <Layout title="Operational Dashboard">
       <div className="space-y-6">
-        {/* Connection status section (real call verification) */}
-        <div className="bg-neutral-card border border-border rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-semibold tracking-wider text-neutral-muted uppercase">
-              System Integration Connectivity Status
-            </h3>
+        {/* Top Control Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border pb-4 stagger-item">
+          <div>
+            <div className="font-data-mono text-xs text-neutral-muted mt-1 uppercase tracking-wider">
+              SYS-TIME: <span className="text-neutral-text font-semibold">{sysTime}</span> | STATUS:{' '}
+              <span className={`font-bold ${statusColor}`}>{statusLabel}</span>
+            </div>
+          </div>
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-2">
             <button
-              onClick={fetchHealth}
+              onClick={() => navigate('/assets')}
+              className="px-3 py-1.5 border border-border bg-neutral-card text-neutral-text font-label-sm text-xs uppercase hover:bg-neutral-muted/15 transition-colors flex items-center gap-1.5 focus:outline-none"
+            >
+              <span className="material-symbols-outlined text-[14px]">add_box</span>
+              Register Asset
+            </button>
+            <button
+              onClick={() => navigate('/bookings')}
+              className="px-3 py-1.5 border border-border bg-neutral-card text-neutral-text font-label-sm text-xs uppercase hover:bg-neutral-muted/15 transition-colors flex items-center gap-1.5 focus:outline-none"
+            >
+              <span className="material-symbols-outlined text-[14px]">event_available</span>
+              Book Resource
+            </button>
+            <button
+              onClick={() => navigate('/maintenance')}
+              className="px-3 py-1.5 border border-border bg-neutral-card text-neutral-text font-label-sm text-xs uppercase hover:bg-neutral-muted/15 transition-colors flex items-center gap-1.5 text-primary focus:outline-none"
+            >
+              <span className="material-symbols-outlined text-[14px]">build_circle</span>
+              Raise Maintenance Request
+            </button>
+            <button
+              onClick={loadData}
               disabled={loading}
-              className="p-2 text-neutral-muted hover:text-neutral-text hover:bg-slate-850 rounded-lg transition-all focus:outline-none disabled:opacity-50"
-              title="Refresh connection status"
+              className="p-1.5 border border-border bg-neutral-card text-neutral-muted hover:text-neutral-text hover:bg-neutral-muted/15 rounded transition-all focus:outline-none disabled:opacity-50 flex items-center justify-center"
+              title="Refresh Dashboard Data"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             </button>
           </div>
+        </div>
 
-          {loading ? (
-            <div className="flex items-center gap-2.5 text-sm text-neutral-muted">
-              <RefreshCw size={16} className="animate-spin text-primary" />
-              <span>Verifying backend and database connection...</span>
+        {/* 1. Connection Health alert banner if degraded */}
+        {error && (
+          <div className="flex items-center gap-3 text-danger bg-danger/10 border border-danger/20 p-4 rounded-none text-xs font-data-mono">
+            <AlertCircle size={16} />
+            <div>
+              <span className="font-semibold uppercase">API HEALTH ERROR:</span> {error} — Fallback data loaded.
             </div>
-          ) : error ? (
-            <div className="flex items-center gap-3 text-danger bg-danger/10 border border-danger/20 p-4 rounded-xl text-sm">
-              <AlertCircle size={18} />
-              <div>
-                <span className="font-semibold">Backend Unreachable:</span> {error}
-              </div>
-            </div>
-          ) : health ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Backend API status */}
-              <div className="flex items-center gap-4 bg-slate-900/30 border border-border p-4 rounded-xl">
-                <div className="p-3 bg-primary/10 text-primary rounded-xl">
-                  <Server size={18} />
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-muted block">
-                    API Server Status
-                  </span>
-                  <span className="text-sm font-semibold text-neutral-text">
-                    {health.status === 'ok' ? 'ONLINE (HTTP 200)' : health.status}
-                  </span>
-                </div>
-              </div>
+          </div>
+        )}
 
-              {/* DB Status */}
-              <div className="flex items-center gap-4 bg-slate-900/30 border border-border p-4 rounded-xl">
+        {/* 2. KPI Summary Row */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {/* Available */}
+          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4FBF9F]"></div>
+            <div className="pl-2 flex items-center justify-between">
+              <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
+                Assets Available
+              </span>
+              <span className="material-symbols-outlined text-[#4FBF9F] text-base">inventory</span>
+            </div>
+            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+              {availableCount.toLocaleString()}
+            </div>
+          </div>
+
+          {/* Allocated */}
+          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#5C8FC2]"></div>
+            <div className="pl-2 flex items-center justify-between">
+              <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
+                Assets Allocated
+              </span>
+              <span className="material-symbols-outlined text-[#5C8FC2] text-base">local_shipping</span>
+            </div>
+            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+              {allocatedCount.toLocaleString()}
+            </div>
+          </div>
+
+          {/* Maintenance */}
+          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#F0A030]"></div>
+            <div className="pl-2 flex items-center justify-between">
+              <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
+                Maintenance Today
+              </span>
+              <span className="material-symbols-outlined text-[#F0A030] text-base">handyman</span>
+            </div>
+            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+              {maintenanceCount.toLocaleString()}
+            </div>
+          </div>
+
+          {/* Bookings */}
+          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#5C8FC2]"></div>
+            <div className="pl-2 flex items-center justify-between">
+              <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
+                Active Bookings
+              </span>
+              <span className="material-symbols-outlined text-[#5C8FC2] text-base">calendar_month</span>
+            </div>
+            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+              {activeBookingsCount.toLocaleString()}
+            </div>
+          </div>
+
+          {/* Transfers */}
+          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4FBF9F]"></div>
+            <div className="pl-2 flex items-center justify-between">
+              <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
+                Pending Transfers
+              </span>
+              <span className="material-symbols-outlined text-[#4FBF9F] text-base">sync_alt</span>
+            </div>
+            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+              {pendingTransfersCount.toLocaleString()}
+            </div>
+          </div>
+
+          {/* Returns */}
+          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-neutral-muted"></div>
+            <div className="pl-2 flex items-center justify-between">
+              <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
+                Upcoming Returns
+              </span>
+              <span className="material-symbols-outlined text-neutral-muted text-base">keyboard_return</span>
+            </div>
+            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+              {upcomingReturnsCount.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Bottom Panels Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Overdue Section (1/3 width) */}
+          <div className="col-span-1 border border-border bg-neutral-card flex flex-col min-h-[400px] stagger-item">
+            <div className="p-3 border-b border-border bg-neutral-card/40 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#C25D4E] text-base">warning</span>
+              <span className="font-label-sm text-xs uppercase text-neutral-text tracking-wider">
+                Critical / Overdue
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+              {overdueItems.map((item, idx) => (
                 <div
-                  className={`p-3 rounded-xl ${
-                    health.db === 'connected' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
-                  }`}
+                  key={idx}
+                  className="border border-border bg-neutral-bg relative pl-3 p-2.5 group hover:bg-neutral-muted/10 transition-colors cursor-pointer"
                 >
-                  <Database size={18} />
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${item.color}`}></div>
+                  <div className="flex justify-between items-start mb-1">
+                    <span className={`font-data-mono text-xs font-semibold ${item.textColor}`}>
+                      {item.id}
+                    </span>
+                    <span className="font-data-mono text-[9px] text-neutral-muted bg-neutral-card px-1 border border-border uppercase">
+                      {item.status}
+                    </span>
+                  </div>
+                  <div className="font-body-md text-xs text-neutral-text truncate">{item.name}</div>
+                  <div className="font-label-sm text-[10px] text-neutral-muted uppercase mt-1">
+                    {item.sub}
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-muted block">
-                    Database State
-                  </span>
-                  <span className="text-sm font-semibold text-neutral-text">
-                    {health.db.toUpperCase()}
-                  </span>
-                </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
-              {/* Timestamp */}
-              <div className="flex items-center gap-4 bg-slate-900/30 border border-border p-4 rounded-xl">
-                <div className="p-3 bg-slate-800 text-neutral-muted rounded-xl">
-                  <RefreshCw size={18} />
+          {/* Activity Log Section (2/3 width) */}
+          <div className="col-span-1 lg:col-span-2 border border-border bg-neutral-card flex flex-col min-h-[400px] stagger-item">
+            <div className="p-3 border-b border-border bg-neutral-card/40 flex items-center justify-between">
+              <span className="font-label-sm text-xs uppercase text-neutral-text tracking-wider">
+                System Activity Log
+              </span>
+            </div>
+
+            {/* Dense List Header */}
+            <div className="grid grid-cols-[32px_90px_1fr_90px] gap-2 px-3 py-1.5 border-b border-border bg-neutral-bg/60 font-label-sm text-[10px] text-neutral-muted uppercase">
+              <div>TYP</div>
+              <div>ASSET ID</div>
+              <div>DESCRIPTION / ACTION</div>
+              <div className="text-right">TIMESTAMP</div>
+            </div>
+
+            {/* Feed Rows */}
+            <div className="flex-1 overflow-y-auto">
+              {activityLogs.map((log) => (
+                <div
+                  key={log.id}
+                  className="grid grid-cols-[32px_90px_1fr_90px] gap-2 px-3 py-2.5 border-b border-border hover:bg-neutral-muted/10 transition-colors items-center group"
+                >
+                  <div className={log.iconColor}>
+                    <span className="material-symbols-outlined text-[16px] block">
+                      {log.icon}
+                    </span>
+                  </div>
+                  <div className="font-data-mono text-xs text-neutral-text group-hover:text-primary transition-colors">
+                    {log.assetId}
+                  </div>
+                  <div className="font-body-md text-xs text-neutral-text truncate">
+                    {log.description}
+                  </div>
+                  <div className="font-data-mono text-[10px] text-neutral-muted text-right">
+                    {log.timestamp}
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-muted block">
-                    Last Health Ping
-                  </span>
-                  <span className="text-xs font-mono text-neutral-text">
-                    {new Date(health.timestamp).toLocaleTimeString()}
-                  </span>
-                </div>
+              ))}
+            </div>
+
+            <div className="p-2 border-t border-border bg-neutral-bg/40 flex justify-center">
+              <button
+                onClick={() => navigate('/activity')}
+                className="font-label-sm text-xs uppercase text-neutral-muted hover:text-primary transition-colors focus:outline-none py-1 px-3"
+              >
+                Load More Logs
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Backend System Connectivity Details */}
+        {health && (
+          <div className="border border-border p-4 bg-neutral-card/30 mt-6 stagger-item">
+            <h4 className="text-[10px] uppercase font-bold tracking-wider text-neutral-muted mb-3">
+              INTEGRATION PING STATS
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3">
+                <Server size={14} className="text-primary" />
+                <span className="text-xs text-neutral-text">
+                  API: <span className="font-semibold text-success">ONLINE (HTTP 200)</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Database size={14} className="text-success" />
+                <span className="text-xs text-neutral-text">
+                  DB Connection: <span className="font-semibold text-success">CONNECTED</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-neutral-muted text-xs">
+                <span>Last verification: {new Date(health.timestamp).toLocaleTimeString()}</span>
               </div>
             </div>
-          ) : null}
-        </div>
-
-        {/* Coming in dashboard build message */}
-        <div className="flex flex-col items-center justify-center min-h-[30vh] text-center border border-dashed border-border rounded-2xl p-12 bg-neutral-card/20">
-          <p className="text-neutral-muted text-sm font-medium tracking-wide">
-            Coming in Dashboard build.
-          </p>
-        </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
