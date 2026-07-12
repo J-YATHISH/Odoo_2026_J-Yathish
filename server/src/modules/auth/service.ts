@@ -1,14 +1,96 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import prisma from '../../prisma/client';
+import { SignupRequestBody, LoginRequestBody, LoginResult } from './types';
+import { AppError } from '../../utils/AppError';
+import { HTTP, ErrorCode } from '../../utils/constants';
+
 // ─── Auth service ─────────────────────────────────────────────────────────────
-//
-// Business logic for authentication lives here.
-// The controller calls this; it never touches the database directly.
-//
-// TODO: Implement in the Auth build step (Step 2 of the guide):
-//   - signup(): hash password with bcrypt, set role = EMPLOYEE always,
-//               create Employee record, return sanitized employee data
-//   - login():  find employee by email, bcrypt.compare(), sign JWT,
-//               write ActivityLog entry for the login event
-//   - The JWT payload shape must match AuthenticatedUser in middleware/auth.ts
-//
-// For now this file exists so the module has its full structure in place
-// and other modules can see the correct folder pattern.
+
+export async function signup(data: SignupRequestBody) {
+  // Check if email already exists
+  const existing = await prisma.employee.findUnique({
+    where: { email: data.email },
+  });
+
+  if (existing) {
+    throw new AppError('Email is already registered.', HTTP.CONFLICT, ErrorCode.CONFLICT);
+  }
+
+  // Hash password
+  const passwordHash = await bcrypt.hash(data.password, 12);
+
+  // Create employee (role is always EMPLOYEE by default in Prisma schema)
+  const employee = await prisma.employee.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      passwordHash,
+      departmentId: data.departmentId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      departmentId: true,
+      status: true,
+    },
+  });
+
+  return employee;
+}
+
+export async function login(data: LoginRequestBody): Promise<LoginResult> {
+  const employee = await prisma.employee.findUnique({
+    where: { email: data.email },
+  });
+
+  if (!employee) {
+    throw new AppError('Invalid email or password.', HTTP.UNAUTHORIZED, ErrorCode.UNAUTHORIZED);
+  }
+
+  if (employee.status !== 'ACTIVE') {
+    throw new AppError('This account has been deactivated.', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+  }
+
+  const isValidPassword = await bcrypt.compare(data.password, employee.passwordHash);
+
+  if (!isValidPassword) {
+    throw new AppError('Invalid email or password.', HTTP.UNAUTHORIZED, ErrorCode.UNAUTHORIZED);
+  }
+
+  // Generate JWT
+  const secret = process.env.JWT_SECRET!;
+  const token = jwt.sign(
+    {
+      id: employee.id,
+      email: employee.email,
+      role: employee.role,
+      departmentId: employee.departmentId,
+    },
+    secret,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '8h' },
+  );
+
+  // Record login in ActivityLog
+  await prisma.activityLog.create({
+    data: {
+      employeeId: employee.id,
+      action: 'LOGGED_IN',
+      entityType: 'Employee',
+      entityId: employee.id,
+    },
+  });
+
+  return {
+    token,
+    employee: {
+      id: employee.id,
+      name: employee.name,
+      email: employee.email,
+      role: employee.role,
+      departmentId: employee.departmentId,
+    },
+  };
+}
