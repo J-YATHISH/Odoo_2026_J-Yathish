@@ -7,48 +7,74 @@
 
 ---
 
-## 🏗️ System Architecture & Workflow
+## 🏗️ High-Level System Architecture
 
-Below is the architecture and data flow of the entire system, showing how the Client, Server, and AI Model interact seamlessly.
+The application is split into three main tiers, cleanly separating the user interface, business logic, and artificial intelligence layer.
 
 ```mermaid
-flowchart TD
-    %% Define Nodes
-    User([fa:fa-user Employee / Admin])
-    Frontend[Frontend - React/Vite]
-    Backend[Backend - Node.js/Express]
-    DB[(PostgreSQL - Supabase)]
-    AI[AI Model - Python/FastAPI]
-    
-    %% Flow
-    User -- "Types natural language issue" --> Frontend
-    Frontend -- "POST /maintenance/zero-touch" --> Backend
-    
-    Backend -- "1. Fetch Employee's Active Assets" --> DB
-    DB -- "Returns Assigned Devices" --> Backend
-    
-    Backend -- "2. POST /predict (Issue + Asset Info)" --> AI
-    
-    subgraph AI Model Server
-        AI -- "HuggingFace facebook/bart-large-mnli" --> NLP
-        NLP -- "Zero-Shot Text Classification" --> NLP
+flowchart LR
+    subgraph Client Layer
+        Web[React + Vite + Tailwind UI]
     end
     
-    AI -- "Returns Priority & Category" --> Backend
+    subgraph Application Layer
+        API[Node.js + Express Backend]
+        Auth[JWT Security Middleware]
+        Auth --> API
+    end
     
-    Backend -- "3. Save categorized Maintenance Request" --> DB
-    Backend -- "4. Return created request to User" --> Frontend
-    Frontend -- "Success Notification" --> User
-
+    subgraph Data & AI Layer
+        DB[(PostgreSQL on Supabase)]
+        AI[Python FastAPI + HuggingFace]
+    end
+    
+    Web -- "HTTPS / REST API" --> Auth
+    API -- "Prisma ORM" --> DB
+    API -- "Predictive Inference" --> AI
+    
     classDef client fill:#3b82f6,stroke:#2563eb,color:#fff;
     classDef server fill:#10b981,stroke:#059669,color:#fff;
-    classDef db fill:#f59e0b,stroke:#d97706,color:#fff;
-    classDef ai fill:#8b5cf6,stroke:#7c3aed,color:#fff;
+    classDef data fill:#f59e0b,stroke:#d97706,color:#fff;
     
-    class Frontend client;
-    class Backend server;
-    class DB db;
-    class AI ai;
+    class Web client;
+    class API,Auth server;
+    class DB,AI data;
+```
+
+---
+
+## 🤖 Zero-Touch AI Triage Workflow
+
+This sequence diagram illustrates exactly how the AI seamlessly processes natural language into structured database tickets without user intervention.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Employee
+    participant React UI
+    participant Node Backend
+    participant PostgreSQL
+    participant AI NLP Server
+    
+    Employee->>React UI: Types: "My laptop battery is swelling!"
+    React UI->>Node Backend: POST /maintenance/zero-touch
+    
+    Note over Node Backend,PostgreSQL: Context Gathering Phase
+    Node Backend->>PostgreSQL: Query: Find active devices assigned to this Employee
+    PostgreSQL-->>Node Backend: Returns: [Dell XPS 13, iPhone 12]
+    Node Backend->>Node Backend: Fuzzy match text to Asset Category ("laptop" -> Dell XPS)
+    
+    Note over Node Backend,AI NLP Server: AI Inference Phase
+    Node Backend->>AI NLP Server: POST /predict { text, category }
+    AI NLP Server->>AI NLP Server: HuggingFace Zero-Shot Classification
+    AI NLP Server-->>Node Backend: Returns: { category: "Hardware", priority: "High" }
+    
+    Note over Node Backend,PostgreSQL: Finalization Phase
+    Node Backend->>PostgreSQL: INSERT Maintenance Request (Priority: High)
+    PostgreSQL-->>Node Backend: Success
+    
+    Node Backend-->>React UI: Returns 201 Created ticket
+    React UI-->>Employee: Shows "Ticket Created (High Priority)"
 ```
 
 ---
