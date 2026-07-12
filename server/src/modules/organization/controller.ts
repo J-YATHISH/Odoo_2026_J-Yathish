@@ -1,37 +1,59 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Organization controller ───────────────────────────────────────────────────
-//
-// Handles: Departments, AssetCategories, Employee Directory, role promotion.
-// TODO: Implement in the Organization build step.
-
-export function listDepartments(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listDepartments(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listDepartments();
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function createDepartment(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function createDepartment(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createDepartment(req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function updateDepartment(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function updateDepartment(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.updateDepartment(parseInt(req.params.id, 10), req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function listCategories(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listCategories(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listCategories();
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function createCategory(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function createCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createCategory(req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function listEmployees(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function updateCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.updateCategory(parseInt(req.params.id, 10), req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function promoteEmployee(_req: Request, res: Response): void {
-  // This is the ONLY endpoint where an employee's role can change.
-  // Route is guarded with requireRole([Role.ADMIN]).
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Organization build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listEmployees(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listEmployees();
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
+}
+
+export async function promoteEmployee(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.promoteEmployee(parseInt(req.params.id, 10), req.body.role);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }

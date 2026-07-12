@@ -1,44 +1,30 @@
 import { Router } from 'express';
+import * as c from './controller';
+import { validate } from '../../middleware/validate';
 import { requireAuth, requireRole } from '../../middleware/auth';
 import { Role } from '../../utils/constants';
-import {
-  listDepartments,
-  createDepartment,
-  updateDepartment,
-  listCategories,
-  createCategory,
-  listEmployees,
-  promoteEmployee,
-} from './controller';
+import * as t from './types';
 
 const router = Router();
 
-// ─── Organization routes ───────────────────────────────────────────────────────
-// All organization routes require authentication.
-// Admin-only routes additionally use requireRole([Role.ADMIN]).
+// Health
+router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'organization' }); });
 
-router.get('/health', (_req, res) => {
-  res.json({ status: 'ok', module: 'organization' });
-});
+// All organization routes require authentication
+router.use(requireAuth);
 
 // Departments
-router.get('/departments', requireAuth, listDepartments);
-router.post('/departments', requireAuth, requireRole([Role.ADMIN]), createDepartment);
-router.patch('/departments/:id', requireAuth, requireRole([Role.ADMIN]), updateDepartment);
+router.get('/departments', c.listDepartments);
+router.post('/departments', requireRole([Role.ADMIN]), validate(t.createDepartmentSchema), c.createDepartment);
+router.patch('/departments/:id', requireRole([Role.ADMIN]), validate(t.updateDepartmentSchema), c.updateDepartment);
 
-// Asset Categories
-router.get('/categories', requireAuth, listCategories);
-router.post('/categories', requireAuth, requireRole([Role.ADMIN]), createCategory);
+// Categories
+router.get('/categories', c.listCategories);
+router.post('/categories', requireRole([Role.ADMIN, Role.ASSET_MANAGER]), validate(t.createCategorySchema), c.createCategory);
+router.patch('/categories/:id', requireRole([Role.ADMIN, Role.ASSET_MANAGER]), validate(t.updateCategorySchema), c.updateCategory);
 
-// Employee Directory
-router.get('/employees', requireAuth, listEmployees);
-
-// Promote employee role — the ONLY endpoint where role changes are allowed.
-router.patch(
-  '/employees/:id/promote',
-  requireAuth,
-  requireRole([Role.ADMIN]),
-  promoteEmployee,
-);
+// Employees
+router.get('/employees', c.listEmployees);
+router.patch('/employees/:id/promote', requireRole([Role.ADMIN]), validate(t.promoteEmployeeSchema), c.promoteEmployee);
 
 export default router;
