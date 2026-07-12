@@ -5,7 +5,10 @@ import * as t from './types';
 import { z } from 'zod';
 import { transitionAssetStatus } from '../assets/service';
 
-export async function createAllocation(organizationId: number, data: z.infer<typeof t.createAllocationSchema>) {
+export async function createAllocation(
+  organizationId: number,
+  data: z.infer<typeof t.createAllocationSchema>,
+) {
   try {
     return await prisma.$transaction(async (tx) => {
       // 1. Create the allocation.
@@ -32,7 +35,7 @@ export async function createAllocation(organizationId: number, data: z.infer<typ
           action: 'ALLOCATED_ASSET',
           entityType: 'Asset',
           entityId: data.assetId,
-        }
+        },
       });
 
       return allocation;
@@ -43,14 +46,21 @@ export async function createAllocation(organizationId: number, data: z.infer<typ
       // Fetch the current holder to tell the user who has it.
       const active = await prisma.allocation.findFirst({
         where: { assetId: data.assetId, isActive: true },
-        include: { holder: { select: { name: true } }, asset: { select: { categoryId: true, name: true } } },
+        include: {
+          holder: { select: { name: true } },
+          asset: { select: { categoryId: true, name: true } },
+        },
       });
 
       // Fetch 3 alternative available assets of the same category
       let alternatives: any[] = [];
       if (active?.asset) {
         alternatives = await prisma.asset.findMany({
-          where: { organizationId, categoryId: active.asset.categoryId, status: AssetStatus.AVAILABLE },
+          where: {
+            organizationId,
+            categoryId: active.asset.categoryId,
+            status: AssetStatus.AVAILABLE,
+          },
           take: 3,
           select: { id: true, name: true, tag: true },
         });
@@ -60,18 +70,25 @@ export async function createAllocation(organizationId: number, data: z.infer<typ
         `Asset is currently held by ${active?.holder.name ?? 'someone else'}.`,
         HTTP.CONFLICT,
         ErrorCode.CONFLICT,
-        { alternatives } // Sending back alternative suggestions!
+        { alternatives }, // Sending back alternative suggestions!
       );
     }
     throw error;
   }
 }
 
-export async function returnAsset(organizationId: number, allocationId: number, reqEmployeeId: number, data: z.infer<typeof t.returnAssetSchema>) {
+export async function returnAsset(
+  organizationId: number,
+  allocationId: number,
+  reqEmployeeId: number,
+  data: z.infer<typeof t.returnAssetSchema>,
+) {
   const allocation = await prisma.allocation.findUnique({ where: { id: allocationId } });
-  if (!allocation || allocation.organizationId !== organizationId) throw new AppError('Allocation not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
-  if (!allocation.isActive) throw new AppError('Allocation is already returned', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
-  
+  if (!allocation || allocation.organizationId !== organizationId)
+    throw new AppError('Allocation not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (!allocation.isActive)
+    throw new AppError('Allocation is already returned', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
+
   // Ensure the person returning it is the holder, or they are an admin
   // (In a real app, we'd check roles here, but we'll allow the holder for now)
 
@@ -94,7 +111,7 @@ export async function returnAsset(organizationId: number, allocationId: number, 
         action: 'RETURNED_ASSET',
         entityType: 'Asset',
         entityId: allocation.assetId,
-      }
+      },
     });
 
     return updated;
@@ -103,10 +120,21 @@ export async function returnAsset(organizationId: number, allocationId: number, 
 
 // ─── Transfer Requests ────────────────────────────────────────────────────────
 
-export async function requestTransfer(organizationId: number, allocationId: number, fromId: number, data: z.infer<typeof t.requestTransferSchema>) {
+export async function requestTransfer(
+  organizationId: number,
+  allocationId: number,
+  fromId: number,
+  data: z.infer<typeof t.requestTransferSchema>,
+) {
   const allocation = await prisma.allocation.findUnique({ where: { id: allocationId } });
-  if (!allocation || !allocation.isActive || allocation.organizationId !== organizationId) throw new AppError('Active allocation not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
-  if (allocation.holderId !== fromId) throw new AppError('Only the current holder can request a transfer', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+  if (!allocation || !allocation.isActive || allocation.organizationId !== organizationId)
+    throw new AppError('Active allocation not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (allocation.holderId !== fromId)
+    throw new AppError(
+      'Only the current holder can request a transfer',
+      HTTP.FORBIDDEN,
+      ErrorCode.FORBIDDEN,
+    );
 
   return prisma.transferRequest.create({
     data: {
@@ -120,15 +148,27 @@ export async function requestTransfer(organizationId: number, allocationId: numb
   });
 }
 
-export async function resolveTransfer(organizationId: number, requestId: number, toId: number, data: z.infer<typeof t.resolveTransferSchema>) {
+export async function resolveTransfer(
+  organizationId: number,
+  requestId: number,
+  toId: number,
+  data: z.infer<typeof t.resolveTransferSchema>,
+) {
   const request = await prisma.transferRequest.findUnique({
     where: { id: requestId },
-    include: { allocation: true }
+    include: { allocation: true },
   });
 
-  if (!request || request.organizationId !== organizationId) throw new AppError('Transfer request not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
-  if (request.toId !== toId) throw new AppError('Only the recipient can resolve this request', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
-  if (request.status !== TransferStatus.REQUESTED) throw new AppError('Request already resolved', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
+  if (!request || request.organizationId !== organizationId)
+    throw new AppError('Transfer request not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (request.toId !== toId)
+    throw new AppError(
+      'Only the recipient can resolve this request',
+      HTTP.FORBIDDEN,
+      ErrorCode.FORBIDDEN,
+    );
+  if (request.status !== TransferStatus.REQUESTED)
+    throw new AppError('Request already resolved', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
 
   return prisma.$transaction(async (tx) => {
     // 1. Update the request status
@@ -165,7 +205,7 @@ export async function resolveTransfer(organizationId: number, requestId: number,
           action: 'ACCEPTED_TRANSFER',
           entityType: 'Asset',
           entityId: request.allocation.assetId,
-        }
+        },
       });
     }
 

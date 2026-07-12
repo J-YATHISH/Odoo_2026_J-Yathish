@@ -22,7 +22,11 @@ export interface DashboardReportResponse {
   };
 }
 
-export async function fetchDashboardReport(departmentId?: number): Promise<DashboardReportResponse> {
-  const url = departmentId ? `/reports/dashboard?departmentId=${departmentId}` : '/reports/dashboard';
+export async function fetchDashboardReport(
+  departmentId?: number,
+): Promise<DashboardReportResponse> {
+  const url = departmentId
+    ? `/reports/dashboard?departmentId=${departmentId}`
+    : '/reports/dashboard';
   return apiFetch<DashboardReportResponse>(url);
 }

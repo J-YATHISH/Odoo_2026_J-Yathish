@@ -4,11 +4,11 @@ import { AssetStatus } from '../../utils/constants';
 export async function getUtilizationReport(organizationId: number, _departmentId?: number) {
   // Find count of assets allocated vs available
   const allocated = await prisma.asset.count({
-    where: { organizationId, status: AssetStatus.ALLOCATED }
+    where: { organizationId, status: AssetStatus.ALLOCATED },
   });
 
   const available = await prisma.asset.count({
-    where: { organizationId, status: AssetStatus.AVAILABLE }
+    where: { organizationId, status: AssetStatus.AVAILABLE },
   });
 
   const total = allocated + available;
@@ -24,11 +24,11 @@ export async function getUtilizationReport(organizationId: number, _departmentId
 
 export async function getMaintenanceReport(organizationId: number) {
   const maintenanceAssets = await prisma.asset.count({
-    where: { organizationId, status: AssetStatus.UNDER_MAINTENANCE }
+    where: { organizationId, status: AssetStatus.UNDER_MAINTENANCE },
   });
 
   const recentRequests = await prisma.maintenanceRequest.count({
-    where: { organizationId, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }
+    where: { organizationId, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
   });
 
   return {
@@ -45,14 +45,14 @@ export async function getIdleAssetsReport(organizationId: number) {
     where: {
       organizationId,
       status: AssetStatus.AVAILABLE,
-      lastActivityAt: { lt: thirtyDaysAgo }
+      lastActivityAt: { lt: thirtyDaysAgo },
     },
     select: {
       id: true,
       name: true,
       tag: true,
       lastActivityAt: true,
-    }
+    },
   });
 
   return {

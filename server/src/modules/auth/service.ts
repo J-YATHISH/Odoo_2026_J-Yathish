@@ -22,13 +22,13 @@ export async function signup(data: SignupRequestBody) {
 
   // Find or create organization
   let org = await prisma.organization.findUnique({
-    where: { name: data.organizationName }
+    where: { name: data.organizationName },
   });
 
   let isNewOrg = false;
   if (!org) {
     org = await prisma.organization.create({
-      data: { name: data.organizationName }
+      data: { name: data.organizationName },
     });
     isNewOrg = true;
 
@@ -43,21 +43,29 @@ export async function signup(data: SignupRequestBody) {
         {
           organizationId: org.id,
           name: 'Asset Manager',
-          permissions: [Permission.VIEW_ASSETS, Permission.MANAGE_ASSETS, Permission.MANAGE_MAINTENANCE],
+          permissions: [
+            Permission.VIEW_ASSETS,
+            Permission.MANAGE_ASSETS,
+            Permission.MANAGE_MAINTENANCE,
+          ],
         },
         {
           organizationId: org.id,
           name: 'Employee',
-          permissions: [Permission.VIEW_ASSETS, Permission.REQUEST_MAINTENANCE, Permission.BOOK_ASSETS],
-        }
-      ]
+          permissions: [
+            Permission.VIEW_ASSETS,
+            Permission.REQUEST_MAINTENANCE,
+            Permission.BOOK_ASSETS,
+          ],
+        },
+      ],
     });
   }
 
   // Determine role for new user
   const targetRoleName = isNewOrg ? 'Admin' : 'Employee';
   const targetRole = await prisma.role.findUnique({
-    where: { organizationId_name: { organizationId: org.id, name: targetRoleName } }
+    where: { organizationId_name: { organizationId: org.id, name: targetRoleName } },
   });
 
   if (!targetRole) {

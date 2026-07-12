@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-
 // ─── Auth module type definitions ─────────────────────────────────────────────
 
 export const signupSchema = z.object({

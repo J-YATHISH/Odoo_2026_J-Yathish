@@ -54,9 +54,9 @@ export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
 // Define the granular permissions that can be assigned to a Role.
 export const Permission = {
   MANAGE_ORGANIZATION: 'MANAGE_ORGANIZATION', // Departments, roles, employees, categories
-  MANAGE_ASSETS: 'MANAGE_ASSETS',             // Create, update, delete assets
-  MANAGE_MAINTENANCE: 'MANAGE_MAINTENANCE',   // Approve/reject/update maintenance
-  MANAGE_AUDITS: 'MANAGE_AUDITS',             // Create and close audit cycles
+  MANAGE_ASSETS: 'MANAGE_ASSETS', // Create, update, delete assets
+  MANAGE_MAINTENANCE: 'MANAGE_MAINTENANCE', // Approve/reject/update maintenance
+  MANAGE_AUDITS: 'MANAGE_AUDITS', // Create and close audit cycles
   // Basic permissions implicitly granted or explicitly checked
   VIEW_ASSETS: 'VIEW_ASSETS',
   REQUEST_MAINTENANCE: 'REQUEST_MAINTENANCE',
