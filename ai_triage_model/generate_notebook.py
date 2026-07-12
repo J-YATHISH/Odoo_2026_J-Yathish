@@ -201,12 +201,20 @@ try:
         print("\\n✅ Connected to Supabase DB! Here is live dynamic data:")
         print(df.head())
     
-    # Run predictions directly on the data
-    print("\\nRunning AI on DB Data (or Sample Data):")
-    for index, row in df.iterrows():
-        cat = classifier(row['issueDescription'], ["Hardware", "Software", "Network"])['labels'][0]
-        pri = classifier(row['issueDescription'], ["High", "Medium", "Low"])['labels'][0]
-        print(f"ID {row['id']} - Text: '{row['issueDescription']}' --> Pred: [{pri}, {cat}]")
+    # Run predictions and UPDATE the database directly
+    print("\\nRunning AI on Live DB Data & Saving Results...")
+    
+    from sqlalchemy import text
+    with engine.begin() as conn:
+        for index, row in df.iterrows():
+            cat = classifier(row['issueDescription'], ["Hardware", "Software", "Network"])['labels'][0]
+            pri = classifier(row['issueDescription'], ["High", "Medium", "Low"])['labels'][0]
+            
+            # Save the AI Prediction back into the Supabase database!
+            update_query = text('UPDATE "MaintenanceRequest" SET "issueCategory" = :cat, priority = :pri, "aiAssessed" = true WHERE id = :id')
+            conn.execute(update_query, {"cat": cat.upper(), "pri": pri, "id": row['id']})
+            
+            print(f"✅ ID {row['id']} - Saved to DB --> Pred: [{pri}, {cat}]")
 
 except Exception as e:
     print("❌ Connection failed.")
