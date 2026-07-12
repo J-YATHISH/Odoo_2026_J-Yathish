@@ -1,17 +1,24 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Booking controller ────────────────────────────────────────────────────────
-// TODO: Implement in the Booking build step.
-
-export function createBooking(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Booking build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function createBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createBooking(req.user!.id, req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function cancelBooking(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Booking build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listBookings(req.query as any);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function listBookings(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Booking build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.cancelBooking(parseInt(req.params.id, 10), req.user!.id);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
