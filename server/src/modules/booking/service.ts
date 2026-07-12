@@ -4,18 +4,20 @@ import { HTTP, ErrorCode, BookingStatus } from '../../utils/constants';
 import * as t from './types';
 import { z } from 'zod';
 
-export async function createBooking(organizationId: number, employeeId: number, data: z.infer<typeof t.createBookingSchema>) {
+export async function createBooking(
+  organizationId: number,
+  employeeId: number,
+  data: z.infer<typeof t.createBookingSchema>,
+) {
   // App-level overlap check
   const overlapping = await prisma.booking.findFirst({
     where: {
       organizationId,
       assetId: data.assetId,
       status: { in: [BookingStatus.UPCOMING, BookingStatus.ONGOING] },
-      OR: [
-        { startTime: { lt: data.endTime }, endTime: { gt: data.startTime } }
-      ]
+      OR: [{ startTime: { lt: data.endTime }, endTime: { gt: data.startTime } }],
     },
-    orderBy: { endTime: 'asc' }
+    orderBy: { endTime: 'asc' },
   });
 
   if (overlapping) {
@@ -29,8 +31,8 @@ export async function createBooking(organizationId: number, employeeId: number, 
       HTTP.CONFLICT,
       ErrorCode.CONFLICT,
       {
-        suggestedSlot: { startTime: suggestedStartTime, endTime: suggestedEndTime }
-      }
+        suggestedSlot: { startTime: suggestedStartTime, endTime: suggestedEndTime },
+      },
     );
   }
 
@@ -48,25 +50,39 @@ export async function createBooking(organizationId: number, employeeId: number, 
   });
 }
 
-export async function listBookings(organizationId: number, query: z.infer<typeof t.searchBookingsSchema>) {
+export async function listBookings(
+  organizationId: number,
+  query: z.infer<typeof t.searchBookingsSchema>,
+) {
   return prisma.booking.findMany({
     where: { organizationId, assetId: query.assetId },
     include: {
       bookedBy: { select: { name: true, email: true } },
-      asset: { select: { name: true, tag: true } }
+      asset: { select: { name: true, tag: true } },
     },
-    orderBy: { startTime: 'asc' }
+    orderBy: { startTime: 'asc' },
   });
 }
 
-export async function cancelBooking(organizationId: number, bookingId: number, reqEmployeeId: number) {
+export async function cancelBooking(
+  organizationId: number,
+  bookingId: number,
+  reqEmployeeId: number,
+) {
   const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
-  if (!booking || booking.organizationId !== organizationId) throw new AppError('Booking not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
-  if (booking.bookedById !== reqEmployeeId) throw new AppError('Cannot cancel another user\'s booking', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
-  if (booking.status !== BookingStatus.UPCOMING) throw new AppError('Only upcoming bookings can be cancelled', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
+  if (!booking || booking.organizationId !== organizationId)
+    throw new AppError('Booking not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (booking.bookedById !== reqEmployeeId)
+    throw new AppError("Cannot cancel another user's booking", HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+  if (booking.status !== BookingStatus.UPCOMING)
+    throw new AppError(
+      'Only upcoming bookings can be cancelled',
+      HTTP.BAD_REQUEST,
+      ErrorCode.BAD_REQUEST,
+    );
 
   return prisma.booking.update({
     where: { id: bookingId },
-    data: { status: BookingStatus.CANCELLED }
+    data: { status: BookingStatus.CANCELLED },
   });
 }

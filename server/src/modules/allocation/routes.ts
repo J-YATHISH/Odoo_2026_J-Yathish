@@ -6,7 +6,9 @@ import * as t from './types';
 
 const router = Router();
 
-router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'allocation' }); });
+router.get('/health', (_req, res) => {
+  res.json({ status: 'ok', module: 'allocation' });
+});
 
 // All allocation routes require authentication and organization scoping
 router.use(requireAuth, scopeToOrg);

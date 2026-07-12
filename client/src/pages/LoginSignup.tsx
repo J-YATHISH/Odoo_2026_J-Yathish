@@ -66,24 +66,14 @@ export const LoginSignup: React.FC = () => {
       return {
         label: 'Moderate',
         colorClass: 'text-warning',
-        segmentClasses: [
-          'bg-danger',
-          'bg-warning',
-          'bg-neutral-muted/20',
-          'bg-neutral-muted/20',
-        ],
+        segmentClasses: ['bg-danger', 'bg-warning', 'bg-neutral-muted/20', 'bg-neutral-muted/20'],
       };
     }
     if (val.length < 12) {
       return {
         label: 'Strong',
         colorClass: 'text-success',
-        segmentClasses: [
-          'bg-danger',
-          'bg-warning',
-          'bg-success',
-          'bg-neutral-muted/20',
-        ],
+        segmentClasses: ['bg-danger', 'bg-warning', 'bg-success', 'bg-neutral-muted/20'],
       };
     }
     return {
@@ -119,7 +109,6 @@ export const LoginSignup: React.FC = () => {
           response = await apiLogin({ email, password });
           notify('Session initialized successfully.', 'success');
         }
-
         login(response.token, {
           id: response.employee.id,
           name: response.employee.name,
@@ -259,7 +248,9 @@ export const LoginSignup: React.FC = () => {
               {mode === 'login' && (
                 <button
                   type="button"
-                  onClick={() => notify('Security key recovery is handled by your system administrator.', 'info')}
+                  onClick={() =>
+                    notify('Security key recovery is handled by your system administrator.', 'info')
+                  }
                   className="font-data-mono text-[10px] text-neutral-muted/65 hover:text-neutral-text transition-colors underline focus:outline-none"
                 >
                   Forgot key?
@@ -353,7 +344,9 @@ export const LoginSignup: React.FC = () => {
 
           {/* Context Advisory Box */}
           <div className="bg-neutral-bg/60 p-3 mt-4 border border-border flex items-start gap-3 transition-colors duration-200">
-            <span className="material-symbols-outlined text-sm text-neutral-muted mt-0.5">info</span>
+            <span className="material-symbols-outlined text-sm text-neutral-muted mt-0.5">
+              info
+            </span>
             <p className="font-data-mono text-[10px] text-neutral-muted leading-relaxed">
               {mode === 'login'
                 ? 'Note: New registrations require a join code. To set up a new tenant, use the "Register New Organization" flow.'

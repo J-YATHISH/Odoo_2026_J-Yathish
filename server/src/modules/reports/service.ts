@@ -96,7 +96,7 @@ export async function getIdleAssetsReport(organizationId: number, departmentId?:
       name: true,
       tag: true,
       lastActivityAt: true,
-    }
+    },
   });
 
   return {

@@ -73,11 +73,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
       // This is a server configuration error, not a client error.
       // Log it as a hard error and return a generic 500.
       console.error('[FATAL] JWT_SECRET is not set in environment variables.');
-      throw new AppError(
-        'Server configuration error.',
-        HTTP.SERVER_ERROR,
-        ErrorCode.SERVER_ERROR,
-      );
+      throw new AppError('Server configuration error.', HTTP.SERVER_ERROR, ErrorCode.SERVER_ERROR);
     }
 
     // jwt.verify throws if the token is expired, malformed, or has a bad signature.
@@ -148,7 +144,7 @@ export function requirePermission(allowedPermissions: string[]) {
 
     // Admins usually have all permissions, but for clarity, the user object
     // should just have the permissions array populated from the DB.
-    const hasPermission = allowedPermissions.some(perm => req.user!.permissions.includes(perm));
+    const hasPermission = allowedPermissions.some((perm) => req.user!.permissions.includes(perm));
 
     if (!hasPermission) {
       next(

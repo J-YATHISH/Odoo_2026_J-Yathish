@@ -125,6 +125,11 @@ model AssetCategory {
   
   name        String
   extraFields Json?
+  
+  expectedLifespanMonths Int   @default(36)
+  baseCarbonFootprintKg  Float @default(100.0)
+  powerDrawWatts         Float @default(50.0)
+
   assets      Asset[]
 
   @@unique([organizationId, name]) // Name unique per organization
@@ -182,6 +187,7 @@ model Asset {
   bookings        Booking[]
   maintenanceReqs MaintenanceRequest[]
   auditItems      AuditItem[]
+  intelligence    AssetIntelligence?
 
   @@unique([organizationId, tag])
   @@unique([organizationId, serialNumber])
@@ -251,6 +257,8 @@ model MaintenanceRequest {
   raisedBy         Employee          @relation("RaisedBy", fields: [raisedById], references: [id])
   issueDescription String
   priority         String            @default("Medium")
+  issueCategory    String?           // To store the AI's prediction (e.g., "Hardware", "Software")
+  aiAssessed       Boolean           @default(false)
   photoUrl         String?
   status           MaintenanceStatus @default(PENDING)
   technicianName   String?
@@ -318,4 +326,15 @@ model ActivityLog {
   entityType     String
   entityId       Int?
   createdAt      DateTime     @default(now())
+}
+
+model AssetIntelligence {
+  id                 Int      @id @default(autoincrement())
+  assetId            Int      @unique
+  asset              Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  
+  healthScore        Float    @default(100.0)
+  failureProbability Float    @default(0.0)
+  carbonFootprintKg  Float    @default(0.0)
+  lastCalculatedAt   DateTime @default(now())
 }

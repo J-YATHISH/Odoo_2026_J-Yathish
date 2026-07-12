@@ -14,6 +14,8 @@ import maintenanceRouter from './modules/maintenance/routes';
 import auditRouter from './modules/audit/routes';
 import reportsRouter from './modules/reports/routes';
 import notificationsRouter from './modules/notifications/routes';
+import intelligenceRouter from './modules/intelligence/routes';
+import { initIntelligenceCron } from './modules/intelligence/cron';
 
 // ─── App configuration ────────────────────────────────────────────────────────
 
@@ -111,6 +113,7 @@ app.use('/maintenance', maintenanceRouter);
 app.use('/audit', auditRouter);
 app.use('/reports', reportsRouter);
 app.use('/notifications', notificationsRouter);
+app.use('/intelligence', intelligenceRouter);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 // Any request that didn't match a registered route lands here.
@@ -128,6 +131,9 @@ app.use((_req, res) => {
 // Must be the LAST middleware registered — Express identifies it by the
 // four-argument signature (err, req, res, next).
 app.use(globalErrorHandler);
+
+// ─── Initialize Background Tasks ──────────────────────────────────────────────
+initIntelligenceCron();
 
 // ─── Start server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {

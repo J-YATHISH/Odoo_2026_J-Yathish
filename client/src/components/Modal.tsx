@@ -33,9 +33,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 text-sm text-neutral-text overflow-y-auto max-h-[70vh]">
-          {children}
-        </div>
+        <div className="p-6 text-sm text-neutral-text overflow-y-auto max-h-[70vh]">{children}</div>
       </div>
     </div>
   );

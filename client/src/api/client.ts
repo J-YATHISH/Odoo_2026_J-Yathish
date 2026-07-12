@@ -33,10 +33,7 @@ export class APIException extends Error {
 /**
  * Standard HTTP Request Wrapper for the AssetFlow Backend API
  */
-export async function apiFetch<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
+export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   if (!apiBaseUrl) {
     throw new Error('Environment variable VITE_API_BASE_URL is not set.');
@@ -64,7 +61,7 @@ export async function apiFetch<T>(
   if (!response.ok) {
     let errorJson: APIErrorResponse | null = null;
     try {
-      errorJson = await response.json() as APIErrorResponse;
+      errorJson = (await response.json()) as APIErrorResponse;
     } catch {
       // Response was not JSON, we will fallback to status-based message
     }

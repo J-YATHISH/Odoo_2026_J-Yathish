@@ -21,7 +21,8 @@ export interface SignupPayload {
   name: string;
   email: string;
   password: string;
-  joinCode: string;
+  joinCode?: string;
+  organizationName?: string;
   departmentId?: number;
 }
 

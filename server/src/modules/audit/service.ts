@@ -5,7 +5,10 @@ import * as t from './types';
 import { z } from 'zod';
 import { transitionAssetStatus } from '../assets/service';
 
-export async function createAuditCycle(organizationId: number, data: z.infer<typeof t.createAuditCycleSchema>) {
+export async function createAuditCycle(
+  organizationId: number,
+  data: z.infer<typeof t.createAuditCycleSchema>,
+) {
   return prisma.$transaction(async (tx) => {
     // 1. Create the cycle
     const cycle = await tx.auditCycle.create({
@@ -16,8 +19,8 @@ export async function createAuditCycle(organizationId: number, data: z.infer<typ
         startDate: data.startDate,
         endDate: data.endDate,
         auditors: {
-          create: data.auditorIds.map(id => ({ employeeId: id }))
-        }
+          create: data.auditorIds.map((id) => ({ employeeId: id })),
+        },
       },
     });
 
@@ -28,17 +31,17 @@ export async function createAuditCycle(organizationId: number, data: z.infer<typ
         organizationId,
         status: { in: [AssetStatus.AVAILABLE, AssetStatus.ALLOCATED] },
         location: data.scopeLoc ? data.scopeLoc : undefined,
-      }
+      },
     });
 
     // 3. Create AuditItems for each asset
     if (assets.length > 0) {
       await tx.auditItem.createMany({
-        data: assets.map(a => ({
+        data: assets.map((a) => ({
           organizationId,
           auditCycleId: cycle.id,
           assetId: a.id,
-        }))
+        })),
       });
     }
 
@@ -51,47 +54,61 @@ export async function listAuditCycles(organizationId: number) {
     where: { organizationId },
     include: {
       auditors: { include: { employee: { select: { name: true } } } },
-      _count: { select: { items: true } }
+      _count: { select: { items: true } },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   });
 }
 
-export async function verifyAuditItem(organizationId: number, itemId: number, auditorId: number, data: z.infer<typeof t.updateAuditItemSchema>) {
+export async function verifyAuditItem(
+  organizationId: number,
+  itemId: number,
+  auditorId: number,
+  data: z.infer<typeof t.updateAuditItemSchema>,
+) {
   const item = await prisma.auditItem.findUnique({
     where: { id: itemId },
-    include: { auditCycle: { include: { auditors: true } } }
+    include: { auditCycle: { include: { auditors: true } } },
   });
 
-  if (!item || item.organizationId !== organizationId) throw new AppError('Audit item not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
-  if (item.auditCycle.closed) throw new AppError('Audit cycle is already closed', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
+  if (!item || item.organizationId !== organizationId)
+    throw new AppError('Audit item not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (item.auditCycle.closed)
+    throw new AppError('Audit cycle is already closed', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
 
-  const isAssigned = item.auditCycle.auditors.some(a => a.employeeId === auditorId);
-  if (!isAssigned) throw new AppError('You are not assigned to this audit cycle', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+  const isAssigned = item.auditCycle.auditors.some((a) => a.employeeId === auditorId);
+  if (!isAssigned)
+    throw new AppError(
+      'You are not assigned to this audit cycle',
+      HTTP.FORBIDDEN,
+      ErrorCode.FORBIDDEN,
+    );
 
   return prisma.auditItem.update({
     where: { id: itemId },
     data: {
       verification: data.verification,
       notes: data.notes,
-    }
+    },
   });
 }
 
 export async function closeAuditCycle(organizationId: number, cycleId: number) {
   const cycle = await prisma.auditCycle.findUnique({
     where: { id: cycleId },
-    include: { items: true }
+    include: { items: true },
   });
 
-  if (!cycle || cycle.organizationId !== organizationId) throw new AppError('Audit cycle not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
-  if (cycle.closed) throw new AppError('Audit cycle already closed', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
+  if (!cycle || cycle.organizationId !== organizationId)
+    throw new AppError('Audit cycle not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (cycle.closed)
+    throw new AppError('Audit cycle already closed', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
 
   return prisma.$transaction(async (tx) => {
     // 1. Close cycle
     const closedCycle = await tx.auditCycle.update({
       where: { id: cycleId },
-      data: { closed: true }
+      data: { closed: true },
     });
 
     // 2. Any item marked MISSING gets its asset transitioned to LOST

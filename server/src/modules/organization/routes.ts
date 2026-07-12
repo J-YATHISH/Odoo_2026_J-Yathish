@@ -7,7 +7,9 @@ import * as t from './types';
 const router = Router();
 
 // Health
-router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'organization' }); });
+router.get('/health', (_req, res) => {
+  res.json({ status: 'ok', module: 'organization' });
+});
 
 // All organization routes require authentication and organization scoping
 router.use(requireAuth, scopeToOrg);

@@ -6,7 +6,9 @@ import * as t from './types';
 
 const router = Router();
 
-router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'assets' }); });
+router.get('/health', (_req, res) => {
+  res.json({ status: 'ok', module: 'assets' });
+});
 
 // All asset routes require authentication and tenant organization scoping
 router.use(requireAuth, scopeToOrg);

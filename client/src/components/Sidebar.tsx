@@ -49,14 +49,14 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 bg-neutral-card border-r border-border h-screen flex flex-col shrink-0 transition-colors duration-200">
+    <aside className="w-[240px] bg-surface-container border-r border-outline-variant h-screen flex flex-col shrink-0 transition-colors duration-200">
       {/* Brand Header */}
-      <div className="p-6 border-b border-border flex items-center gap-3 shrink-0">
-        <div className="bg-primary/10 p-2 rounded-lg text-primary transition-colors duration-200">
+      <div className="p-6 border-b border-outline-variant flex items-center gap-3 shrink-0">
+        <div className="bg-primary/10 p-2 text-primary transition-colors duration-200 border border-primary/20">
           <Cpu size={24} />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-neutral-text tracking-wide m-0 p-0 leading-none">
+          <h1 className="font-headline-lg text-on-surface tracking-wide m-0 p-0 leading-none">
             AssetFlow
           </h1>
           <span className="text-[10px] text-neutral-muted uppercase tracking-wider font-semibold truncate block max-w-[150px]" title={orgName}>
@@ -72,10 +72,10 @@ export const Sidebar: React.FC = () => {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+              `flex items-center gap-3 px-4 py-3 font-headline-md text-sm transition-all duration-200 border-l-4 ${
                 isActive
-                  ? 'bg-[rgb(var(--color-btn-primary-bg))] text-[rgb(var(--color-btn-primary-text))] shadow-md shadow-primary/5'
-                  : 'text-neutral-muted hover:text-neutral-text hover:bg-neutral-muted/10'
+                  ? 'bg-surface text-on-surface border-primary-container'
+                  : 'border-transparent text-outline hover:text-on-surface hover:bg-surface-bright/20'
               }`
             }
           >
@@ -86,10 +86,10 @@ export const Sidebar: React.FC = () => {
       </nav>
 
       {/* Logout Action at the very bottom */}
-      <div className="p-4 border-t border-border shrink-0">
+      <div className="p-4 border-t border-outline-variant shrink-0">
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium w-full text-danger hover:bg-danger/10 hover:text-danger transition-all duration-200 focus:outline-none"
+          className="flex items-center gap-3 px-4 py-3 font-headline-md text-sm w-full text-error hover:bg-error/10 hover:text-error transition-all duration-200 focus:outline-none border-l-4 border-transparent hover:border-error"
         >
           <LogOut size={18} />
           <span>Logout</span>
