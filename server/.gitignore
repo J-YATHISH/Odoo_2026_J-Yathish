@@ -1,0 +1,20 @@
+# ─── Node ────────────────────────────────────────────────────────────────────
+node_modules/
+dist/
+build/
+
+# ─── Environment secrets ──────────────────────────────────────────────────────
+.env
+# Keep .env.example tracked — it documents required vars without real values
+!.env.example
+
+# ─── Prisma generated client ──────────────────────────────────────────────────
+# The generated client lives inside node_modules/@prisma/client — already covered.
+# If you ever change generateClient output dir in schema.prisma, add that path here.
+
+# ─── OS / editor noise ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
