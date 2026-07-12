@@ -1,25 +1,31 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Allocation controller ─────────────────────────────────────────────────────
-// TODO: Implement in the Allocation build step.
-
-export function createAllocation(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Allocation build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function createAllocation(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createAllocation(req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function returnAllocation(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Allocation build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function returnAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.returnAsset(parseInt(req.params.id, 10), req.user!.id, req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function createTransferRequest(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Allocation build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function requestTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.requestTransfer(parseInt(req.params.allocationId, 10), req.user!.id, req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function approveTransfer(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Allocation build step.', code: ErrorCode.NOT_IMPLEMENTED } });
-}
-
-export function rejectTransfer(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Allocation build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function resolveTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.resolveTransfer(parseInt(req.params.requestId, 10), req.user!.id, req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }

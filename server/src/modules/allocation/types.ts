@@ -1,11 +1,21 @@
-// ─── Allocation module type definitions ───────────────────────────────────────
-//
-// Types for asset allocation and transfer request workflows.
-//
-// TODO: Define in the Allocation build step:
-//   - CreateAllocationBody (assetId, holderId, expectedReturnDate?)
-//   - ReturnAllocationBody (conditionAtReturn)
-//   - CreateTransferRequestBody (allocationId, toId, reason?)
-//   - AllocationConflictResponse (includes currentHolder + suggested alternatives)
-//     This is the 409 response shape that the build guide describes in detail:
-//     { currentHolder: Employee, suggestions: Asset[] }
+import { z } from 'zod';
+import { TransferStatus } from '../../utils/constants';
+
+export const createAllocationSchema = z.object({
+  assetId: z.number().int().positive(),
+  holderId: z.number().int().positive(),
+  expectedReturnDate: z.coerce.date().optional(),
+});
+
+export const returnAssetSchema = z.object({
+  conditionAtReturn: z.string().optional(),
+});
+
+export const requestTransferSchema = z.object({
+  toId: z.number().int().positive(),
+  reason: z.string().optional(),
+});
+
+export const resolveTransferSchema = z.object({
+  status: z.enum([TransferStatus.APPROVED, TransferStatus.REJECTED]),
+});
