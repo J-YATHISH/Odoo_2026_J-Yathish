@@ -134,8 +134,81 @@ print("*" * 50)
 print("PASTE THIS EXACT URL INTO YOUR NODE.JS .ENV FILE AS: AI_MODEL_URL")
 
 # Apply asyncio patch for Colab and run server
-nest_asyncio.apply()
-uvicorn.run(app, host="0.0.0.0", port=8000)
+# NOTE: uvicorn.run blocks the cell. The cells below are for testing!
+import threading
+def run_server():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+thread = threading.Thread(target=run_server)
+thread.start()
+"""
+
+code_test_api = """\
+# --- CELL 6: TEST THE API ENDPOINT (Simulating the Node.js Backend) ---
+# This cell acts like your Node.js backend sending data to the AI model.
+import requests
+import time
+
+# Give the server a second to start
+time.sleep(2)
+
+print("Simulating Node.js Backend Request to AI Model...")
+url = "http://localhost:8000/predict"
+payload = {
+    "issueDescription": "The Dell XPS 15 laptop has a cracked screen after being dropped.",
+    "organizationId": 1,
+    "assetCategoryName": "Laptop"
+}
+
+try:
+    response = requests.post(url, json=payload)
+    print("\\n✅ API IS WORKING PERFECTLY!")
+    print("Frontend/Backend Payload Sent:", payload)
+    print("AI Model Response Received:", response.json())
+except Exception as e:
+    print("❌ API Error:", e)
+"""
+
+code_db = """\
+# --- CELL 7: LIVE DATABASE CONNECTION (Dynamic Postgres Test) ---
+# To test this with your actual DB, you must expose your local Postgres port (5432) 
+# to the internet using ngrok, or host the DB on AWS/Render.
+!pip install psycopg2-binary SQLAlchemy
+
+import psycopg2
+import pandas as pd
+from sqlalchemy import create_engine
+
+print("Template: Connecting to live PostgreSQL Database...")
+
+# Replace with your actual DB credentials (or ngrok tcp URL)
+DB_HOST = "localhost" # If using ngrok, this will be something like 0.tcp.ngrok.io
+DB_PORT = "5432"      # ngrok port
+DB_USER = "postgres"
+DB_PASS = "password"
+DB_NAME = "assetflow"
+
+try:
+    # Create DB Engine
+    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+    
+    # Query the live MaintenanceRequest table
+    query = "SELECT id, \"issueDescription\", \"priority\", \"issueCategory\" FROM \"MaintenanceRequest\" LIMIT 5"
+    df = pd.read_sql(query, engine)
+    
+    print("\\n✅ Connected to DB! Here is live dynamic data:")
+    print(df.head())
+    
+    # Run predictions directly on live DB data
+    print("\\nRunning AI on Live DB Data:")
+    for index, row in df.iterrows():
+        cat = classifier(row['issueDescription'], ["Hardware", "Software", "Network"])['labels'][0]
+        pri = classifier(row['issueDescription'], ["High", "Medium", "Low"])['labels'][0]
+        print(f"ID {row['id']} - Text: '{row['issueDescription']}' --> Pred: [{pri}, {cat}]")
+
+except Exception as e:
+    print("⚠️ Connection skipped. (Configure DB_HOST/PORT to point to your live database to run this).")
+    print("Error:", e)
 """
 
 nb['cells'] = [
@@ -143,9 +216,11 @@ nb['cells'] = [
     nbf.v4.new_code_cell(code_install),
     nbf.v4.new_code_cell(code_model),
     nbf.v4.new_code_cell(code_test),
-    nbf.v4.new_code_cell(code_api)
+    nbf.v4.new_code_cell(code_api),
+    nbf.v4.new_code_cell(code_test_api),
+    nbf.v4.new_code_cell(code_db)
 ]
 
 with open('AssetFlow_AI_Triage.ipynb', 'w', encoding='utf-8') as f:
     nbf.write(nb, f)
-print("Notebook generated successfully with Confusion Matrices!")
+print("Notebook generated successfully with Confusion Matrices and DB Testing Cells!")
