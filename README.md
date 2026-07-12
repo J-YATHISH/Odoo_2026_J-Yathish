@@ -58,12 +58,19 @@ curl http://localhost:3001/health
 
 ---
 
-### Frontend (Step 2 — coming next)
+### Frontend (Step 2 — available now)
 
 ```bash
+# 1. Go into the client folder
 cd client
+
+# 2. Copy the environment template and fill in your values
 cp .env.example .env
+
+# 3. Install dependencies
 npm install
+
+# 4. Start the development server
 npm run dev
 ```
 
