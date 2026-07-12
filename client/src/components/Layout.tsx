@@ -20,9 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({ title, children }) => {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
         <header className="h-16 border-b border-border bg-neutral-card/40 backdrop-blur-md flex items-center justify-between px-8 shrink-0 z-30 transition-colors duration-200">
-          <h2 className="text-md font-semibold text-neutral-text tracking-wide m-0">
-            {title}
-          </h2>
+          <h2 className="text-md font-semibold text-neutral-text tracking-wide m-0">{title}</h2>
           <div className="flex items-center gap-4">
             {/* Theme Switch Control */}
             <button

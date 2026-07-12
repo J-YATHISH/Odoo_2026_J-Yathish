@@ -1,6 +1,5 @@
 import prisma from '../../prisma/client';
 
-
 // ─── Eco-Predictive Engine (Mathematical Heuristics) ─────────────────────────
 
 export async function calculateAssetIntelligence() {
@@ -23,12 +22,13 @@ export async function calculateAssetIntelligence() {
   for (const asset of assets) {
     if (!asset.acquisitionDate) continue;
 
-    const ageInMonths = (now.getTime() - asset.acquisitionDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
+    const ageInMonths =
+      (now.getTime() - asset.acquisitionDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
     const expectedLifespan = asset.category.expectedLifespanMonths;
     const maintenanceCount = asset._count.maintenanceReqs;
 
     // Health Score Math: Start at 100, lose points based on age ratio (up to 50 pts) and maintenance history (10 pts per repair)
-    let healthScore = 100 - (ageInMonths / expectedLifespan) * 50 - (maintenanceCount * 10);
+    let healthScore = 100 - (ageInMonths / expectedLifespan) * 50 - maintenanceCount * 10;
     healthScore = Math.max(0, Math.min(100, healthScore)); // Clamp between 0 and 100
 
     const failureProbability = 100 - healthScore;
@@ -36,9 +36,11 @@ export async function calculateAssetIntelligence() {
     // EcoScore / Carbon Math
     // Assuming 'active hours' is roughly 8 hours per day since acquisition if allocated often.
     // For simplicity, we just use a formula based on age and power draw.
-    const estimatedActiveHours = ageInMonths * 30 * 8; 
+    const estimatedActiveHours = ageInMonths * 30 * 8;
     // Carbon footprint = Base manufacturing footprint + (power draw in kW * hours * generic emission factor 0.4 kgCO2/kWh)
-    const carbonFootprintKg = asset.category.baseCarbonFootprintKg + ((asset.category.powerDrawWatts / 1000) * estimatedActiveHours * 0.4);
+    const carbonFootprintKg =
+      asset.category.baseCarbonFootprintKg +
+      (asset.category.powerDrawWatts / 1000) * estimatedActiveHours * 0.4;
 
     await prisma.assetIntelligence.upsert({
       where: { assetId: asset.id },
@@ -62,13 +64,19 @@ export async function calculateAssetIntelligence() {
     // Autonomous Action: Generate Maintenance Request if high risk
     if (failureProbability > 85 && asset.status !== 'UNDER_MAINTENANCE') {
       const existingReq = await prisma.maintenanceRequest.findFirst({
-        where: { assetId: asset.id, status: { in: ['PENDING', 'IN_PROGRESS', 'TECHNICIAN_ASSIGNED', 'APPROVED'] } },
+        where: {
+          assetId: asset.id,
+          status: { in: ['PENDING', 'IN_PROGRESS', 'TECHNICIAN_ASSIGNED', 'APPROVED'] },
+        },
       });
 
       if (!existingReq) {
         // We need an employee to assign as 'raisedBy'. We will assign it to the first Admin in the organization.
         const adminUser = await prisma.employee.findFirst({
-          where: { organizationId: asset.organizationId, role: { permissions: { has: 'MANAGE_MAINTENANCE' } } },
+          where: {
+            organizationId: asset.organizationId,
+            role: { permissions: { has: 'MANAGE_MAINTENANCE' } },
+          },
         });
 
         if (adminUser) {
@@ -96,14 +104,14 @@ export async function getGlobalBenchmarks(organizationId: number) {
   // We use raw SQL queries to do efficient cross-tenant aggregations without pulling everything into Node.
 
   // 1. Maintenance Resolution Speed (Average hours to resolve)
-  const maintenanceQuery = await prisma.$queryRaw`
+  const maintenanceQuery = (await prisma.$queryRaw`
     SELECT 
       "organizationId",
       AVG(EXTRACT(EPOCH FROM ("resolvedAt" - "createdAt"))/3600) as avg_resolution_hours
     FROM "MaintenanceRequest"
     WHERE "status" = 'RESOLVED' AND "resolvedAt" IS NOT NULL
     GROUP BY "organizationId"
-  ` as any[];
+  `) as any[];
 
   let orgResolutionHours = 0;
   let globalResolutionHours = 0;
@@ -118,7 +126,7 @@ export async function getGlobalBenchmarks(organizationId: number) {
   globalResolutionHours = totalOrgs > 0 ? globalResolutionHours / totalOrgs : 0;
 
   // 2. Hardware Reliability (Maintenance counts per category globally)
-  const reliabilityQuery = await prisma.$queryRaw`
+  const reliabilityQuery = (await prisma.$queryRaw`
     SELECT 
       c.name as "categoryName",
       COUNT(m.id) as "maintenanceCount"
@@ -127,17 +135,17 @@ export async function getGlobalBenchmarks(organizationId: number) {
     JOIN "AssetCategory" c ON a."categoryId" = c.id
     GROUP BY c.name
     ORDER BY "maintenanceCount" DESC
-  ` as any[];
+  `) as any[];
 
   // 3. Asset Utilization (% of Assets Allocated vs Total)
-  const utilizationQuery = await prisma.$queryRaw`
+  const utilizationQuery = (await prisma.$queryRaw`
     SELECT 
       "organizationId",
       COUNT(*) FILTER (WHERE "status" = 'ALLOCATED')::float / GREATEST(COUNT(*), 1) * 100 as utilization_pct
     FROM "Asset"
     WHERE "status" NOT IN ('RETIRED', 'DISPOSED', 'LOST')
     GROUP BY "organizationId"
-  ` as any[];
+  `) as any[];
 
   let orgUtilization = 0;
   let globalUtilization = 0;
@@ -153,13 +161,17 @@ export async function getGlobalBenchmarks(organizationId: number) {
     maintenance: {
       organizationAverageHours: orgResolutionHours,
       globalAverageHours: globalResolutionHours,
-      verdict: orgResolutionHours < globalResolutionHours ? 'Faster than average' : 'Slower than average',
+      verdict:
+        orgResolutionHours < globalResolutionHours ? 'Faster than average' : 'Slower than average',
     },
-    hardwareReliability: reliabilityQuery.map(r => ({ category: r.categoryName, incidents: Number(r.maintenanceCount) })),
+    hardwareReliability: reliabilityQuery.map((r) => ({
+      category: r.categoryName,
+      incidents: Number(r.maintenanceCount),
+    })),
     utilization: {
       organizationUtilizationPct: orgUtilization,
       globalUtilizationPct: globalUtilization,
-    }
+    },
   };
 }
 

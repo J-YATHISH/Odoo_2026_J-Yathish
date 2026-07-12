@@ -17,9 +17,9 @@ async function verifyDynamicIntelligence() {
   // 2. Create Dynamic Test Data
   console.log('Creating Organization, Employee, and Category...');
   const org = await prisma.organization.create({ data: { name: 'TechCorp ' + Date.now() } });
-  
+
   const role = await prisma.role.create({
-    data: { name: 'Admin', organizationId: org.id, permissions: ['MANAGE_MAINTENANCE'] }
+    data: { name: 'Admin', organizationId: org.id, permissions: ['MANAGE_MAINTENANCE'] },
   });
 
   await prisma.employee.create({
@@ -28,8 +28,8 @@ async function verifyDynamicIntelligence() {
       name: 'System Admin',
       email: 'admin@techcorp.com',
       passwordHash: 'hashed',
-      roleId: role.id
-    }
+      roleId: role.id,
+    },
   });
 
   const category = await prisma.assetCategory.create({
@@ -38,8 +38,8 @@ async function verifyDynamicIntelligence() {
       name: 'High-Power Laptop',
       expectedLifespanMonths: 36, // 3 years
       baseCarbonFootprintKg: 150.0,
-      powerDrawWatts: 65.0
-    }
+      powerDrawWatts: 65.0,
+    },
   });
 
   // Create an old asset (6 years old) that SHOULD trigger the 85% threshold
@@ -54,8 +54,8 @@ async function verifyDynamicIntelligence() {
       name: 'MacBook Pro 2022',
       categoryId: category.id,
       acquisitionDate,
-      status: 'AVAILABLE'
-    }
+      status: 'AVAILABLE',
+    },
   });
 
   // 3. Run the Engine
@@ -83,4 +83,6 @@ async function verifyDynamicIntelligence() {
   console.log('\n--- VERIFICATION COMPLETE ---');
 }
 
-verifyDynamicIntelligence().catch(console.error).finally(() => prisma.$disconnect());
+verifyDynamicIntelligence()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

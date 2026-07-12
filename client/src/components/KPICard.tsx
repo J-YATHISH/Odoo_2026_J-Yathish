@@ -11,13 +11,7 @@ interface KPICardProps {
   };
 }
 
-export const KPICard: React.FC<KPICardProps> = ({
-  title,
-  value,
-  description,
-  icon,
-  trend,
-}) => {
+export const KPICard: React.FC<KPICardProps> = ({ title, value, description, icon, trend }) => {
   return (
     <div className="bg-neutral-card border border-border rounded-xl p-5 shadow-sm hover:border-primary/30 transition-all duration-300 flex flex-col justify-between">
       <div>
@@ -35,8 +29,8 @@ export const KPICard: React.FC<KPICardProps> = ({
                 trend.type === 'positive'
                   ? 'text-success'
                   : trend.type === 'negative'
-                  ? 'text-danger'
-                  : 'text-neutral-muted'
+                    ? 'text-danger'
+                    : 'text-neutral-muted'
               }`}
             >
               {trend.value}

@@ -44,10 +44,10 @@ export const NotifyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               n.type === 'success'
                 ? 'bg-emerald-950/80 border-emerald-500/30 text-emerald-200'
                 : n.type === 'warning'
-                ? 'bg-amber-950/80 border-amber-500/30 text-amber-200'
-                : n.type === 'danger'
-                ? 'bg-rose-950/80 border-rose-500/30 text-rose-200'
-                : 'bg-slate-900/80 border-slate-700/30 text-slate-200'
+                  ? 'bg-amber-950/80 border-amber-500/30 text-amber-200'
+                  : n.type === 'danger'
+                    ? 'bg-rose-950/80 border-rose-500/30 text-rose-200'
+                    : 'bg-slate-900/80 border-slate-700/30 text-slate-200'
             }`}
           >
             <span className="text-sm font-medium">{n.message}</span>

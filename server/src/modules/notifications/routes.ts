@@ -6,7 +6,9 @@ import * as t from './types';
 
 const router = Router();
 
-router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'notifications' }); });
+router.get('/health', (_req, res) => {
+  res.json({ status: 'ok', module: 'notifications' });
+});
 
 router.use(requireAuth);
 

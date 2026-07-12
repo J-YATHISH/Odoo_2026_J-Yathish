@@ -12,7 +12,6 @@ import type { EcoPredictiveData, BenchmarksData } from '../api/intelligence';
 import { APIException } from '../api/client';
 import { RefreshCw, Server, Database, AlertCircle, Leaf, BarChart2 } from 'lucide-react';
 
-
 interface ActivityRow {
   id: string;
   icon: string;
@@ -172,8 +171,6 @@ export const Dashboard: React.FC = () => {
     setActivityLogs([...formattedDbLogs, ...mockLogs]);
   };
 
-
-
   // Dynamic values or mock defaults
   const availableCount = report?.utilization.availableAssets || 1492;
   const allocatedCount = report?.utilization.allocatedAssets || 348;
@@ -235,7 +232,8 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center gap-3 text-danger bg-danger/10 border border-danger/20 p-4 rounded-none text-xs font-data-mono">
             <AlertCircle size={16} />
             <div>
-              <span className="font-semibold uppercase">API HEALTH ERROR:</span> {error} — Fallback data loaded.
+              <span className="font-semibold uppercase">API HEALTH ERROR:</span> {error} — Fallback
+              data loaded.
             </div>
           </div>
         )}
@@ -263,7 +261,9 @@ export const Dashboard: React.FC = () => {
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
                 Assets Allocated
               </span>
-              <span className="material-symbols-outlined text-[#5C8FC2] text-base">local_shipping</span>
+              <span className="material-symbols-outlined text-[#5C8FC2] text-base">
+                local_shipping
+              </span>
             </div>
             <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
               {allocatedCount.toLocaleString()}
@@ -291,7 +291,9 @@ export const Dashboard: React.FC = () => {
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
                 Active Bookings
               </span>
-              <span className="material-symbols-outlined text-[#5C8FC2] text-base">calendar_month</span>
+              <span className="material-symbols-outlined text-[#5C8FC2] text-base">
+                calendar_month
+              </span>
             </div>
             <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
               {activeBookingsCount.toLocaleString()}
@@ -319,7 +321,9 @@ export const Dashboard: React.FC = () => {
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
                 Upcoming Returns
               </span>
-              <span className="material-symbols-outlined text-neutral-muted text-base">keyboard_return</span>
+              <span className="material-symbols-outlined text-neutral-muted text-base">
+                keyboard_return
+              </span>
             </div>
             <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
               {upcomingReturnsCount.toLocaleString()}
@@ -332,30 +336,48 @@ export const Dashboard: React.FC = () => {
           <div className="border border-border bg-neutral-card p-4 stagger-item mb-2">
             <div className="flex items-center gap-2 mb-4">
               <BarChart2 size={16} className="text-primary" />
-              <h3 className="font-label-sm uppercase text-xs tracking-wider text-neutral-text">Cross-Tenant Global Benchmarks</h3>
+              <h3 className="font-label-sm uppercase text-xs tracking-wider text-neutral-text">
+                Cross-Tenant Global Benchmarks
+              </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-neutral-bg/50 border border-border p-3">
-                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">Avg Resolution Speed</div>
-                <div className="flex items-end gap-2">
-                  <span className="font-data-mono text-xl text-neutral-text">{benchmarksData.maintenance.organizationAverageHours.toFixed(1)}h</span>
-                  <span className="font-label-sm text-[10px] text-neutral-muted">vs {benchmarksData.maintenance.globalAverageHours.toFixed(1)}h global</span>
+                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">
+                  Avg Resolution Speed
                 </div>
-                <div className={`text-[10px] uppercase font-bold mt-1 ${benchmarksData.maintenance.verdict.includes('Faster') ? 'text-success' : 'text-danger'}`}>
+                <div className="flex items-end gap-2">
+                  <span className="font-data-mono text-xl text-neutral-text">
+                    {benchmarksData.maintenance.organizationAverageHours.toFixed(1)}h
+                  </span>
+                  <span className="font-label-sm text-[10px] text-neutral-muted">
+                    vs {benchmarksData.maintenance.globalAverageHours.toFixed(1)}h global
+                  </span>
+                </div>
+                <div
+                  className={`text-[10px] uppercase font-bold mt-1 ${benchmarksData.maintenance.verdict.includes('Faster') ? 'text-success' : 'text-danger'}`}
+                >
                   {benchmarksData.maintenance.verdict}
-                </div>
-              </div>
-              
-              <div className="bg-neutral-bg/50 border border-border p-3">
-                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">Asset Utilization</div>
-                <div className="flex items-end gap-2">
-                  <span className="font-data-mono text-xl text-neutral-text">{benchmarksData.utilization.organizationUtilizationPct.toFixed(1)}%</span>
-                  <span className="font-label-sm text-[10px] text-neutral-muted">vs {benchmarksData.utilization.globalUtilizationPct.toFixed(1)}% global</span>
                 </div>
               </div>
 
               <div className="bg-neutral-bg/50 border border-border p-3">
-                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">Top Failing Asset Globally</div>
+                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">
+                  Asset Utilization
+                </div>
+                <div className="flex items-end gap-2">
+                  <span className="font-data-mono text-xl text-neutral-text">
+                    {benchmarksData.utilization.organizationUtilizationPct.toFixed(1)}%
+                  </span>
+                  <span className="font-label-sm text-[10px] text-neutral-muted">
+                    vs {benchmarksData.utilization.globalUtilizationPct.toFixed(1)}% global
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-neutral-bg/50 border border-border p-3">
+                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">
+                  Top Failing Asset Globally
+                </div>
                 <div className="font-body-md text-sm text-neutral-text truncate">
                   {benchmarksData.hardwareReliability[0]?.category || 'N/A'}
                 </div>
@@ -380,30 +402,43 @@ export const Dashboard: React.FC = () => {
               </div>
               {ecoData && (
                 <div className="font-data-mono text-[10px] bg-[#4FBF9F]/10 text-[#4FBF9F] border border-[#4FBF9F]/30 px-2 py-0.5 rounded-full">
-                  {ecoData.totalOrganizationCarbonFootprintKg.toLocaleString(undefined, {maximumFractionDigits: 1})} kg CO2e
+                  {ecoData.totalOrganizationCarbonFootprintKg.toLocaleString(undefined, {
+                    maximumFractionDigits: 1,
+                  })}{' '}
+                  kg CO2e
                 </div>
               )}
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-2">
-              <div className="text-[10px] text-neutral-muted uppercase px-1 mb-2 font-semibold tracking-wider">Highest Failure Probability</div>
+              <div className="text-[10px] text-neutral-muted uppercase px-1 mb-2 font-semibold tracking-wider">
+                Highest Failure Probability
+              </div>
               {ecoData?.topAtRiskAssets.length === 0 && (
-                <div className="text-xs text-neutral-muted italic p-4 text-center">No predictive data available.</div>
+                <div className="text-xs text-neutral-muted italic p-4 text-center">
+                  No predictive data available.
+                </div>
               )}
               {ecoData?.topAtRiskAssets.map((asset) => (
                 <div
                   key={asset.id}
                   className="border border-border bg-neutral-bg relative pl-3 p-2.5 group hover:bg-neutral-muted/10 transition-colors cursor-pointer"
                 >
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${asset.failureProbability > 85 ? 'bg-[#C25D4E]' : asset.failureProbability > 50 ? 'bg-[#F0A030]' : 'bg-[#4FBF9F]'}`}></div>
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 ${asset.failureProbability > 85 ? 'bg-[#C25D4E]' : asset.failureProbability > 50 ? 'bg-[#F0A030]' : 'bg-[#4FBF9F]'}`}
+                  ></div>
                   <div className="flex justify-between items-start mb-1">
                     <span className="font-data-mono text-xs font-semibold text-neutral-text">
                       {asset.asset.tag}
                     </span>
-                    <span className={`font-data-mono text-[9px] px-1 border uppercase ${asset.failureProbability > 85 ? 'text-[#C25D4E] border-[#C25D4E]/30 bg-[#C25D4E]/10' : 'text-neutral-muted border-border bg-neutral-card'}`}>
+                    <span
+                      className={`font-data-mono text-[9px] px-1 border uppercase ${asset.failureProbability > 85 ? 'text-[#C25D4E] border-[#C25D4E]/30 bg-[#C25D4E]/10' : 'text-neutral-muted border-border bg-neutral-card'}`}
+                    >
                       {asset.failureProbability.toFixed(1)}% RISK
                     </span>
                   </div>
-                  <div className="font-body-md text-xs text-neutral-text truncate">{asset.asset.name}</div>
+                  <div className="font-body-md text-xs text-neutral-text truncate">
+                    {asset.asset.name}
+                  </div>
                   <div className="flex justify-between items-center mt-1">
                     <div className="font-label-sm text-[10px] text-neutral-muted uppercase">
                       {asset.asset.category.name}
@@ -441,9 +476,7 @@ export const Dashboard: React.FC = () => {
                   className="grid grid-cols-[32px_90px_1fr_90px] gap-2 px-3 py-2.5 border-b border-border hover:bg-neutral-muted/10 transition-colors items-center group"
                 >
                   <div className={log.iconColor}>
-                    <span className="material-symbols-outlined text-[16px] block">
-                      {log.icon}
-                    </span>
+                    <span className="material-symbols-outlined text-[16px] block">{log.icon}</span>
                   </div>
                   <div className="font-data-mono text-xs text-neutral-text group-hover:text-primary transition-colors">
                     {log.assetId}

@@ -4,7 +4,10 @@ import { HTTP, ErrorCode, AssetStatus } from '../../utils/constants';
 import * as t from './types';
 import { z } from 'zod';
 
-export async function createAsset(organizationId: number, data: z.infer<typeof t.createAssetSchema>) {
+export async function createAsset(
+  organizationId: number,
+  data: z.infer<typeof t.createAssetSchema>,
+) {
   // Use a transaction to ensure tag generation is safe and sequential
   return prisma.$transaction(async (tx) => {
     const count = await tx.asset.count({ where: { organizationId } });
@@ -21,7 +24,10 @@ export async function createAsset(organizationId: number, data: z.infer<typeof t
   });
 }
 
-export async function listAssets(organizationId: number, query: z.infer<typeof t.searchAssetsSchema>) {
+export async function listAssets(
+  organizationId: number,
+  query: z.infer<typeof t.searchAssetsSchema>,
+) {
   const where: any = { organizationId };
 
   if (query.query) {
@@ -48,13 +54,19 @@ export async function getAsset(organizationId: number, id: number) {
     include: { category: true },
   });
 
-  if (!asset || asset.organizationId !== organizationId) throw new AppError('Asset not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (!asset || asset.organizationId !== organizationId)
+    throw new AppError('Asset not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
   return asset;
 }
 
-export async function updateAsset(organizationId: number, id: number, data: z.infer<typeof t.updateAssetSchema>) {
+export async function updateAsset(
+  organizationId: number,
+  id: number,
+  data: z.infer<typeof t.updateAssetSchema>,
+) {
   const asset = await prisma.asset.findUnique({ where: { id } });
-  if (!asset || asset.organizationId !== organizationId) throw new AppError('Not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (!asset || asset.organizationId !== organizationId)
+    throw new AppError('Not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
 
   return prisma.asset.update({
     where: { id },
@@ -64,20 +76,26 @@ export async function updateAsset(organizationId: number, id: number, data: z.in
 
 // ─── State Machine ────────────────────────────────────────────────────────────
 
-export async function transitionAssetStatus(organizationId: number, id: number, newStatus: AssetStatus, txClient?: any) {
+export async function transitionAssetStatus(
+  organizationId: number,
+  id: number,
+  newStatus: AssetStatus,
+  txClient?: any,
+) {
   const db = txClient ?? prisma;
-  
+
   const asset = await db.asset.findUnique({ where: { id } });
-  if (!asset || asset.organizationId !== organizationId) throw new AppError('Asset not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (!asset || asset.organizationId !== organizationId)
+    throw new AppError('Asset not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
 
   // Implement strict transition rules if needed, e.g.:
   // if (asset.status === AssetStatus.LOST && newStatus !== AssetStatus.AVAILABLE) throw Error...
 
   return db.asset.update({
     where: { id },
-    data: { 
+    data: {
       status: newStatus,
-      lastActivityAt: new Date()
+      lastActivityAt: new Date(),
     },
   });
 }

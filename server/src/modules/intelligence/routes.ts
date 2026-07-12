@@ -9,10 +9,22 @@ const router = Router();
 router.use(requireAuth);
 
 // Eco-Predictive Engine endpoints
-router.get('/eco-predictive', requirePermission([Permission.MANAGE_ASSETS, Permission.MANAGE_ORGANIZATION]), c.getOrganizationIntelligence);
-router.post('/eco-predictive/trigger', requirePermission([Permission.MANAGE_ORGANIZATION]), c.triggerEcoPredictiveEngine);
+router.get(
+  '/eco-predictive',
+  requirePermission([Permission.MANAGE_ASSETS, Permission.MANAGE_ORGANIZATION]),
+  c.getOrganizationIntelligence,
+);
+router.post(
+  '/eco-predictive/trigger',
+  requirePermission([Permission.MANAGE_ORGANIZATION]),
+  c.triggerEcoPredictiveEngine,
+);
 
 // Cross-Tenant Benchmarking endpoints
-router.get('/benchmarks', requirePermission([Permission.MANAGE_ORGANIZATION]), c.getGlobalBenchmarks);
+router.get(
+  '/benchmarks',
+  requirePermission([Permission.MANAGE_ORGANIZATION]),
+  c.getGlobalBenchmarks,
+);
 
 export default router;

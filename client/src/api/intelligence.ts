@@ -56,14 +56,14 @@ export const intelligenceApi = {
     const response = await apiClient.get<EcoPredictiveData>('/eco-predictive');
     return response.data;
   },
-  
+
   getBenchmarks: async () => {
     const response = await apiClient.get<BenchmarksData>('/benchmarks');
     return response.data;
   },
-  
+
   triggerCalculation: async () => {
     const response = await apiClient.post('/eco-predictive/trigger');
     return response.data;
-  }
+  },
 };
