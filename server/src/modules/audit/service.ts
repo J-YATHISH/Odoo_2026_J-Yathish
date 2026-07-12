@@ -5,11 +5,12 @@ import * as t from './types';
 import { z } from 'zod';
 import { transitionAssetStatus } from '../assets/service';
 
-export async function createAuditCycle(data: z.infer<typeof t.createAuditCycleSchema>) {
+export async function createAuditCycle(organizationId: number, data: z.infer<typeof t.createAuditCycleSchema>) {
   return prisma.$transaction(async (tx) => {
     // 1. Create the cycle
     const cycle = await tx.auditCycle.create({
       data: {
+        organizationId,
         scopeDept: data.scopeDept,
         scopeLoc: data.scopeLoc,
         startDate: data.startDate,
@@ -24,6 +25,7 @@ export async function createAuditCycle(data: z.infer<typeof t.createAuditCycleSc
     // For this build, let's just grab all available/allocated assets if no scope is provided
     const assets = await tx.asset.findMany({
       where: {
+        organizationId,
         status: { in: [AssetStatus.AVAILABLE, AssetStatus.ALLOCATED] },
         location: data.scopeLoc ? data.scopeLoc : undefined,
       }
@@ -33,6 +35,7 @@ export async function createAuditCycle(data: z.infer<typeof t.createAuditCycleSc
     if (assets.length > 0) {
       await tx.auditItem.createMany({
         data: assets.map(a => ({
+          organizationId,
           auditCycleId: cycle.id,
           assetId: a.id,
         }))
@@ -43,8 +46,9 @@ export async function createAuditCycle(data: z.infer<typeof t.createAuditCycleSc
   });
 }
 
-export async function listAuditCycles() {
+export async function listAuditCycles(organizationId: number) {
   return prisma.auditCycle.findMany({
+    where: { organizationId },
     include: {
       auditors: { include: { employee: { select: { name: true } } } },
       _count: { select: { items: true } }
@@ -53,13 +57,13 @@ export async function listAuditCycles() {
   });
 }
 
-export async function verifyAuditItem(itemId: number, auditorId: number, data: z.infer<typeof t.updateAuditItemSchema>) {
+export async function verifyAuditItem(organizationId: number, itemId: number, auditorId: number, data: z.infer<typeof t.updateAuditItemSchema>) {
   const item = await prisma.auditItem.findUnique({
     where: { id: itemId },
     include: { auditCycle: { include: { auditors: true } } }
   });
 
-  if (!item) throw new AppError('Audit item not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (!item || item.organizationId !== organizationId) throw new AppError('Audit item not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
   if (item.auditCycle.closed) throw new AppError('Audit cycle is already closed', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
 
   const isAssigned = item.auditCycle.auditors.some(a => a.employeeId === auditorId);
@@ -74,13 +78,13 @@ export async function verifyAuditItem(itemId: number, auditorId: number, data: z
   });
 }
 
-export async function closeAuditCycle(cycleId: number) {
+export async function closeAuditCycle(organizationId: number, cycleId: number) {
   const cycle = await prisma.auditCycle.findUnique({
     where: { id: cycleId },
     include: { items: true }
   });
 
-  if (!cycle) throw new AppError('Audit cycle not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (!cycle || cycle.organizationId !== organizationId) throw new AppError('Audit cycle not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
   if (cycle.closed) throw new AppError('Audit cycle already closed', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
 
   return prisma.$transaction(async (tx) => {
@@ -93,7 +97,7 @@ export async function closeAuditCycle(cycleId: number) {
     // 2. Any item marked MISSING gets its asset transitioned to LOST
     for (const item of cycle.items) {
       if (item.verification === 'MISSING') {
-        await transitionAssetStatus(item.assetId, AssetStatus.LOST, tx);
+        await transitionAssetStatus(organizationId, item.assetId, AssetStatus.LOST, tx);
       }
     }
 

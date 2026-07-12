@@ -1,14 +1,14 @@
 import prisma from '../../prisma/client';
 import { AssetStatus } from '../../utils/constants';
 
-export async function getUtilizationReport(_departmentId?: number) {
+export async function getUtilizationReport(organizationId: number, _departmentId?: number) {
   // Find count of assets allocated vs available
   const allocated = await prisma.asset.count({
-    where: { status: AssetStatus.ALLOCATED }
+    where: { organizationId, status: AssetStatus.ALLOCATED }
   });
 
   const available = await prisma.asset.count({
-    where: { status: AssetStatus.AVAILABLE }
+    where: { organizationId, status: AssetStatus.AVAILABLE }
   });
 
   const total = allocated + available;
@@ -22,13 +22,13 @@ export async function getUtilizationReport(_departmentId?: number) {
   };
 }
 
-export async function getMaintenanceReport() {
+export async function getMaintenanceReport(organizationId: number) {
   const maintenanceAssets = await prisma.asset.count({
-    where: { status: AssetStatus.UNDER_MAINTENANCE }
+    where: { organizationId, status: AssetStatus.UNDER_MAINTENANCE }
   });
 
   const recentRequests = await prisma.maintenanceRequest.count({
-    where: { createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }
+    where: { organizationId, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } }
   });
 
   return {
@@ -37,12 +37,13 @@ export async function getMaintenanceReport() {
   };
 }
 
-export async function getIdleAssetsReport() {
+export async function getIdleAssetsReport(organizationId: number) {
   // Find assets with no activity in 30 days
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const idleAssets = await prisma.asset.findMany({
     where: {
+      organizationId,
       status: AssetStatus.AVAILABLE,
       lastActivityAt: { lt: thirtyDaysAgo }
     },
@@ -60,10 +61,10 @@ export async function getIdleAssetsReport() {
   };
 }
 
-export async function getFullDashboardReport(_departmentId?: number) {
-  const utilization = await getUtilizationReport(_departmentId);
-  const maintenance = await getMaintenanceReport();
-  const idle = await getIdleAssetsReport();
+export async function getFullDashboardReport(organizationId: number, _departmentId?: number) {
+  const utilization = await getUtilizationReport(organizationId, _departmentId);
+  const maintenance = await getMaintenanceReport(organizationId);
+  const idle = await getIdleAssetsReport(organizationId);
 
   return {
     utilization,

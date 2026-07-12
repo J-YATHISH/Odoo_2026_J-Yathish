@@ -20,13 +20,28 @@ export async function signup(data: SignupRequestBody) {
   // Hash password
   const passwordHash = await bcrypt.hash(data.password, 12);
 
-  // Create employee (role is always EMPLOYEE by default in Prisma schema)
+  // Find or create organization
+  let org = await prisma.organization.findUnique({
+    where: { name: data.organizationName }
+  });
+
+  let isNewOrg = false;
+  if (!org) {
+    org = await prisma.organization.create({
+      data: { name: data.organizationName }
+    });
+    isNewOrg = true;
+  }
+
+  // Create employee. If this is a brand new organization, the first user is an ADMIN.
   const employee = await prisma.employee.create({
     data: {
       name: data.name,
       email: data.email,
       passwordHash,
       departmentId: data.departmentId,
+      organizationId: org.id,
+      role: isNewOrg ? 'ADMIN' : 'EMPLOYEE',
     },
     select: {
       id: true,
@@ -34,6 +49,7 @@ export async function signup(data: SignupRequestBody) {
       email: true,
       role: true,
       departmentId: true,
+      organizationId: true,
       status: true,
     },
   });
@@ -68,6 +84,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
       email: employee.email,
       role: employee.role,
       departmentId: employee.departmentId,
+      organizationId: employee.organizationId,
     },
     secret,
     { expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as jwt.SignOptions['expiresIn'] },
@@ -76,6 +93,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
   // Record login in ActivityLog
   await prisma.activityLog.create({
     data: {
+      organizationId: employee.organizationId,
       employeeId: employee.id,
       action: 'LOGGED_IN',
       entityType: 'Employee',
@@ -91,6 +109,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
       email: employee.email,
       role: employee.role,
       departmentId: employee.departmentId,
+      organizationId: employee.organizationId,
     },
   };
 }
