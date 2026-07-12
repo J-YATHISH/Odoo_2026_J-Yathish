@@ -372,7 +372,7 @@ export const Dashboard: React.FC = () => {
         {/* 2. KPI Summary Row */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {/* Available */}
-          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+          <div className="bg-neutral-card border border-border p-3 flex flex-col justify-between h-20 relative overflow-hidden stagger-item">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4FBF9F]"></div>
             <div className="pl-2 flex items-center justify-between">
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
@@ -380,13 +380,13 @@ export const Dashboard: React.FC = () => {
               </span>
               <span className="material-symbols-outlined text-[#4FBF9F] text-base">inventory</span>
             </div>
-            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+            <div className="pl-2 font-data-mono text-xl text-neutral-text font-semibold">
               {availableCount.toLocaleString()}
             </div>
           </div>
 
           {/* Allocated */}
-          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+          <div className="bg-neutral-card border border-border p-3 flex flex-col justify-between h-20 relative overflow-hidden stagger-item">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#5C8FC2]"></div>
             <div className="pl-2 flex items-center justify-between">
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
@@ -396,13 +396,13 @@ export const Dashboard: React.FC = () => {
                 local_shipping
               </span>
             </div>
-            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+            <div className="pl-2 font-data-mono text-xl text-neutral-text font-semibold">
               {allocatedCount.toLocaleString()}
             </div>
           </div>
 
           {/* Maintenance */}
-          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+          <div className="bg-neutral-card border border-border p-3 flex flex-col justify-between h-20 relative overflow-hidden stagger-item">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#F0A030]"></div>
             <div className="pl-2 flex items-center justify-between">
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
@@ -410,13 +410,13 @@ export const Dashboard: React.FC = () => {
               </span>
               <span className="material-symbols-outlined text-[#F0A030] text-base">handyman</span>
             </div>
-            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+            <div className="pl-2 font-data-mono text-xl text-neutral-text font-semibold">
               {maintenanceCount.toLocaleString()}
             </div>
           </div>
 
           {/* Bookings */}
-          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+          <div className="bg-neutral-card border border-border p-3 flex flex-col justify-between h-20 relative overflow-hidden stagger-item">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#5C8FC2]"></div>
             <div className="pl-2 flex items-center justify-between">
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
@@ -426,13 +426,13 @@ export const Dashboard: React.FC = () => {
                 calendar_month
               </span>
             </div>
-            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+            <div className="pl-2 font-data-mono text-xl text-neutral-text font-semibold">
               {activeBookingsCount.toLocaleString()}
             </div>
           </div>
 
           {/* Transfers */}
-          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+          <div className="bg-neutral-card border border-border p-3 flex flex-col justify-between h-20 relative overflow-hidden stagger-item">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4FBF9F]"></div>
             <div className="pl-2 flex items-center justify-between">
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
@@ -440,13 +440,13 @@ export const Dashboard: React.FC = () => {
               </span>
               <span className="material-symbols-outlined text-[#4FBF9F] text-base">sync_alt</span>
             </div>
-            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+            <div className="pl-2 font-data-mono text-xl text-neutral-text font-semibold">
               {pendingTransfersCount.toLocaleString()}
             </div>
           </div>
 
           {/* Returns */}
-          <div className="bg-neutral-card border border-border p-3.5 flex flex-col justify-between h-24 relative overflow-hidden stagger-item">
+          <div className="bg-neutral-card border border-border p-3 flex flex-col justify-between h-20 relative overflow-hidden stagger-item">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-neutral-muted"></div>
             <div className="pl-2 flex items-center justify-between">
               <span className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
@@ -456,7 +456,7 @@ export const Dashboard: React.FC = () => {
                 keyboard_return
               </span>
             </div>
-            <div className="pl-2 font-data-mono text-2xl text-neutral-text font-semibold">
+            <div className="pl-2 font-data-mono text-xl text-neutral-text font-semibold">
               {upcomingReturnsCount.toLocaleString()}
             </div>
           </div>
@@ -477,7 +477,7 @@ export const Dashboard: React.FC = () => {
                   Avg Resolution Speed
                 </div>
                 <div className="flex items-end gap-2">
-                  <span className="font-data-mono text-xl text-neutral-text">
+                  <span className="font-data-mono text-lg text-neutral-text">
                     {benchmarksData.maintenance.organizationAverageHours.toFixed(1)}h
                   </span>
                   <span className="font-label-sm text-[10px] text-neutral-muted">
@@ -496,7 +496,7 @@ export const Dashboard: React.FC = () => {
                   Asset Utilization
                 </div>
                 <div className="flex items-end gap-2">
-                  <span className="font-data-mono text-xl text-neutral-text">
+                  <span className="font-data-mono text-lg text-neutral-text">
                     {benchmarksData.utilization.organizationUtilizationPct.toFixed(1)}%
                   </span>
                   <span className="font-label-sm text-[10px] text-neutral-muted">
@@ -521,9 +521,9 @@ export const Dashboard: React.FC = () => {
         )}
 
         {/* 4. Bottom Panels Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Eco-Predictive Health Section (1/3 width) replacing Overdue Mock */}
-          <div className="col-span-1 border border-border bg-neutral-card flex flex-col min-h-[400px] stagger-item">
+          <div className="col-span-1 border border-border bg-neutral-card flex flex-col min-h-[360px] stagger-item">
             <div className="p-3 border-b border-border bg-neutral-card/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Leaf size={16} className="text-[#4FBF9F]" />
@@ -584,7 +584,7 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Activity Log Section (2/3 width) */}
-          <div className="col-span-1 lg:col-span-2 border border-border bg-neutral-card flex flex-col min-h-[400px] stagger-item">
+          <div className="col-span-1 lg:col-span-2 border border-border bg-neutral-card flex flex-col min-h-[360px] stagger-item">
             <div className="p-3 border-b border-border bg-neutral-card/40 flex items-center justify-between">
               <span className="font-label-sm text-xs uppercase text-neutral-text tracking-wider">
                 System Activity Log

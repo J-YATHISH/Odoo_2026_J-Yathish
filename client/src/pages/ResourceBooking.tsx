@@ -213,7 +213,7 @@ export const ResourceBooking: React.FC = () => {
     <Layout title="Resource Booking">
       <div className="flex flex-col gap-0 -m-8 h-[calc(100vh-4rem)]">
         {/* ── Control Strip ── */}
-        <div className="bg-neutral-card border-b border-border p-4 flex items-center justify-between flex-shrink-0">
+        <div className="bg-neutral-card border-b border-border p-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-6 flex-wrap">
             {/* Resource Selector */}
             <div className="flex flex-col gap-1">
@@ -254,7 +254,7 @@ export const ResourceBooking: React.FC = () => {
             </div>
           </div>
 
-          <button className="btn-primary-industrial font-headline-md text-sm font-bold px-4 py-2 flex items-center gap-2 border border-primary/30 shrink-0">
+          <button className="btn-primary-industrial font-headline-md text-xs font-bold px-3 py-2 flex items-center gap-2 border border-primary/30 shrink-0">
             <span className="material-symbols-outlined">add</span>
             Book Slot
           </button>
@@ -397,7 +397,7 @@ export const ResourceBooking: React.FC = () => {
           </div>
 
           {/* ── Context Panel (Right Side) ── */}
-          <div className="w-80 border-l border-border bg-neutral-card flex flex-col flex-shrink-0 hidden lg:flex">
+          <div className="w-80 border-l border-border bg-neutral-card hidden lg:flex lg:flex-col flex-shrink-0">
             <div className="p-4 border-b border-border">
               <h2 className="font-headline-md text-sm font-bold text-neutral-text uppercase tracking-wider">
                 Asset Details

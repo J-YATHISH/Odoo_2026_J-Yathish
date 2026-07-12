@@ -236,7 +236,7 @@ export const ActivityLogs: React.FC = () => {
         {filteredLogs.map((log, idx) => (
           <div
             key={log.id}
-            className="group border-b border-border relative flex items-center px-6 py-3 hover:bg-neutral-muted/10 transition-colors"
+            className="group border-b border-border relative flex items-center px-4 py-2.5 hover:bg-neutral-muted/10 transition-colors"
             style={{
               animation: `fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards`,
               animationDelay: `${0.05 * (idx + 1)}s`,
@@ -257,9 +257,9 @@ export const ActivityLogs: React.FC = () => {
             {/* Content */}
             <div className="flex-1 min-w-0 pr-6">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className={`font-data-mono text-[13px] uppercase ${log.tagColor}`}>{log.tag}</span>
+                <span className={`font-data-mono text-xs uppercase ${log.tagColor}`}>{log.tag}</span>
                 <span
-                  className={`font-body-md text-sm truncate ${
+                  className={`font-body-md text-xs truncate ${
                     log.isUnread ? 'text-neutral-text' : 'text-neutral-muted'
                   }`}
                 >

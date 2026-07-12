@@ -145,15 +145,15 @@ export const AssetAllocation: React.FC = () => {
 
   return (
     <Layout title="Asset Allocation & Transfer">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {/* ═══ Top Section: Two Zones ═══ */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-4">
           {/* ── LEFT ZONE (60%) ── */}
-          <div className="lg:w-[60%] flex flex-col gap-6">
+          <div className="lg:w-[60%] flex flex-col gap-4">
             {/* Asset Selector */}
             <section className="bg-neutral-card border border-border p-4 flex flex-col gap-4">
               <div className="flex justify-between items-center border-b border-border pb-2">
-                <h2 className="font-headline-md text-base uppercase font-semibold text-neutral-text">
+                <h2 className="font-headline-md text-sm uppercase font-semibold text-neutral-text">
                   Asset Selection
                 </h2>
               </div>
@@ -191,7 +191,7 @@ export const AssetAllocation: React.FC = () => {
                 {/* Red accent bar */}
                 <div className="w-1 bg-[#C25D4E] absolute left-0 top-0 bottom-0" />
 
-                <div className="p-6 pl-8 flex-1 flex flex-col gap-6">
+                <div className="p-4 pl-6 flex-1 flex flex-col gap-4">
                   {/* Conflict Header */}
                   <div className="flex flex-col sm:flex-row justify-between items-start border-b border-border pb-4 gap-4">
                     <div>
@@ -213,7 +213,7 @@ export const AssetAllocation: React.FC = () => {
                         <div className="font-label-sm text-[11px] text-neutral-muted uppercase mb-1 tracking-wider">
                           Current Custodian
                         </div>
-                        <div className="font-headline-md text-[16px] uppercase text-neutral-text">
+                        <div className="font-headline-md text-sm uppercase text-neutral-text">
                           {currentCustodian.name}
                         </div>
                         <div className="font-data-mono text-[11px] text-neutral-muted mt-1">
@@ -225,7 +225,7 @@ export const AssetAllocation: React.FC = () => {
 
                   {/* Transfer Request Form */}
                   <div className="bg-neutral-bg border border-border p-4 flex flex-col gap-4">
-                    <h3 className="font-headline-md text-[16px] uppercase border-b border-border pb-2 text-neutral-text">
+                    <h3 className="font-headline-md text-sm uppercase border-b border-border pb-2 text-neutral-text">
                       Initiate Transfer Request
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -271,7 +271,7 @@ export const AssetAllocation: React.FC = () => {
                     <div className="flex flex-col sm:flex-row gap-4 mt-2 border-t border-border pt-4">
                       <button
                         onClick={handleSubmitTransfer}
-                        className={`btn-primary-industrial font-headline-md text-[14px] px-6 py-2 uppercase flex-1 text-center font-bold tracking-wide transition-all ${
+                        className={`btn-primary-industrial font-headline-md text-xs px-4 py-2 uppercase flex-1 text-center font-bold tracking-wide transition-all ${
                           submitFlash ? 'ring-2 ring-primary ring-offset-1 ring-offset-neutral-bg' : ''
                         }`}
                       >
@@ -279,7 +279,7 @@ export const AssetAllocation: React.FC = () => {
                       </button>
                       <button
                         onClick={handleMarkReturned}
-                        className={`btn-secondary-industrial font-headline-md text-[14px] px-6 py-2 uppercase transition-all ${
+                        className={`btn-secondary-industrial font-headline-md text-xs px-4 py-2 uppercase transition-all ${
                           returnFlash ? 'ring-2 ring-success ring-offset-1 ring-offset-neutral-bg' : ''
                         }`}
                       >
@@ -293,9 +293,9 @@ export const AssetAllocation: React.FC = () => {
 
             {/* No-conflict state */}
             {!hasConflict && (
-              <section className="bg-neutral-card border border-border p-6 flex flex-col items-center justify-center gap-3 min-h-[200px]">
+              <section className="bg-neutral-card border border-border p-4 flex flex-col items-center justify-center gap-2 min-h-[180px]">
                 <span className="material-symbols-outlined text-success text-[40px]">check_circle</span>
-                <p className="font-headline-md text-base uppercase text-success">Asset Available</p>
+                <p className="font-headline-md text-sm uppercase text-success">Asset Available</p>
                 <p className="font-data-mono text-[13px] text-neutral-muted">
                   {searchTag.toUpperCase()} is ready for allocation.
                 </p>
@@ -304,10 +304,10 @@ export const AssetAllocation: React.FC = () => {
           </div>
 
           {/* ── RIGHT ZONE (40%) ── */}
-          <div className="lg:w-[40%] flex flex-col gap-6">
+          <div className="lg:w-[40%] flex flex-col gap-4">
             {/* Transfer Status Tracker */}
             <section className="bg-neutral-card border border-border p-4 flex flex-col gap-4">
-              <h2 className="font-headline-md text-base uppercase border-b border-border pb-2 font-semibold text-neutral-text">
+              <h2 className="font-headline-md text-sm uppercase border-b border-border pb-2 font-semibold text-neutral-text">
                 Active Request Status
               </h2>
               <div className="flex flex-col gap-0 relative">
@@ -332,7 +332,7 @@ export const AssetAllocation: React.FC = () => {
                     {/* Step content */}
                     <div className={step.state === 'future' ? 'opacity-50' : ''}>
                       <div
-                        className={`font-headline-md text-[14px] uppercase ${
+                        className={`font-headline-md text-xs uppercase ${
                           step.state === 'done' ? 'text-primary' : 'text-neutral-muted'
                         }`}
                       >
@@ -354,7 +354,7 @@ export const AssetAllocation: React.FC = () => {
               }`}
             >
               <div className="flex justify-between items-center border-b border-border pb-2">
-                <h2 className="font-headline-md text-base uppercase font-semibold text-neutral-text">
+                <h2 className="font-headline-md text-sm uppercase font-semibold text-neutral-text">
                   Condition Check-in
                 </h2>
               </div>
@@ -374,7 +374,7 @@ export const AssetAllocation: React.FC = () => {
                     disabled={hasConflict}
                     className="accent-primary"
                   />
-                  <span className="font-headline-md text-[14px] uppercase text-neutral-text">Nominal</span>
+                  <span className="font-headline-md text-xs uppercase text-neutral-text">Nominal</span>
                 </label>
                 <label
                   className={`flex items-center gap-2 p-2 border cursor-pointer transition-colors ${
@@ -391,7 +391,7 @@ export const AssetAllocation: React.FC = () => {
                     disabled={hasConflict}
                     className="accent-[#C25D4E]"
                   />
-                  <span className="font-headline-md text-[14px] uppercase text-[#C25D4E]">Damaged</span>
+                  <span className="font-headline-md text-xs uppercase text-[#C25D4E]">Damaged</span>
                 </label>
               </div>
             </section>
@@ -401,7 +401,7 @@ export const AssetAllocation: React.FC = () => {
         {/* ═══ Bottom Section: Allocation History Ledger ═══ */}
         <section className="bg-neutral-card border border-border flex flex-col">
           <div className="p-4 border-b border-border flex justify-between items-center bg-neutral-card/60">
-            <h2 className="font-headline-md text-base uppercase font-semibold text-neutral-text">
+            <h2 className="font-headline-md text-sm uppercase font-semibold text-neutral-text">
               Allocation History Ledger
             </h2>
             <span className="font-data-mono text-[13px] text-neutral-muted">Last {history.length} records</span>

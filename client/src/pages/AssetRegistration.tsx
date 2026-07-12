@@ -65,36 +65,36 @@ export const AssetRegistration: React.FC = () => {
     <Layout title="Asset Master Ledger">
       <div className="flex h-full w-full -mt-2">
         {/* Left Area: Main Table */}
-        <div className="flex-1 flex flex-col min-w-0 pr-6 transition-all duration-300">
+        <div className="flex-1 flex flex-col min-w-0 pr-4 transition-all duration-300">
 
           {/* Toolbar */}
-          <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex flex-wrap gap-3 mb-4">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-outline">
-                <Search size={16} />
+                <Search size={14} />
               </div>
               <input 
                 type="text" 
                 placeholder="Tag, Serial, QR..." 
-                className="w-full bg-surface-container border border-outline-variant rounded-none text-sm px-10 py-2 text-on-surface font-data-mono placeholder:text-outline focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-surface-container border border-outline-variant rounded-none text-xs px-9 py-1.5 text-on-surface font-data-mono placeholder:text-outline focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
-            <div className="relative w-48">
-              <select className="w-full appearance-none bg-surface-container border border-outline-variant rounded-none text-sm font-data-mono px-4 py-2 pr-10 text-on-surface focus:outline-none focus:border-primary cursor-pointer">
+            <div className="relative w-44">
+              <select className="w-full appearance-none bg-surface-container border border-outline-variant rounded-none text-xs font-data-mono px-3 py-1.5 pr-8 text-on-surface focus:outline-none focus:border-primary cursor-pointer">
                 <option>Category: All</option>
               </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-outline">
-                <ChevronDown size={16} />
+              <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-outline">
+                <ChevronDown size={14} />
               </div>
             </div>
 
-            <div className="relative w-48">
-              <select className="w-full appearance-none bg-surface-container border border-outline-variant rounded-none text-sm font-data-mono px-4 py-2 pr-10 text-on-surface focus:outline-none focus:border-primary cursor-pointer">
+            <div className="relative w-44">
+              <select className="w-full appearance-none bg-surface-container border border-outline-variant rounded-none text-xs font-data-mono px-3 py-1.5 pr-8 text-on-surface focus:outline-none focus:border-primary cursor-pointer">
                 <option>Status: All</option>
               </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-outline">
-                <ChevronDown size={16} />
+              <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-outline">
+                <ChevronDown size={14} />
               </div>
             </div>
           </div>
@@ -103,12 +103,12 @@ export const AssetRegistration: React.FC = () => {
           <div className="border border-outline-variant rounded-none overflow-hidden bg-surface">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-outline-variant bg-surface-container-low font-label-sm uppercase tracking-widest text-outline">
-                  <th className="px-4 py-3 w-12 border-r border-outline-variant"></th>
-                  <th className="px-4 py-3 border-r border-outline-variant">Asset Tag</th>
-                  <th className="px-4 py-3 border-r border-outline-variant">Name</th>
-                  <th className="px-4 py-3 border-r border-outline-variant">Category</th>
-                  <th className="px-4 py-3 text-right">Status</th>
+                <tr className="border-b border-outline-variant bg-surface-container-low font-label-sm text-[10px] uppercase tracking-wider text-outline">
+                  <th className="px-3 py-2 w-10 border-r border-outline-variant"></th>
+                  <th className="px-3 py-2 border-r border-outline-variant">Asset Tag</th>
+                  <th className="px-3 py-2 border-r border-outline-variant">Name</th>
+                  <th className="px-3 py-2 border-r border-outline-variant">Category</th>
+                  <th className="px-3 py-2 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
@@ -122,15 +122,15 @@ export const AssetRegistration: React.FC = () => {
                         isSelected ? 'bg-surface-container-highest border-l-4 border-primary' : 'hover:bg-surface-container-high border-l-4 border-transparent'
                       }`}
                     >
-                      <td className="px-4 py-3 text-outline border-r border-outline-variant">
+                      <td className="px-3 py-2 text-outline border-r border-outline-variant">
                         {isSelected ? (
-                          <CheckSquare size={18} className="text-primary" />
+                          <CheckSquare size={16} className="text-primary" />
                         ) : (
-                          <Square size={18} className="group-hover:text-primary/50" />
+                          <Square size={16} className="group-hover:text-primary/50" />
                         )}
                       </td>
-                      <td className="px-4 py-3 border-r border-outline-variant">
-                        <span className={`font-data-mono text-sm px-2 py-0.5 rounded-none border ${
+                      <td className="px-3 py-2 border-r border-outline-variant">
+                        <span className={`font-data-mono text-xs px-2 py-0.5 rounded-none border ${
                           isSelected 
                             ? 'bg-primary-container/10 border-primary text-primary' 
                             : 'bg-surface-container border-outline-variant text-on-surface'
@@ -138,14 +138,14 @@ export const AssetRegistration: React.FC = () => {
                           {asset.tag}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-headline-md text-sm text-on-surface border-r border-outline-variant">
+                      <td className="px-3 py-2 font-headline-md text-xs text-on-surface border-r border-outline-variant">
                         {asset.name}
                       </td>
-                      <td className="px-4 py-3 text-sm font-data-mono text-outline border-r border-outline-variant">
+                      <td className="px-3 py-2 text-xs font-data-mono text-outline border-r border-outline-variant">
                         {asset.category}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`font-label-sm text-[10px] uppercase tracking-wider px-2 py-1 rounded-none border ${
+                      <td className="px-3 py-2 text-right">
+                        <span className={`font-label-sm text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-none border ${
                           asset.status === 'OPERATIONAL' 
                             ? 'text-tertiary border-tertiary/30 bg-tertiary/5' 
                             : 'text-error border-error/30 bg-error/5'
@@ -163,10 +163,10 @@ export const AssetRegistration: React.FC = () => {
 
         {/* Right Area: Asset Details Panel */}
         {selectedAsset && (
-          <div className="w-[380px] shrink-0 border-l border-outline-variant pl-6 flex flex-col h-full overflow-y-auto custom-scrollbar">
+          <div className="w-[340px] shrink-0 border-l border-outline-variant pl-4 flex flex-col h-full overflow-y-auto custom-scrollbar">
             
             {/* Panel Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-outline-variant mb-6">
+            <div className="flex items-center justify-between pb-3 border-b border-outline-variant mb-4">
               <span className="font-label-sm text-[10px] uppercase tracking-widest text-on-surface">
                 Asset Details
               </span>
@@ -192,15 +192,15 @@ export const AssetRegistration: React.FC = () => {
               </span>
             </div>
 
-            <h2 className="font-headline-md text-[14px] font-semibold text-on-surface mb-2">
+            <h2 className="font-headline-md text-sm font-semibold text-on-surface mb-2">
               {selectedAsset.name}
             </h2>
-            <p className="font-body-md text-sm text-outline mb-6 leading-relaxed">
+            <p className="font-body-md text-xs text-outline mb-4 leading-relaxed">
               {selectedAsset.description}
             </p>
 
             {/* Document Card */}
-            <div className="flex items-center justify-between p-4 bg-surface-container border border-outline-variant rounded-none mb-8 group hover:border-primary/50 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between p-3 bg-surface-container border border-outline-variant rounded-none mb-6 group hover:border-primary/50 transition-colors cursor-pointer">
               <div className="flex items-center gap-4">
                 <FileText size={24} className="text-outline group-hover:text-on-surface transition-colors" />
                 <div className="flex flex-col">

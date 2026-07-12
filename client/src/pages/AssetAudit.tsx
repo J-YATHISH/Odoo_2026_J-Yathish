@@ -34,9 +34,9 @@ export const AssetAudit: React.FC = () => {
 
   return (
     <Layout title="Asset Audit">
-      <div className="max-w-5xl mx-auto flex flex-col gap-6 w-full">
+      <div className="max-w-5xl mx-auto flex flex-col gap-4 w-full">
         {/* Audit Metadata Bar */}
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-4 px-6 py-4 bg-neutral-card/40 border border-border rounded-lg text-sm">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 bg-neutral-card/40 border border-border rounded-lg text-xs">
           <div className="flex items-center gap-2">
             <span className="text-neutral-muted uppercase tracking-wider font-semibold text-xs">Cycle ID</span>
             <span className="text-primary font-data-mono font-medium">AUD-2024-05-12</span>
@@ -69,25 +69,25 @@ export const AssetAudit: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-border bg-neutral-card/40 text-[10px] uppercase tracking-wider text-neutral-muted font-semibold">
-                <th className="px-6 py-4 w-40">Asset Tag</th>
-                <th className="px-6 py-4">Asset Name</th>
-                <th className="px-6 py-4 w-48">Expected Loc</th>
-                <th className="px-6 py-4 w-96">Verification Status</th>
+                <th className="px-4 py-3 w-40">Asset Tag</th>
+                <th className="px-4 py-3">Asset Name</th>
+                <th className="px-4 py-3 w-48">Expected Loc</th>
+                <th className="px-4 py-3 w-96">Verification Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {items.map((item) => (
                 <tr key={item.id} className="hover:bg-neutral-card/30 transition-colors">
-                  <td className="px-6 py-4 font-data-mono text-primary text-sm">
+                  <td className="px-4 py-3 font-data-mono text-primary text-sm">
                     {item.tag}
                   </td>
-                  <td className="px-6 py-4 text-sm text-neutral-text font-medium">
+                  <td className="px-4 py-3 text-sm text-neutral-text font-medium">
                     {item.name}
                   </td>
-                  <td className="px-6 py-4 text-sm text-neutral-muted">
+                  <td className="px-4 py-3 text-sm text-neutral-muted">
                     {item.expectedLoc}
                   </td>
-                  <td className="px-6 py-3">
+                  <td className="px-4 py-2.5">
                     <div className="flex bg-neutral-card/50 rounded-md border border-border p-1 gap-1">
                       <button
                         onClick={() => updateStatus(item.id, 'VERIFIED')}
@@ -130,10 +130,10 @@ export const AssetAudit: React.FC = () => {
         {/* Discrepancy Alert */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
           {hasDiscrepancy ? (
-            <div className="flex items-center gap-6 px-6 py-4 bg-[#2a1d20] border border-danger/20 rounded-lg w-full sm:w-auto flex-1">
+            <div className="flex items-center gap-4 px-4 py-3 bg-[#2a1d20] border border-danger/20 rounded-lg w-full sm:w-auto flex-1">
               <div className="flex items-center gap-3 text-danger">
                 <AlertTriangle size={24} strokeWidth={2} className="text-[#ffb4ab]" />
-                <span className="font-headline-md tracking-widest uppercase font-bold text-lg text-[#ffb4ab]">
+                <span className="font-headline-md tracking-widest uppercase font-bold text-sm text-[#ffb4ab]">
                   Discrepancy Alert
                 </span>
               </div>
@@ -163,10 +163,10 @@ export const AssetAudit: React.FC = () => {
           )}
 
           <div className="flex items-center gap-4 w-full sm:w-auto self-end">
-            <button className="px-8 py-3 text-xs font-bold uppercase tracking-wider text-neutral-text border border-border hover:bg-neutral-card rounded transition-colors w-full sm:w-auto">
+            <button className="px-6 py-2 text-xs font-bold uppercase tracking-wider text-neutral-text border border-border hover:bg-neutral-card rounded transition-colors w-full sm:w-auto">
               Save Draft
             </button>
-            <button className="flex items-center justify-center gap-2 px-8 py-3 bg-[rgb(var(--color-btn-primary-bg))] hover:bg-[rgb(var(--color-btn-primary-hover))] text-[rgb(var(--color-btn-primary-text))] text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-lg shadow-primary/10 w-full sm:w-auto">
+            <button className="flex items-center justify-center gap-2 px-6 py-2 bg-[rgb(var(--color-btn-primary-bg))] hover:bg-[rgb(var(--color-btn-primary-hover))] text-[rgb(var(--color-btn-primary-text))] text-xs font-bold uppercase tracking-wider rounded transition-colors shadow-lg shadow-primary/10 w-full sm:w-auto">
               <Lock size={16} />
               Close Audit Cycle
             </button>
@@ -175,7 +175,7 @@ export const AssetAudit: React.FC = () => {
 
         {/* Audit History Accordion */}
         <div className="mt-4 border border-border rounded-lg bg-neutral-card/10 overflow-hidden">
-          <button className="w-full flex items-center justify-between px-6 py-4 hover:bg-neutral-card/30 transition-colors">
+          <button className="w-full flex items-center justify-between px-4 py-3 hover:bg-neutral-card/30 transition-colors">
             <span className="font-headline-md font-bold uppercase tracking-wider text-neutral-text">
               Audit History
             </span>

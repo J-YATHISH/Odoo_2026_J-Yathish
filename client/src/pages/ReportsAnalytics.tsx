@@ -223,7 +223,7 @@ export const ReportsAnalytics: React.FC = () => {
         {/* ── Main 2×2 Grid ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 border border-border bg-neutral-card">
           {/* MODULE 1: Utilization by Department (Bar Chart) */}
-          <div className="border-b border-border lg:border-b-0 lg:border-r p-4 bg-neutral-card flex flex-col h-[320px]">
+          <div className="border-b border-border lg:border-b-0 lg:border-r p-3 bg-neutral-card flex flex-col h-[280px]">
             <div className="flex justify-between items-center mb-4 border-b border-border pb-1">
               <h3 className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
                 Utilization by Dept. (Q3)
@@ -236,7 +236,7 @@ export const ReportsAnalytics: React.FC = () => {
           </div>
 
           {/* MODULE 2: Maintenance Frequency by Category (Line Chart) */}
-          <div className="p-4 bg-neutral-card flex flex-col h-[320px] border-b border-border">
+          <div className="p-3 bg-neutral-card flex flex-col h-[280px] border-b border-border">
             <div className="flex justify-between items-center mb-4 border-b border-border pb-1">
               <h3 className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted">
                 Maint. Freq. by Category
@@ -249,9 +249,9 @@ export const ReportsAnalytics: React.FC = () => {
           </div>
 
           {/* MODULE 3: Asset Usage Rankings (Two Lists) */}
-          <div className="border-b border-border lg:border-b-0 lg:border-r p-0 bg-neutral-card flex flex-col md:flex-row h-auto min-h-[240px]">
+          <div className="border-b border-border lg:border-b-0 lg:border-r p-0 bg-neutral-card flex flex-col md:flex-row h-auto min-h-[220px]">
             {/* Most Used */}
-            <div className="flex-1 p-4 md:border-r border-b md:border-b-0 border-border">
+            <div className="flex-1 p-3 md:border-r border-b md:border-b-0 border-border">
               <h3 className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted mb-2 border-b border-border pb-1">
                 Most Used Assets
               </h3>
@@ -271,7 +271,7 @@ export const ReportsAnalytics: React.FC = () => {
               </ul>
             </div>
             {/* Idle */}
-            <div className="flex-1 p-4">
+            <div className="flex-1 p-3">
               <h3 className="font-label-sm text-[11px] uppercase tracking-wider text-neutral-muted mb-2 border-b border-border pb-1">
                 Idle Assets
               </h3>
