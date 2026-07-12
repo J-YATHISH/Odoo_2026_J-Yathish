@@ -125,16 +125,21 @@ sequenceDiagram
 
 ---
 
-## Multi-Tenant & Role-Based Access Architecture (RBAC)
+## Multi-Tenant B2B SaaS & Role-Based Access Architecture (RBAC)
 
-The system is designed as a secure, multi-tenant B2B SaaS platform.
+AssetFlow is not just built for a single company; it is architected from the ground up as a scalable **B2B SaaS (Software as a Service) Platform**. This allows a single deployment to host hundreds of distinct companies, generating significant recurring software revenue (MRR/ARR) for the platform owner.
 
-1. **Multi-Organization Scoping:** Every single query in the Express API is strictly bound by an `organizationId`. An employee at "TechCorp" cannot read or write any assets, bookings, or tickets belonging to "DiagCorp". This isolation is guaranteed at the database schema level.
-2. **Strict RBAC Middleware:** Express middleware reads cryptographically signed JWTs to enforce Role-Based Access.
-   - **ADMIN:** Full system access.
-   - **ASSET_MANAGER:** Can approve Transfer Requests and AI Maintenance tickets.
-   - **DEPARTMENT_HEAD:** Can view and manage assets within their department hierarchy.
-   - **EMPLOYEE:** Can only view their own allocated assets and create maintenance tickets.
+### 1. Multi-Organization Scoping (B2B SaaS Isolation)
+Every single query in the Express API is strictly bound by a cryptographic `organizationId`. 
+- **Data Isolation:** An employee at "TechCorp" cannot read, write, or even query assets, bookings, or tickets belonging to "DiagCorp". This multi-tenant isolation is enforced globally at the database schema level.
+- **Industry Profitability:** Because the infrastructure is shared but the data is securely isolated, hosting costs remain extremely low while the platform can be monetized and sold on a subscription basis to multiple enterprises simultaneously.
+
+### 2. Strict RBAC Middleware
+Express middleware decodes and verifies cryptographically signed JWTs to enforce Role-Based Access within each organization.
+- **ADMIN:** Full system configuration access.
+- **ASSET_MANAGER:** Can approve Transfer Requests, review AI Maintenance tickets, and oversee audits.
+- **DEPARTMENT_HEAD:** Can view and manage physical assets strictly within their department's hierarchy.
+- **EMPLOYEE:** Can only view their personal allocated hardware and create maintenance tickets.
 
 ---
 
