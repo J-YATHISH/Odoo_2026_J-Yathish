@@ -98,7 +98,7 @@ from pydantic import BaseModel
 # ==========================================
 # IMPORTANT: PASTE YOUR NGROK AUTHTOKEN HERE
 # ==========================================
-NGROK_AUTH_TOKEN = "PASTE_YOUR_TOKEN_HERE"
+NGROK_AUTH_TOKEN = "3FZS6u2JQ6BBjiQxZbikUykvHo8_6GHkFij6wfa4MAXuHqL9Q"
 ngrok.set_auth_token(NGROK_AUTH_TOKEN)
 
 app = FastAPI(title="AssetFlow AI Triage API")
