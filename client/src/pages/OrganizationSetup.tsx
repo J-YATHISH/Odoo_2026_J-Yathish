@@ -181,9 +181,6 @@ export const OrganizationSetup: React.FC = () => {
         {/* ── Page Header + Tabs ─────────────────────────────────────────── */}
         <div className="px-6 pt-6 pb-0 border-b border-border bg-neutral-card/40 shrink-0">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-headline-lg text-lg text-neutral-text uppercase tracking-tight">
-              ORGANIZATION_SETUP
-            </h1>
             <div className="flex items-center gap-2">
               <button
                 onClick={loadAll} disabled={loading}

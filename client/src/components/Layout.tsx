@@ -34,42 +34,46 @@ export const Layout: React.FC<LayoutProps> = ({ title, children }) => {
   const initials = getInitials(user?.name, user?.email);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-bg text-neutral-text transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden transition-colors duration-200"
+      style={{ backgroundColor: 'rgb(var(--color-surface))', color: 'rgb(var(--color-on-surface))' }}>
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content Container */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        {/* Header */}
-        <header className="h-16 border-b border-outline-variant bg-surface-container flex items-center justify-between px-8 shrink-0 z-30 transition-colors duration-200">
-          <h2 className="font-headline-md text-on-surface tracking-wide m-0">
+        {/* Header — exact match to reference: h-12, px-4, border-b, bg-surface-container */}
+        <header className="h-12 border-b border-outline-variant bg-surface-container flex items-center justify-between px-4 shrink-0 z-20 transition-colors duration-200">
+          <h2 className="font-headline-md text-[13px] font-semibold text-on-surface uppercase tracking-wider m-0 leading-none">
             {title}
           </h2>
           <div className="flex items-center gap-4">
             {/* Theme Switch Control */}
             <button
               onClick={toggleTheme}
-              className="p-2 text-outline hover:text-on-surface hover:bg-surface-bright/20 transition-all focus:outline-none w-9 h-9 flex items-center justify-center border border-transparent hover:border-outline-variant"
+              className="text-on-surface-variant hover:text-primary-container transition-colors focus:outline-none"
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
-              {theme === 'dark' ? <Sun size={18} className="text-primary" /> : <Moon size={18} />}
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
+            {/* User info — matches reference top-right */}
             <div className="text-right hidden sm:block">
-              <span className="text-xs font-medium text-neutral-text block leading-none">
+              <span className="font-data-mono text-[12px] text-on-surface block leading-none">
                 {userName}
               </span>
-              <span className="text-[10px] text-neutral-muted uppercase tracking-wider font-semibold">
+              <span className="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider block mt-0.5">
                 {userRole.replace(/_/g, ' ')}
               </span>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center border border-primary/20">
-              <span className="text-xs font-semibold text-primary">{initials}</span>
+            {/* Avatar square — matches reference small square */}
+            <div className="w-6 h-6 border border-outline-variant bg-surface-container-high flex items-center justify-center shrink-0">
+              <span className="font-data-mono text-[10px] font-bold text-primary-container">{initials}</span>
             </div>
           </div>
         </header>
 
-        <main className="flex-grow p-8 bg-neutral-bg overflow-y-auto transition-colors duration-200">
+        <main className="flex-grow p-margin-page overflow-y-auto transition-colors duration-200"
+          style={{ backgroundColor: 'rgb(var(--color-surface))' }}>
           {children}
         </main>
       </div>

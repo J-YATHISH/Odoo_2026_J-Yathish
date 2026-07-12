@@ -62,14 +62,10 @@ export const AssetRegistration: React.FC = () => {
   const selectedAsset = mockAssets.find(a => a.id === selectedAssetId);
 
   return (
-    <Layout title="">
+    <Layout title="Asset Master Ledger">
       <div className="flex h-full w-full -mt-2">
         {/* Left Area: Main Table */}
         <div className="flex-1 flex flex-col min-w-0 pr-6 transition-all duration-300">
-          
-          <h1 className="text-2xl font-headline-lg tracking-wider text-on-surface mb-6">
-            Asset Master Ledger
-          </h1>
 
           {/* Toolbar */}
           <div className="flex flex-wrap gap-4 mb-6">
@@ -196,7 +192,7 @@ export const AssetRegistration: React.FC = () => {
               </span>
             </div>
 
-            <h2 className="font-headline-lg text-xl text-on-surface mb-2">
+            <h2 className="font-headline-md text-[14px] font-semibold text-on-surface mb-2">
               {selectedAsset.name}
             </h2>
             <p className="font-body-md text-sm text-outline mb-6 leading-relaxed">

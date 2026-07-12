@@ -214,9 +214,6 @@ export const ActivityLogs: React.FC = () => {
     <Layout title="Activity Logs & Notifications">
       {/* ── Page Header & Segmented Tabs ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4 mb-0">
-        <h1 className="font-headline-lg text-xl font-bold text-neutral-text uppercase tracking-tight m-0">
-          Activity Log
-        </h1>
         <div className="flex border border-border overflow-hidden bg-neutral-bg">
           {tabs.map((tab) => (
             <button

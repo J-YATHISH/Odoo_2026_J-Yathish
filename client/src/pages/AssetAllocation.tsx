@@ -196,7 +196,7 @@ export const AssetAllocation: React.FC = () => {
                   <div className="flex flex-col sm:flex-row justify-between items-start border-b border-border pb-4 gap-4">
                     <div>
                       <div className="flex items-center gap-3 mb-1 flex-wrap">
-                        <h2 className="font-headline-lg text-xl uppercase text-[#C25D4E] font-semibold">
+                        <h2 className="font-headline-md text-[14px] uppercase text-[#C25D4E] font-semibold">
                           Allocation Conflict
                         </h2>
                         <span className="bg-[#C25D4E] text-[#111316] font-label-sm text-[11px] px-2 py-0.5 uppercase tracking-wider font-semibold">

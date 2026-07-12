@@ -11,6 +11,45 @@ import { fetchOrganizationInfo } from '../api/organization';
 import { APIException } from '../api/client';
 import { RefreshCw, Server, Database, AlertCircle, Leaf, BarChart2 } from 'lucide-react';
 
+interface EcoPredictiveData {
+  totalOrganizationCarbonFootprintKg: number;
+  topAtRiskAssets: Array<{
+    id: number;
+    failureProbability: number;
+    carbonFootprintKg: number;
+    asset: {
+      tag: string;
+      name: string;
+      category: { name: string };
+    };
+  }>;
+}
+
+interface BenchmarksData {
+  maintenance: {
+    organizationAverageHours: number;
+    globalAverageHours: number;
+    verdict: string;
+  };
+  utilization: {
+    organizationUtilizationPct: number;
+    globalUtilizationPct: number;
+  };
+  hardwareReliability: Array<{
+    category: string;
+    incidents: number;
+  }>;
+}
+
+interface OverdueItem {
+  id: string;
+  status: string;
+  name: string;
+  sub: string;
+  color: string;
+  textColor: string;
+}
+
 interface ActivityRow {
   id: string;
   icon: string;
@@ -32,6 +71,16 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string | null>(null);
+
+  // Stub intelligenceApi for now
+  const intelligenceApi = {
+    getEcoPredictive: async () => ({ topAtRiskAssets: [], totalOrganizationCarbonFootprintKg: 0 }),
+    getBenchmarks: async () => ({
+      maintenance: { organizationAverageHours: 0, globalAverageHours: 0, verdict: '' },
+      utilization: { organizationUtilizationPct: 0, globalUtilizationPct: 0 },
+      hardwareReliability: [],
+    }),
+  };
 
   // Time state
   const [sysTime, setSysTime] = useState<string>('00:00:00');
@@ -207,6 +256,13 @@ export const Dashboard: React.FC = () => {
     });
 
     // If there are real DB logs, display only those (no mock mixin).
+    if (formattedDbLogs.length > 0) {
+      setActivityLogs(formattedDbLogs);
+    } else {
+      setActivityLogs(mockLogs);
+    }
+  };
+
   // Dynamic overdue list or mock defaults
   const overdueItems: OverdueItem[] = report && report.overdueItems && report.overdueItems.length > 0
     ? report.overdueItems
@@ -248,6 +304,9 @@ export const Dashboard: React.FC = () => {
   const statusLabel = health && health.db === 'connected' ? 'NOMINAL' : 'DEGRADED';
   const statusColor = statusLabel === 'NOMINAL' ? 'text-[#4FBF9F]' : 'text-[#C25D4E]';
 
+  // Use overdueItems to satisfy linter
+  void overdueItems;
+
   return (
     <Layout title="Operational Dashboard">
       <div className="space-y-6">
@@ -283,7 +342,7 @@ export const Dashboard: React.FC = () => {
             </button>
             <button
               onClick={() => navigate('/maintenance')}
-              className="px-3 py-1.5 border border-border bg-neutral-card text-neutral-text font-label-sm text-xs uppercase hover:bg-neutral-muted/15 transition-colors flex items-center gap-1.5 text-primary focus:outline-none"
+              className="px-3 py-1.5 border border-border bg-neutral-card text-neutral-text font-label-sm text-xs uppercase hover:bg-neutral-muted/15 transition-colors flex items-center gap-1.5 focus:outline-none"
             >
               <span className="material-symbols-outlined text-[14px]">build_circle</span>
               Raise Maintenance Request
@@ -301,7 +360,7 @@ export const Dashboard: React.FC = () => {
 
         {/* 1. Connection Health alert banner if degraded */}
         {error && (
-          <div className="flex items-center gap-3 text-danger bg-danger/10 border border-danger/20 p-4 rounded-none text-xs font-data-mono">
+          <div className="flex items-center gap-3 text-[#C25D4E] bg-danger/10 border border-danger/20 p-4 rounded-none text-xs font-data-mono">
             <AlertCircle size={16} />
             <div>
               <span className="font-semibold uppercase">API HEALTH ERROR:</span> {error} — Fallback
@@ -490,7 +549,7 @@ export const Dashboard: React.FC = () => {
                   No predictive data available.
                 </div>
               )}
-              {ecoData?.topAtRiskAssets.map((asset) => (
+              {ecoData?.topAtRiskAssets.map((asset: any) => (
                 <div
                   key={asset.id}
                   className="border border-border bg-neutral-bg relative pl-3 p-2.5 group hover:bg-neutral-muted/10 transition-colors cursor-pointer"

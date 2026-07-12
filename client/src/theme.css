@@ -1,51 +1,145 @@
-:root {
-  --color-surface: 17 19 22;
+/* ============================================
+   Stitch Industrial Design System — Theme Tokens
+   Reference: operational_dashboard_main/code.html
+   
+   Dark mode = default (:root)  bg:#15171A  panel:#1D2023  border:#2C3033
+   Light mode = [data-theme="light"]  clean whites with amber accent
+   ============================================ */
+
+[data-theme="dark"], :root {
+  /* ── Surfaces (exact from reference) ── */
+  --color-surface: 21 23 26;              /* #15171A  main bg */
   --color-surface-dim: 17 19 22;
-  --color-surface-bright: 55 57 61;
+  --color-surface-bright: 55 57 61;       /* #37393d */
   --color-surface-container-lowest: 12 14 17;
-  --color-surface-container-low: 26 28 31;
-  --color-surface-container: 30 32 35;
-  --color-surface-container-high: 40 42 45;
-  --color-surface-container-highest: 51 53 56;
-  --color-on-surface: 226 226 230;
-  --color-on-surface-variant: 215 195 175;
+  --color-surface-container-low: 26 28 31;  /* #1a1c1f */
+  --color-surface-container: 29 32 35;    /* #1D2023  panel bg */
+  --color-surface-container-high: 40 42 45; /* #282a2d */
+  --color-surface-container-highest: 51 53 56; /* #333538 */
+
+  /* ── Text ── */
+  --color-on-surface: 226 226 230;        /* #e2e2e6 */
+  --color-on-surface-variant: 215 195 175; /* #d7c3af */
   --color-inverse-surface: 226 226 230;
   --color-inverse-on-surface: 47 48 52;
-  --color-outline: 160 142 123;
-  --color-outline-variant: 82 68 53;
+
+  /* ── Borders ── */
+  --color-outline: 160 142 123;           /* #a08e7b */
+  --color-outline-variant: 44 48 51;      /* #2C3033  ui-border */
+
+  /* ── Primary: Amber/Gold accent ── */
   --color-surface-tint: 255 185 97;
-  --color-primary: 255 193 118;
+  --color-primary: 255 193 118;           /* #ffc176  text accent */
   --color-on-primary: 71 42 0;
-  --color-primary-container: 240 160 48;
-  --color-on-primary-container: 97 59 0;
+  --color-primary-container: 240 160 48;  /* #f0a030  THE amber button bg */
+  --color-on-primary-container: 17 19 22; /* #111316  dark text on amber */
   --color-inverse-primary: 134 83 0;
-  --color-secondary: 154 203 255;
+  --color-primary-fixed: 255 221 184;
+  --color-primary-fixed-dim: 229 152 46;  /* #e5982e  amber hover */
+  --color-on-primary-fixed: 43 23 0;
+  --color-on-primary-fixed-variant: 102 62 0;
+
+  /* ── Secondary: Steel blue ── */
+  --color-secondary: 154 203 255;         /* #9acbff */
   --color-on-secondary: 0 51 85;
   --color-secondary-container: 2 74 121;
   --color-on-secondary-container: 135 185 239;
-  --color-tertiary: 114 224 190;
-  --color-on-tertiary: 0 56 43;
-  --color-tertiary-container: 84 196 164;
-  --color-on-tertiary-container: 0 78 61;
-  --color-error: 255 180 171;
-  --color-on-error: 105 0 5;
-  --color-error-container: 147 0 10;
-  --color-on-error-container: 255 218 214;
-  --color-primary-fixed: 255 221 184;
-  --color-primary-fixed-dim: 255 185 97;
-  --color-on-primary-fixed: 43 23 0;
-  --color-on-primary-fixed-variant: 102 62 0;
   --color-secondary-fixed: 208 228 255;
   --color-secondary-fixed-dim: 154 203 255;
   --color-on-secondary-fixed: 0 29 52;
   --color-on-secondary-fixed-variant: 2 74 121;
+
+  /* ── Tertiary: Teal ── */
+  --color-tertiary: 114 224 190;          /* #72e0be */
+  --color-on-tertiary: 0 56 43;
+  --color-tertiary-container: 84 196 164; /* #54c4a4 */
+  --color-on-tertiary-container: 0 78 61;
   --color-tertiary-fixed: 137 247 212;
   --color-tertiary-fixed-dim: 108 218 184;
   --color-on-tertiary-fixed: 0 33 24;
   --color-on-tertiary-fixed-variant: 0 81 63;
+
+  /* ── Error ── */
+  --color-error: 255 180 171;             /* #ffb4ab */
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+
+  /* ── Background ── */
   --color-background: 17 19 22;
   --color-on-background: 226 226 230;
   --color-surface-variant: 51 53 56;
+}
+
+/* ============================================
+   Light Theme — clean industrial light mode
+   Surfaces: whites/near-whites
+   Text: very dark for contrast
+   Amber button stays the same (#f0a030)
+   ============================================ */
+[data-theme="light"] {
+  /* ── Surfaces ── */
+  --color-surface: 255 255 255;           /* #ffffff  clean white main bg */
+  --color-surface-dim: 243 244 246;
+  --color-surface-bright: 255 255 255;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 249 250 251;  /* #f9fafb */
+  --color-surface-container: 243 244 246; /* #f3f4f6  panel bg */
+  --color-surface-container-high: 229 231 235; /* #e5e7eb */
+  --color-surface-container-highest: 209 213 219; /* #d1d5db */
+
+  /* ── Text — very dark for max contrast on light bg ── */
+  --color-on-surface: 17 24 39;           /* #111827  near black */
+  --color-on-surface-variant: 55 65 81;   /* #374151  dark gray */
+  --color-inverse-surface: 17 24 39;
+  --color-inverse-on-surface: 249 250 251;
+
+  /* ── Borders — visible on white ── */
+  --color-outline: 107 114 128;           /* #6b7280  medium gray */
+  --color-outline-variant: 209 213 219;   /* #d1d5db  light gray border */
+
+  /* ── Primary: Same amber — keeps brand identity ── */
+  --color-surface-tint: 240 160 48;
+  --color-primary: 161 82 0;              /* #a15200  darker amber for text on light bg */
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 240 160 48;  /* #f0a030  SAME amber button */
+  --color-on-primary-container: 17 19 22; /* dark text on amber */
+  --color-inverse-primary: 255 193 118;
+  --color-primary-fixed: 255 237 199;
+  --color-primary-fixed-dim: 229 152 46;  /* hover amber */
+  --color-on-primary-fixed: 92 41 0;
+  --color-on-primary-fixed-variant: 120 55 0;
+
+  /* ── Secondary: Deep blue ── */
+  --color-secondary: 37 99 235;           /* #2563eb */
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 219 234 254;
+  --color-on-secondary-container: 30 64 175;
+  --color-secondary-fixed: 219 234 254;
+  --color-secondary-fixed-dim: 147 197 253;
+  --color-on-secondary-fixed: 30 64 175;
+  --color-on-secondary-fixed-variant: 29 78 216;
+
+  /* ── Tertiary: Deep teal ── */
+  --color-tertiary: 5 150 105;            /* #059669 */
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 167 243 208;
+  --color-on-tertiary-container: 6 78 59;
+  --color-tertiary-fixed: 209 250 229;
+  --color-tertiary-fixed-dim: 110 231 183;
+  --color-on-tertiary-fixed: 6 95 70;
+  --color-on-tertiary-fixed-variant: 4 120 87;
+
+  /* ── Error ── */
+  --color-error: 185 28 28;               /* #b91c1c */
+  --color-on-error: 255 255 255;
+  --color-error-container: 254 226 226;
+  --color-on-error-container: 153 27 27;
+
+  /* ── Background ── */
+  --color-background: 249 250 251;        /* #f9fafb  very light gray */
+  --color-on-background: 17 24 39;
+  --color-surface-variant: 229 231 235;
 }
 
 body {
