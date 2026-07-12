@@ -1,13 +1,14 @@
-// ─── Maintenance module type definitions ───────────────────────────────────────
-//
-// Types for maintenance request kanban workflow.
-//
-// TODO: Define in the Maintenance build step:
-//   - CreateMaintenanceRequestBody (assetId, issueDescription, priority?, photoUrl?)
-//   - UpdateMaintenanceStatusBody (status, technicianName?, resolvedAt?)
-//   - MaintenanceKanbanColumn (for board view grouping by status)
-//
-// INNOVATION NOTE (keyword-based priority auto-suggestion):
-//   The service layer will scan issueDescription for keywords like
-//   "broken", "not working", "urgent", "critical" and auto-suggest
-//   priority = "High". This is a keyword rule, not ML — state this plainly.
+import { z } from 'zod';
+import { MaintenanceStatus } from '../../utils/constants';
+
+export const createMaintenanceSchema = z.object({
+  assetId: z.number().int().positive(),
+  issueDescription: z.string().min(5, 'Please provide a detailed description'),
+  photoUrl: z.string().url().optional(),
+});
+
+export const updateMaintenanceSchema = z.object({
+  status: z.nativeEnum(MaintenanceStatus).optional(),
+  technicianName: z.string().optional(),
+  priority: z.enum(['Low', 'Medium', 'High']).optional(),
+});
