@@ -138,14 +138,19 @@ Traditional IT software stops at tracking *where* a laptop is. AssetFlow pioneer
 - The database includes native telemetry for `baseCarbonFootprintKg` and `powerDrawWatts`.
 - The `AssetIntelligence` module actively monitors the lifecycle of the device, continuously tracking the accumulated `carbonFootprintKg` for every single asset across the company. This AI/ML data helps IT administrators make data-driven, eco-friendly hardware purchasing decisions to achieve Carbon Net-Zero goals.
 
-### 3. Mathematical Collision Prevention via PostgreSQL GiST
+### 3. Algorithmic Risk & Failure Prediction Models
+AssetFlow doesn't just react to broken devices—it mathematically predicts when they will break. 
+- **Health Score Decay:** A deterministic mathematical algorithm calculates a live `healthScore` for every asset, derived dynamically from the device's exact `acquisitionDate` versus its category's `expectedLifespanMonths`.
+- **Risk Prediction:** The system leverages historical maintenance frequencies and live condition degradation inputs to calculate a live `failureProbability` percentage. This empowers IT teams to shift from *Reactive Repair* to **Proactive Replacement**, minimizing catastrophic hardware downtime before it ever happens.
+
+### 4. Mathematical Collision Prevention via PostgreSQL GiST
 Standard web apps rely on "Application-Level" logic to prevent double-booking of resources (like meeting rooms or projectors), which frequently results in race-condition bugs during high traffic. 
 AssetFlow innovates by pushing this validation directly to the Database Engine using a raw **PostgreSQL GiST EXCLUDE constraint**. This mathematically guarantees that no two `Booking` records can ever have overlapping `startTime` and `endTime` ranges—ensuring zero data corruption.
 
-### 4. Local, Privacy-Preserving AI
+### 5. Local, Privacy-Preserving AI
 Unlike modern wrappers that just send user data to OpenAI or Claude APIs, this project runs a **local Python FastAPI server** hosting the HuggingFace model. This means the AI inference happens locally, saving API costs and ensuring 100% data privacy for enterprise environments. No proprietary company ticketing data is ever sent to third-party LLM providers.
 
-### 5. Hierarchical Departments & Granular RBAC
+### 6. Hierarchical Departments & Granular RBAC
 - **Hierarchical structure:** Departments can have parent and child relationships to mirror real-world corporate structures.
 - **Role-Based Access Control (RBAC):** The database utilizes Prisma and robust Express middleware to enforce strict roles (ADMIN, ASSET_MANAGER, DEPARTMENT_HEAD, EMPLOYEE). Every API request cryptographically verifies the JWT token signatures.
 
