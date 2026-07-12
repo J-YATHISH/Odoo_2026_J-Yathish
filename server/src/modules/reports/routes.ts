@@ -1,20 +1,15 @@
 import { Router } from 'express';
+import * as c from './controller';
+import { validate } from '../../middleware/validate';
 import { requireAuth } from '../../middleware/auth';
-import { getUtilizationReport, getMaintenanceReport, getIdleAssetsReport, exportCsv } from './controller';
+import * as t from './types';
 
 const router = Router();
 
-// ─── Reports routes ────────────────────────────────────────────────────────────
+router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'reports' }); });
 
-router.get('/health', (_req, res) => {
-  res.json({ status: 'ok', module: 'reports' });
-});
+router.use(requireAuth);
 
-router.get('/utilization', requireAuth, getUtilizationReport);
-router.get('/maintenance', requireAuth, getMaintenanceReport);
-router.get('/idle-assets', requireAuth, getIdleAssetsReport);
-
-// CSV export endpoint — builds and streams the CSV file server-side.
-router.get('/export/:reportType', requireAuth, exportCsv);
+router.get('/dashboard', validate(t.getReportsSchema), c.getDashboardReport);
 
 export default router;

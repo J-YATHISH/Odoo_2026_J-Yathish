@@ -1,21 +1,11 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Reports controller ────────────────────────────────────────────────────────
-// TODO: Implement in the Reports build step.
-
-export function getUtilizationReport(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Reports build step.', code: ErrorCode.NOT_IMPLEMENTED } });
-}
-
-export function getMaintenanceReport(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Reports build step.', code: ErrorCode.NOT_IMPLEMENTED } });
-}
-
-export function getIdleAssetsReport(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Reports build step.', code: ErrorCode.NOT_IMPLEMENTED } });
-}
-
-export function exportCsv(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Reports build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function getDashboardReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const deptId = req.query.departmentId ? parseInt(req.query.departmentId as string, 10) : undefined;
+    const data = await service.getFullDashboardReport(deptId);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
