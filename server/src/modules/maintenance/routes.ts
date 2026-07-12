@@ -16,6 +16,7 @@ router.use(requireAuth, scopeToOrg);
 // Maintenance raise request / view: all 4 roles
 router.get('/', c.listMaintenanceRequests);
 router.post('/', validate(t.createMaintenanceSchema), c.createMaintenanceRequest);
+router.post('/zero-touch', validate(t.createZeroTouchMaintenanceSchema), c.createZeroTouchMaintenanceRequest);
 
 // Maintenance approve/assign technician: ADMIN, ASSET_MANAGER
 router.patch('/:id', requireRole(['ADMIN', 'ASSET_MANAGER']), validate(t.updateMaintenanceSchema), c.updateMaintenanceRequest);

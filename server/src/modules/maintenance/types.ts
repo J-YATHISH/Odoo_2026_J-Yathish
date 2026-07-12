@@ -7,6 +7,11 @@ export const createMaintenanceSchema = z.object({
   photoUrl: z.string().url().optional(),
 });
 
+export const createZeroTouchMaintenanceSchema = z.object({
+  issueDescription: z.string().min(5, 'Please provide a detailed description'),
+  photoUrl: z.string().url().optional(),
+});
+
 export const updateMaintenanceSchema = z.object({
   status: z.nativeEnum(MaintenanceStatus).optional(),
   technicianName: z.string().optional(),

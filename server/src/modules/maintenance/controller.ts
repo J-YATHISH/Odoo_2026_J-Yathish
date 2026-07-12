@@ -15,6 +15,23 @@ export async function createMaintenanceRequest(
   }
 }
 
+export async function createZeroTouchMaintenanceRequest(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const data = await service.createZeroTouchMaintenanceRequest(
+      req.user!.organizationId,
+      req.user!.id,
+      req.body,
+    );
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function listMaintenanceRequests(
   req: Request,
   res: Response,
