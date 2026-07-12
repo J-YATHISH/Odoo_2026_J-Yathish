@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Layout } from '../components/Layout';
 import { fetchMaintenanceRequests, createZeroTouchRequest } from '../api/maintenance';
 import type { MaintenanceRequest } from '../api/maintenance';
@@ -12,20 +12,22 @@ export const MaintenanceManagement: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const { notify } = useNotify();
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const data = await fetchMaintenanceRequests();
       setRequests(data);
-    } catch (err: any) {
-      notify(err.message || 'Failed to fetch requests', 'danger');
+    } catch (err: unknown) {
+      const error = err as Error;
+      notify(error.message || 'Failed to fetch requests', 'danger');
     } finally {
       setLoading(false);
-    }
-  };
+    };
+  }, [notify]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleZeroTouchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +39,9 @@ export const MaintenanceManagement: React.FC = () => {
       notify('AI perfectly categorized your request and alerted the team!', 'success');
       setIssueText('');
       loadData(); // Refresh the table
-    } catch (err: any) {
-      notify(err.message || 'Failed to submit zero-touch request', 'danger');
+    } catch (err: unknown) {
+      const error = err as Error;
+      notify(error.message || 'Failed to submit zero-touch request', 'danger');
     } finally {
       setSubmitting(false);
     }

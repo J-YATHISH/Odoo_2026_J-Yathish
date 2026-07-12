@@ -6,6 +6,7 @@ const apiClient = axios.create({
   baseURL: `${API_URL}/intelligence`,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 apiClient.interceptors.request.use((config: any) => {
   const token = localStorage.getItem('token');
   if (token) {

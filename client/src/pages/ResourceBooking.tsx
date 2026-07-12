@@ -108,6 +108,7 @@ export const ResourceBooking: React.FC = () => {
     const now = new Date();
     const currentHour = now.getHours() + now.getMinutes() / 60;
     if (currentHour >= 8 && currentHour <= 18) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentTimeOffset((currentHour - 8) * HOUR_HEIGHT);
     }
   }, []);

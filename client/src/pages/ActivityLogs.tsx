@@ -139,7 +139,7 @@ export const ActivityLogs: React.FC = () => {
           let iconColor = 'text-primary';
           let tagColor = 'text-primary';
           let category: LogCategory = 'all';
-          let isUnread = idx < 2;
+          const isUnread = idx < 2;
 
           if (log.action === 'LOGGED_IN') {
             icon = 'login';

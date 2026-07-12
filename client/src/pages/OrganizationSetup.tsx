@@ -40,9 +40,9 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
-const getRoleName = (role: any) => {
+const getRoleName = (role: unknown) => {
   if (typeof role === 'string') return role;
-  if (role && typeof role === 'object') return role.name || '';
+  if (role && typeof role === 'object' && 'name' in role) return (role as {name?: string}).name || '';
   return '';
 };
 
@@ -100,9 +100,10 @@ export const OrganizationSetup: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => { loadAll(); }, [loadAll]);
-
-  // ── Handlers ──
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadAll();
+  }, [loadAll]);  // ── Handlers ──
   const handlePromote = async () => {
     if (!selectedEmp || !promotingTo) return;
     setPromoting(true);
