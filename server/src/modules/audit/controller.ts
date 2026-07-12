@@ -18,14 +18,14 @@ export async function listAuditCycles(_req: Request, res: Response, next: NextFu
 
 export async function verifyAuditItem(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.verifyAuditItem(parseInt(req.params.itemId, 10), req.user!.id, req.body);
+    const data = await service.verifyAuditItem(parseInt(req.params.itemId as string, 10), req.user!.id, req.body);
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }
 
 export async function closeAuditCycle(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.closeAuditCycle(parseInt(req.params.id, 10));
+    const data = await service.closeAuditCycle(parseInt(req.params.id as string, 10));
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }

@@ -18,7 +18,7 @@ export async function listMaintenanceRequests(_req: Request, res: Response, next
 
 export async function updateMaintenanceRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.updateMaintenanceRequest(parseInt(req.params.id, 10), req.body);
+    const data = await service.updateMaintenanceRequest(parseInt(req.params.id as string, 10), req.body);
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }

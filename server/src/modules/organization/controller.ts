@@ -18,7 +18,7 @@ export async function createDepartment(req: Request, res: Response, next: NextFu
 
 export async function updateDepartment(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.updateDepartment(parseInt(req.params.id, 10), req.body);
+    const data = await service.updateDepartment(parseInt(req.params.id as string, 10), req.body);
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }
@@ -39,7 +39,7 @@ export async function createCategory(req: Request, res: Response, next: NextFunc
 
 export async function updateCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.updateCategory(parseInt(req.params.id, 10), req.body);
+    const data = await service.updateCategory(parseInt(req.params.id as string, 10), req.body);
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }
@@ -53,7 +53,7 @@ export async function listEmployees(_req: Request, res: Response, next: NextFunc
 
 export async function promoteEmployee(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.promoteEmployee(parseInt(req.params.id, 10), req.body.role);
+    const data = await service.promoteEmployee(parseInt(req.params.id as string, 10), req.body.role);
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }

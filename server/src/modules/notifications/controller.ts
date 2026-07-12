@@ -18,7 +18,7 @@ export async function listMyNotifications(req: Request, res: Response, next: Nex
 
 export async function markNotificationRead(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.markNotificationRead(parseInt(req.params.id, 10), req.user!.id);
+    const data = await service.markNotificationRead(parseInt(req.params.id as string, 10), req.user!.id);
     res.status(HTTP.OK).json(data);
   } catch (err) { next(err); }
 }

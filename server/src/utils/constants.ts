@@ -46,6 +46,7 @@ export const ErrorCode = {
   DB_ERROR: 'DB_ERROR',
   SERVER_ERROR: 'SERVER_ERROR',
   NOT_IMPLEMENTED: 'NOT_IMPLEMENTED',
+  BAD_REQUEST: 'BAD_REQUEST',
 } as const;
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];

@@ -70,7 +70,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
       departmentId: employee.departmentId,
     },
     secret,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '8h' },
+    { expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as jwt.SignOptions['expiresIn'] },
   );
 
   // Record login in ActivityLog

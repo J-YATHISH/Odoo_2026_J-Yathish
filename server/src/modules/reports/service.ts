@@ -1,7 +1,7 @@
 import prisma from '../../prisma/client';
 import { AssetStatus } from '../../utils/constants';
 
-export async function getUtilizationReport(departmentId?: number) {
+export async function getUtilizationReport(_departmentId?: number) {
   // Find count of assets allocated vs available
   const allocated = await prisma.asset.count({
     where: { status: AssetStatus.ALLOCATED }
@@ -60,8 +60,8 @@ export async function getIdleAssetsReport() {
   };
 }
 
-export async function getFullDashboardReport(departmentId?: number) {
-  const utilization = await getUtilizationReport(departmentId);
+export async function getFullDashboardReport(_departmentId?: number) {
+  const utilization = await getUtilizationReport(_departmentId);
   const maintenance = await getMaintenanceReport();
   const idle = await getIdleAssetsReport();
 
