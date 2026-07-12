@@ -7,17 +7,11 @@ import { fetchDashboardReport } from '../api/reports';
 import type { DashboardReportResponse } from '../api/reports';
 import { fetchActivityLogs } from '../api/notifications';
 import type { ActivityLogItem } from '../api/notifications';
+import { intelligenceApi } from '../api/intelligence';
+import type { EcoPredictiveData, BenchmarksData } from '../api/intelligence';
 import { APIException } from '../api/client';
-import { RefreshCw, Server, Database, AlertCircle } from 'lucide-react';
+import { RefreshCw, Server, Database, AlertCircle, Leaf, BarChart2 } from 'lucide-react';
 
-interface OverdueItem {
-  id: string;
-  status: string;
-  name: string;
-  sub: string;
-  color: string;
-  textColor: string;
-}
 
 interface ActivityRow {
   id: string;
@@ -35,6 +29,8 @@ export const Dashboard: React.FC = () => {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [report, setReport] = useState<DashboardReportResponse | null>(null);
   const [activityLogs, setActivityLogs] = useState<ActivityRow[]>([]);
+  const [ecoData, setEcoData] = useState<EcoPredictiveData | null>(null);
+  const [benchmarksData, setBenchmarksData] = useState<BenchmarksData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +64,13 @@ export const Dashboard: React.FC = () => {
       // 3. Fetch activity logs
       const dbLogs = await fetchActivityLogs(10);
       formatLogs(dbLogs);
+
+      // 4. Fetch Intelligence Data
+      const eco = await intelligenceApi.getEcoPredictive();
+      setEcoData(eco);
+
+      const bench = await intelligenceApi.getBenchmarks();
+      setBenchmarksData(bench);
     } catch (err: unknown) {
       if (err instanceof APIException) {
         setError(`${err.message} (Status: ${err.status})`);
@@ -169,33 +172,7 @@ export const Dashboard: React.FC = () => {
     setActivityLogs([...formattedDbLogs, ...mockLogs]);
   };
 
-  // Mock overdue list from mockup
-  const overdueItems: OverdueItem[] = [
-    {
-      id: 'AF-9932',
-      status: 'OVERDUE 2D',
-      name: 'Heavy Lifter Forklift H2',
-      sub: 'Return Pending - WH B2',
-      color: 'bg-[#C25D4E]',
-      textColor: 'text-[#C25D4E]',
-    },
-    {
-      id: 'AF-8411',
-      status: 'OVERDUE 1D',
-      name: 'Calibration Sensor Array X',
-      sub: 'Maint. Inspection - Lab 4',
-      color: 'bg-[#C25D4E]',
-      textColor: 'text-[#C25D4E]',
-    },
-    {
-      id: 'AF-1002',
-      status: 'LATE START',
-      name: 'Mobile Generator Unit M1',
-      sub: 'Booking Allocation - Site C',
-      color: 'bg-[#F0A030]',
-      textColor: 'text-[#F0A030]',
-    },
-  ];
+
 
   // Dynamic values or mock defaults
   const availableCount = report?.utilization.availableAssets || 1492;
@@ -350,34 +327,90 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. Bottom Panels Grid */}
+        {/* 3. Global Benchmarks Panel (New Intelligence Feature) */}
+        {benchmarksData && (
+          <div className="border border-border bg-neutral-card p-4 stagger-item mb-2">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart2 size={16} className="text-primary" />
+              <h3 className="font-label-sm uppercase text-xs tracking-wider text-neutral-text">Cross-Tenant Global Benchmarks</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-neutral-bg/50 border border-border p-3">
+                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">Avg Resolution Speed</div>
+                <div className="flex items-end gap-2">
+                  <span className="font-data-mono text-xl text-neutral-text">{benchmarksData.maintenance.organizationAverageHours.toFixed(1)}h</span>
+                  <span className="font-label-sm text-[10px] text-neutral-muted">vs {benchmarksData.maintenance.globalAverageHours.toFixed(1)}h global</span>
+                </div>
+                <div className={`text-[10px] uppercase font-bold mt-1 ${benchmarksData.maintenance.verdict.includes('Faster') ? 'text-success' : 'text-danger'}`}>
+                  {benchmarksData.maintenance.verdict}
+                </div>
+              </div>
+              
+              <div className="bg-neutral-bg/50 border border-border p-3">
+                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">Asset Utilization</div>
+                <div className="flex items-end gap-2">
+                  <span className="font-data-mono text-xl text-neutral-text">{benchmarksData.utilization.organizationUtilizationPct.toFixed(1)}%</span>
+                  <span className="font-label-sm text-[10px] text-neutral-muted">vs {benchmarksData.utilization.globalUtilizationPct.toFixed(1)}% global</span>
+                </div>
+              </div>
+
+              <div className="bg-neutral-bg/50 border border-border p-3">
+                <div className="text-[10px] text-neutral-muted uppercase tracking-wider mb-1">Top Failing Asset Globally</div>
+                <div className="font-body-md text-sm text-neutral-text truncate">
+                  {benchmarksData.hardwareReliability[0]?.category || 'N/A'}
+                </div>
+                <div className="font-label-sm text-[10px] text-neutral-muted mt-1">
+                  {benchmarksData.hardwareReliability[0]?.incidents || 0} Total Global Incidents
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. Bottom Panels Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Overdue Section (1/3 width) */}
+          {/* Eco-Predictive Health Section (1/3 width) replacing Overdue Mock */}
           <div className="col-span-1 border border-border bg-neutral-card flex flex-col min-h-[400px] stagger-item">
-            <div className="p-3 border-b border-border bg-neutral-card/40 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#C25D4E] text-base">warning</span>
-              <span className="font-label-sm text-xs uppercase text-neutral-text tracking-wider">
-                Critical / Overdue
-              </span>
+            <div className="p-3 border-b border-border bg-neutral-card/40 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Leaf size={16} className="text-[#4FBF9F]" />
+                <span className="font-label-sm text-xs uppercase text-neutral-text tracking-wider">
+                  Eco-Predictive Health
+                </span>
+              </div>
+              {ecoData && (
+                <div className="font-data-mono text-[10px] bg-[#4FBF9F]/10 text-[#4FBF9F] border border-[#4FBF9F]/30 px-2 py-0.5 rounded-full">
+                  {ecoData.totalOrganizationCarbonFootprintKg.toLocaleString(undefined, {maximumFractionDigits: 1})} kg CO2e
+                </div>
+              )}
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-2">
-              {overdueItems.map((item, idx) => (
+              <div className="text-[10px] text-neutral-muted uppercase px-1 mb-2 font-semibold tracking-wider">Highest Failure Probability</div>
+              {ecoData?.topAtRiskAssets.length === 0 && (
+                <div className="text-xs text-neutral-muted italic p-4 text-center">No predictive data available.</div>
+              )}
+              {ecoData?.topAtRiskAssets.map((asset) => (
                 <div
-                  key={idx}
+                  key={asset.id}
                   className="border border-border bg-neutral-bg relative pl-3 p-2.5 group hover:bg-neutral-muted/10 transition-colors cursor-pointer"
                 >
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${item.color}`}></div>
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${asset.failureProbability > 85 ? 'bg-[#C25D4E]' : asset.failureProbability > 50 ? 'bg-[#F0A030]' : 'bg-[#4FBF9F]'}`}></div>
                   <div className="flex justify-between items-start mb-1">
-                    <span className={`font-data-mono text-xs font-semibold ${item.textColor}`}>
-                      {item.id}
+                    <span className="font-data-mono text-xs font-semibold text-neutral-text">
+                      {asset.asset.tag}
                     </span>
-                    <span className="font-data-mono text-[9px] text-neutral-muted bg-neutral-card px-1 border border-border uppercase">
-                      {item.status}
+                    <span className={`font-data-mono text-[9px] px-1 border uppercase ${asset.failureProbability > 85 ? 'text-[#C25D4E] border-[#C25D4E]/30 bg-[#C25D4E]/10' : 'text-neutral-muted border-border bg-neutral-card'}`}>
+                      {asset.failureProbability.toFixed(1)}% RISK
                     </span>
                   </div>
-                  <div className="font-body-md text-xs text-neutral-text truncate">{item.name}</div>
-                  <div className="font-label-sm text-[10px] text-neutral-muted uppercase mt-1">
-                    {item.sub}
+                  <div className="font-body-md text-xs text-neutral-text truncate">{asset.asset.name}</div>
+                  <div className="flex justify-between items-center mt-1">
+                    <div className="font-label-sm text-[10px] text-neutral-muted uppercase">
+                      {asset.asset.category.name}
+                    </div>
+                    <div className="font-data-mono text-[9px] text-[#4FBF9F]">
+                      {asset.carbonFootprintKg.toFixed(1)} kg CO2
+                    </div>
                   </div>
                 </div>
               ))}
@@ -436,7 +469,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 4. Backend System Connectivity Details */}
+        {/* 5. Backend System Connectivity Details */}
         {health && (
           <div className="border border-border p-4 bg-neutral-card/30 mt-6 stagger-item">
             <h4 className="text-[10px] uppercase font-bold tracking-wider text-neutral-muted mb-3">

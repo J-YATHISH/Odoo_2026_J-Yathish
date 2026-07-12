@@ -123,7 +123,7 @@ export async function getGlobalBenchmarks(organizationId: number) {
       c.name as "categoryName",
       COUNT(m.id) as "maintenanceCount"
     FROM "MaintenanceRequest" m
-    JOIN "assets" a ON m."assetId" = a.id
+    JOIN "Asset" a ON m."assetId" = a.id
     JOIN "AssetCategory" c ON a."categoryId" = c.id
     GROUP BY c.name
     ORDER BY "maintenanceCount" DESC
@@ -134,7 +134,7 @@ export async function getGlobalBenchmarks(organizationId: number) {
     SELECT 
       "organizationId",
       COUNT(*) FILTER (WHERE "status" = 'ALLOCATED')::float / GREATEST(COUNT(*), 1) * 100 as utilization_pct
-    FROM "assets"
+    FROM "Asset"
     WHERE "status" NOT IN ('RETIRED', 'DISPOSED', 'LOST')
     GROUP BY "organizationId"
   ` as any[];
