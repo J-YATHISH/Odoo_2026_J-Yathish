@@ -139,7 +139,7 @@ export async function login(data: LoginRequestBody): Promise<LoginResult> {
       id: employee.id,
       name: employee.name,
       email: employee.email,
-      roleId: employee.roleId,
+      role: employee.role.name,
       departmentId: employee.departmentId,
       organizationId: employee.organizationId,
     },
