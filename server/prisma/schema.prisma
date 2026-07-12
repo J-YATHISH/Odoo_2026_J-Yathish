@@ -1,0 +1,266 @@
+// AssetFlow — Prisma Schema
+// This file is the single source of truth for the database structure.
+// Never edit the database directly — make changes here, then run:
+//   npx prisma migrate dev --name describe_your_change
+//
+// Two constraints that Prisma cannot express natively are in a separate
+// raw-SQL migration (migrations/002_add_raw_constraints):
+//   1. Partial unique index on Allocation.isActive = true
+//   2. EXCLUDE constraint on Booking for overlapping time ranges
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  ASSET_MANAGER
+  DEPARTMENT_HEAD
+  EMPLOYEE
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ALLOCATED
+  RESERVED
+  UNDER_MAINTENANCE
+  LOST
+  RETIRED
+  DISPOSED
+}
+
+enum TransferStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum BookingStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  TECHNICIAN_ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum AuditVerification {
+  VERIFIED
+  MISSING
+  DAMAGED
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model Department {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  headId    Int?
+  head      Employee?    @relation("DepartmentHead", fields: [headId], references: [id])
+  parentId  Int?
+  parent    Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
+  children  Department[] @relation("DeptHierarchy")
+  status    Status       @default(ACTIVE)
+  employees Employee[]   @relation("EmployeeDept")
+  createdAt DateTime     @default(now())
+}
+
+model AssetCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  extraFields Json?    // e.g. { "warrantyPeriodMonths": 24 } - avoids a migration per category
+  assets      Asset[]
+}
+
+model Employee {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  passwordHash String
+  role         Role         @default(EMPLOYEE)
+  departmentId Int?
+  department   Department?  @relation("EmployeeDept", fields: [departmentId], references: [id])
+  status       Status       @default(ACTIVE)
+  headOf       Department[] @relation("DepartmentHead")
+  createdAt    DateTime     @default(now())
+
+  allocationsHeld   Allocation[]         @relation("CurrentHolder")
+  transfersFrom     TransferRequest[]    @relation("TransferFrom")
+  transfersTo       TransferRequest[]    @relation("TransferTo")
+  bookingsMade      Booking[]
+  maintenanceRaised MaintenanceRequest[] @relation("RaisedBy")
+  auditsAssigned    AuditCycleAuditor[]
+  notifications     Notification[]
+  activityLogs      ActivityLog[]
+}
+
+model Asset {
+  id              Int           @id @default(autoincrement())
+  tag             String        @unique   // AF-0001, server-generated inside a transaction
+  name            String
+  categoryId      Int
+  category        AssetCategory @relation(fields: [categoryId], references: [id])
+  serialNumber    String?       @unique
+  acquisitionDate DateTime?
+  acquisitionCost Decimal?
+  condition       String        @default("Good")
+  location        String?
+  isBookable      Boolean       @default(false)
+  isLendable      Boolean       @default(false)   // innovation: marketplace flag
+  photoUrl        String?
+  qrPayload       String?       @unique           // innovation: QR audit sync
+  status          AssetStatus   @default(AVAILABLE)
+  lastActivityAt  DateTime      @default(now())   // innovation: ghost-asset detection
+  createdAt       DateTime      @default(now())
+
+  allocations     Allocation[]
+  bookings        Booking[]
+  maintenanceReqs MaintenanceRequest[]
+  auditItems      AuditItem[]
+}
+
+model Allocation {
+  id                 Int       @id @default(autoincrement())
+  assetId            Int
+  asset              Asset     @relation(fields: [assetId], references: [id])
+  holderId           Int
+  holder             Employee  @relation("CurrentHolder", fields: [holderId], references: [id])
+  allocatedAt        DateTime  @default(now())
+  expectedReturnDate DateTime?
+  returnedAt         DateTime?
+  conditionAtReturn  String?
+  isActive           Boolean   @default(true)
+  transferRequests   TransferRequest[]
+
+  // Enforced in Postgres, not just app code:
+  // CREATE UNIQUE INDEX one_active_allocation_per_asset
+  //   ON "Allocation" ("assetId") WHERE "isActive" = true;
+  // See: migrations/002_add_raw_constraints
+}
+
+model TransferRequest {
+  id           Int            @id @default(autoincrement())
+  allocationId Int
+  allocation   Allocation     @relation(fields: [allocationId], references: [id])
+  fromId       Int
+  from         Employee       @relation("TransferFrom", fields: [fromId], references: [id])
+  toId         Int
+  to           Employee       @relation("TransferTo", fields: [toId], references: [id])
+  reason       String?
+  status       TransferStatus @default(REQUESTED)
+  isCrossDept  Boolean        @default(false)   // innovation: marketplace-originated transfer
+  requestedAt  DateTime       @default(now())
+  resolvedAt   DateTime?
+}
+
+model Booking {
+  id         Int           @id @default(autoincrement())
+  assetId    Int
+  asset      Asset         @relation(fields: [assetId], references: [id])
+  bookedById Int
+  bookedBy   Employee      @relation(fields: [bookedById], references: [id])
+  startTime  DateTime
+  endTime    DateTime
+  status     BookingStatus @default(UPCOMING)
+  createdAt  DateTime      @default(now())
+
+  @@index([assetId, startTime, endTime])
+
+  // Postgres-level guarantee against overlap races (raw SQL migration —
+  // Prisma doesn't model EXCLUDE constraints natively):
+  //
+  // ALTER TABLE "Booking" ADD CONSTRAINT no_overlapping_bookings
+  //   EXCLUDE USING gist (
+  //     "assetId" WITH =,
+  //     tstzrange("startTime", "endTime") WITH &&
+  //   ) WHERE (status IN ('UPCOMING','ONGOING'));
+  //
+  // The single strongest "we understand databases" line in the project —
+  // demo it explicitly: even a bug in app-layer validation cannot create an overlap.
+  // See: migrations/002_add_raw_constraints
+}
+
+model MaintenanceRequest {
+  id               Int               @id @default(autoincrement())
+  assetId          Int
+  asset            Asset             @relation(fields: [assetId], references: [id])
+  raisedById       Int
+  raisedBy         Employee          @relation("RaisedBy", fields: [raisedById], references: [id])
+  issueDescription String
+  priority         String            @default("Medium")
+  photoUrl         String?
+  status           MaintenanceStatus @default(PENDING)
+  technicianName   String?
+  createdAt        DateTime          @default(now())
+  resolvedAt       DateTime?
+}
+
+model AuditCycle {
+  id        Int                 @id @default(autoincrement())
+  scopeDept Int?
+  scopeLoc  String?
+  startDate DateTime
+  endDate   DateTime
+  closed    Boolean             @default(false)
+  auditors  AuditCycleAuditor[]
+  items     AuditItem[]
+  createdAt DateTime            @default(now())
+}
+
+model AuditCycleAuditor {
+  id           Int        @id @default(autoincrement())
+  auditCycleId Int
+  auditCycle   AuditCycle @relation(fields: [auditCycleId], references: [id])
+  employeeId   Int
+  employee     Employee   @relation(fields: [employeeId], references: [id])
+}
+
+model AuditItem {
+  id           Int                @id @default(autoincrement())
+  auditCycleId Int
+  auditCycle   AuditCycle         @relation(fields: [auditCycleId], references: [id])
+  assetId      Int
+  asset        Asset              @relation(fields: [assetId], references: [id])
+  verification AuditVerification?
+  notes        String?
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  type       String
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model ActivityLog {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  action     String
+  entityType String
+  entityId   Int?
+  createdAt  DateTime @default(now())
+}
