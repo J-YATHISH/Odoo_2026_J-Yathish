@@ -1,13 +1,3 @@
-// AssetFlow — Prisma Schema
-// This file is the single source of truth for the database structure.
-// Never edit the database directly — make changes here, then run:
-//   npx prisma migrate dev --name describe_your_change
-//
-// Two constraints that Prisma cannot express natively are in a separate
-// raw-SQL migration (migrations/002_add_raw_constraints):
-//   1. Partial unique index on Allocation.isActive = true
-//   2. EXCLUDE constraint on Booking for overlapping time ranges
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,8 +7,258 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── Enums ───────────────────────────────────────────────────────────────────
+model Organization {
+  id               Int                  @id @default(autoincrement())
+  name             String               @unique
+  createdAt        DateTime             @default(now())
+  joinCode         String               @unique @default("")
+  activityLogs     ActivityLog[]
+  allocations      Allocation[]
+  assets           Asset[]
+  categories       AssetCategory[]
+  auditCycles      AuditCycle[]
+  auditItems       AuditItem[]
+  bookings         Booking[]
+  departments      Department[]
+  employees        Employee[]
+  maintenanceReqs  MaintenanceRequest[]
+  notifications    Notification[]
+  roles            Role[]
+  transferRequests TransferRequest[]
+}
 
+model Department {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  name           String
+  headId         Int?
+  parentId       Int?
+  status         Status       @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  head           Employee?    @relation("DepartmentHead", fields: [headId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  parent         Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
+  children       Department[] @relation("DeptHierarchy")
+  employees      Employee[]   @relation("EmployeeDept")
+
+  @@unique([organizationId, name])
+}
+
+model Role {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  name           String
+  permissions    String[]
+  employees      Employee[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, name])
+}
+
+model AssetCategory {
+  id                     Int          @id @default(autoincrement())
+  organizationId         Int
+  name                   String
+  extraFields            Json?
+  baseCarbonFootprintKg  Float        @default(100.0)
+  expectedLifespanMonths Int          @default(36)
+  powerDrawWatts         Float        @default(50.0)
+  assets                 Asset[]
+  organization           Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, name])
+}
+
+model Employee {
+  id                Int                  @id @default(autoincrement())
+  organizationId    Int
+  name              String
+  email             String               @unique
+  passwordHash      String
+  departmentId      Int?
+  status            Status               @default(ACTIVE)
+  createdAt         DateTime             @default(now())
+  roleId            Int
+  activityLogs      ActivityLog[]
+  allocationsHeld   Allocation[]         @relation("CurrentHolder")
+  auditsAssigned    AuditCycleAuditor[]
+  bookingsMade      Booking[]
+  headOf            Department[]         @relation("DepartmentHead")
+  department        Department?          @relation("EmployeeDept", fields: [departmentId], references: [id])
+  organization      Organization         @relation(fields: [organizationId], references: [id])
+  role              Role                 @relation(fields: [roleId], references: [id])
+  maintenanceRaised MaintenanceRequest[] @relation("RaisedBy")
+  notifications     Notification[]
+  transfersFrom     TransferRequest[]    @relation("TransferFrom")
+  transfersTo       TransferRequest[]    @relation("TransferTo")
+}
+
+model Asset {
+  id              Int                  @id @default(autoincrement())
+  organizationId  Int
+  tag             String
+  name            String
+  categoryId      Int
+  serialNumber    String?
+  acquisitionDate DateTime?
+  acquisitionCost Decimal?
+  condition       String               @default("Good")
+  location        String?
+  isBookable      Boolean              @default(false)
+  isLendable      Boolean              @default(false)
+  photoUrl        String?
+  qrPayload       String?
+  status          AssetStatus          @default(AVAILABLE)
+  lastActivityAt  DateTime             @default(now())
+  createdAt       DateTime             @default(now())
+  allocations     Allocation[]
+  category        AssetCategory        @relation(fields: [categoryId], references: [id])
+  organization    Organization         @relation(fields: [organizationId], references: [id])
+  intelligence    AssetIntelligence?
+  auditItems      AuditItem[]
+  bookings        Booking[]
+  maintenanceReqs MaintenanceRequest[]
+
+  @@unique([organizationId, tag])
+  @@unique([organizationId, serialNumber])
+  @@unique([organizationId, qrPayload])
+}
+
+model Allocation {
+  id                 Int               @id @default(autoincrement())
+  organizationId     Int
+  assetId            Int
+  holderId           Int
+  allocatedAt        DateTime          @default(now())
+  expectedReturnDate DateTime?
+  returnedAt         DateTime?
+  conditionAtReturn  String?
+  isActive           Boolean           @default(true)
+  asset              Asset             @relation(fields: [assetId], references: [id])
+  holder             Employee          @relation("CurrentHolder", fields: [holderId], references: [id])
+  organization       Organization      @relation(fields: [organizationId], references: [id])
+  transferRequests   TransferRequest[]
+}
+
+model TransferRequest {
+  id             Int            @id @default(autoincrement())
+  organizationId Int
+  allocationId   Int
+  fromId         Int
+  toId           Int
+  reason         String?
+  status         TransferStatus @default(REQUESTED)
+  isCrossDept    Boolean        @default(false)
+  requestedAt    DateTime       @default(now())
+  resolvedAt     DateTime?
+  allocation     Allocation     @relation(fields: [allocationId], references: [id])
+  from           Employee       @relation("TransferFrom", fields: [fromId], references: [id])
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  to             Employee       @relation("TransferTo", fields: [toId], references: [id])
+}
+
+model Booking {
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  assetId        Int
+  bookedById     Int
+  startTime      DateTime
+  endTime        DateTime
+  status         BookingStatus @default(UPCOMING)
+  createdAt      DateTime      @default(now())
+  asset          Asset         @relation(fields: [assetId], references: [id])
+  bookedBy       Employee      @relation(fields: [bookedById], references: [id])
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  @@index([assetId, startTime, endTime])
+}
+
+model MaintenanceRequest {
+  id               Int               @id @default(autoincrement())
+  organizationId   Int
+  assetId          Int
+  raisedById       Int
+  issueDescription String
+  priority         String            @default("Medium")
+  photoUrl         String?
+  status           MaintenanceStatus @default(PENDING)
+  technicianName   String?
+  createdAt        DateTime          @default(now())
+  resolvedAt       DateTime?
+  aiAssessed       Boolean           @default(false)
+  issueCategory    String?
+  asset            Asset             @relation(fields: [assetId], references: [id])
+  organization     Organization      @relation(fields: [organizationId], references: [id])
+  raisedBy         Employee          @relation("RaisedBy", fields: [raisedById], references: [id])
+}
+
+model AuditCycle {
+  id             Int                 @id @default(autoincrement())
+  organizationId Int
+  scopeDept      Int?
+  scopeLoc       String?
+  startDate      DateTime
+  endDate        DateTime
+  closed         Boolean             @default(false)
+  createdAt      DateTime            @default(now())
+  organization   Organization        @relation(fields: [organizationId], references: [id])
+  auditors       AuditCycleAuditor[]
+  items          AuditItem[]
+}
+
+model AuditCycleAuditor {
+  id           Int        @id @default(autoincrement())
+  auditCycleId Int
+  employeeId   Int
+  auditCycle   AuditCycle @relation(fields: [auditCycleId], references: [id])
+  employee     Employee   @relation(fields: [employeeId], references: [id])
+}
+
+model AuditItem {
+  id             Int                @id @default(autoincrement())
+  organizationId Int
+  auditCycleId   Int
+  assetId        Int
+  verification   AuditVerification?
+  notes          String?
+  asset          Asset              @relation(fields: [assetId], references: [id])
+  auditCycle     AuditCycle         @relation(fields: [auditCycleId], references: [id])
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+}
+
+model Notification {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  employeeId     Int
+  type           String
+  message        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model ActivityLog {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  employeeId     Int
+  action         String
+  entityType     String
+  entityId       Int?
+  createdAt      DateTime     @default(now())
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model AssetIntelligence {
+  id                 Int      @id @default(autoincrement())
+  assetId            Int      @unique
+  healthScore        Float    @default(100.0)
+  failureProbability Float    @default(0.0)
+  carbonFootprintKg  Float    @default(0.0)
+  lastCalculatedAt   DateTime @default(now())
+  asset              Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
 
 enum AssetStatus {
   AVAILABLE
@@ -62,279 +302,4 @@ enum AuditVerification {
 enum Status {
   ACTIVE
   INACTIVE
-}
-
-// ─── Models ──────────────────────────────────────────────────────────────────
-
-model Organization {
-  id        Int      @id @default(autoincrement())
-  name      String
-  joinCode  String   @unique   // short human-typeable code, e.g. "AF-7K2M"
-  createdAt DateTime @default(now())
-
-  // Relationships
-  departments        Department[]
-  categories         AssetCategory[]
-  roles              Role[]
-  employees          Employee[]
-  assets             Asset[]
-  allocations        Allocation[]
-  transferRequests   TransferRequest[]
-  bookings           Booking[]
-  maintenanceReqs    MaintenanceRequest[]
-  auditCycles        AuditCycle[]
-  auditItems         AuditItem[]
-  notifications      Notification[]
-  activityLogs       ActivityLog[]
-}
-
-model Department {
-  id             Int          @id @default(autoincrement())
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  name      String
-  headId    Int?
-  head      Employee?    @relation("DepartmentHead", fields: [headId], references: [id])
-  parentId  Int?
-  parent    Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
-  children  Department[] @relation("DeptHierarchy")
-  status    Status       @default(ACTIVE)
-  employees Employee[]   @relation("EmployeeDept")
-  createdAt DateTime     @default(now())
-
-  @@unique([organizationId, name]) // Name must be unique per organization
-}
-
-model Role {
-  id             Int          @id @default(autoincrement())
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  name           String
-  permissions    String[]
-  employees      Employee[]
-
-  @@unique([organizationId, name])
-}
-
-model AssetCategory {
-  id             Int          @id @default(autoincrement())
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  
-  name        String
-  extraFields Json?
-  
-  expectedLifespanMonths Int   @default(36)
-  baseCarbonFootprintKg  Float @default(100.0)
-  powerDrawWatts         Float @default(50.0)
-
-  assets      Asset[]
-
-  @@unique([organizationId, name]) // Name unique per organization
-}
-
-model Employee {
-  id             Int          @id @default(autoincrement())
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  name         String
-  email        String       @unique // Email globally unique for easy login
-  passwordHash String
-  roleId       Int
-  role         Role         @relation(fields: [roleId], references: [id])
-  departmentId Int?
-  department   Department?  @relation("EmployeeDept", fields: [departmentId], references: [id])
-  status       Status       @default(ACTIVE)
-  headOf       Department[] @relation("DepartmentHead")
-  createdAt    DateTime     @default(now())
-
-  allocationsHeld   Allocation[]         @relation("CurrentHolder")
-  transfersFrom     TransferRequest[]    @relation("TransferFrom")
-  transfersTo       TransferRequest[]    @relation("TransferTo")
-  bookingsMade      Booking[]
-  maintenanceRaised MaintenanceRequest[] @relation("RaisedBy")
-  auditsAssigned    AuditCycleAuditor[]
-  notifications     Notification[]
-  activityLogs      ActivityLog[]
-}
-
-model Asset {
-  id              Int           @id @default(autoincrement())
-  organizationId  Int
-  organization    Organization  @relation(fields: [organizationId], references: [id])
-
-  tag             String        // AF-0001, server-generated
-  name            String
-  categoryId      Int
-  category        AssetCategory @relation(fields: [categoryId], references: [id])
-  serialNumber    String?
-  acquisitionDate DateTime?
-  acquisitionCost Decimal?
-  condition       String        @default("Good")
-  location        String?
-  isBookable      Boolean       @default(false)
-  isLendable      Boolean       @default(false)
-  photoUrl        String?
-  qrPayload       String?
-  status          AssetStatus   @default(AVAILABLE)
-  lastActivityAt  DateTime      @default(now())
-  createdAt       DateTime      @default(now())
-
-  allocations     Allocation[]
-  bookings        Booking[]
-  maintenanceReqs MaintenanceRequest[]
-  auditItems      AuditItem[]
-  intelligence    AssetIntelligence?
-
-  @@unique([organizationId, tag])
-  @@unique([organizationId, serialNumber])
-  @@unique([organizationId, qrPayload])
-}
-
-model Allocation {
-  id                 Int          @id @default(autoincrement())
-  organizationId     Int
-  organization       Organization @relation(fields: [organizationId], references: [id])
-
-  assetId            Int
-  asset              Asset        @relation(fields: [assetId], references: [id])
-  holderId           Int
-  holder             Employee     @relation("CurrentHolder", fields: [holderId], references: [id])
-  allocatedAt        DateTime     @default(now())
-  expectedReturnDate DateTime?
-  returnedAt         DateTime?
-  conditionAtReturn  String?
-  isActive           Boolean      @default(true)
-  transferRequests   TransferRequest[]
-}
-
-model TransferRequest {
-  id             Int            @id @default(autoincrement())
-  organizationId Int
-  organization   Organization   @relation(fields: [organizationId], references: [id])
-
-  allocationId   Int
-  allocation     Allocation     @relation(fields: [allocationId], references: [id])
-  fromId         Int
-  from           Employee       @relation("TransferFrom", fields: [fromId], references: [id])
-  toId           Int
-  to             Employee       @relation("TransferTo", fields: [toId], references: [id])
-  reason         String?
-  status         TransferStatus @default(REQUESTED)
-  isCrossDept    Boolean        @default(false)
-  requestedAt    DateTime       @default(now())
-  resolvedAt     DateTime?
-}
-
-model Booking {
-  id             Int           @id @default(autoincrement())
-  organizationId Int
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-
-  assetId        Int
-  asset          Asset         @relation(fields: [assetId], references: [id])
-  bookedById     Int
-  bookedBy       Employee      @relation(fields: [bookedById], references: [id])
-  startTime      DateTime
-  endTime        DateTime
-  status         BookingStatus @default(UPCOMING)
-  createdAt      DateTime      @default(now())
-
-  @@index([assetId, startTime, endTime])
-}
-
-model MaintenanceRequest {
-  id               Int               @id @default(autoincrement())
-  organizationId   Int
-  organization     Organization      @relation(fields: [organizationId], references: [id])
-
-  assetId          Int
-  asset            Asset             @relation(fields: [assetId], references: [id])
-  raisedById       Int
-  raisedBy         Employee          @relation("RaisedBy", fields: [raisedById], references: [id])
-  issueDescription String
-  priority         String            @default("Medium")
-  issueCategory    String?           // To store the AI's prediction (e.g., "Hardware", "Software")
-  aiAssessed       Boolean           @default(false)
-  photoUrl         String?
-  status           MaintenanceStatus @default(PENDING)
-  technicianName   String?
-  createdAt        DateTime          @default(now())
-  resolvedAt       DateTime?
-}
-
-model AuditCycle {
-  id             Int                 @id @default(autoincrement())
-  organizationId Int
-  organization   Organization        @relation(fields: [organizationId], references: [id])
-
-  scopeDept      Int?
-  scopeLoc       String?
-  startDate      DateTime
-  endDate        DateTime
-  closed         Boolean             @default(false)
-  auditors       AuditCycleAuditor[]
-  items          AuditItem[]
-  createdAt      DateTime            @default(now())
-}
-
-model AuditCycleAuditor {
-  id           Int        @id @default(autoincrement())
-  auditCycleId Int
-  auditCycle   AuditCycle @relation(fields: [auditCycleId], references: [id])
-  employeeId   Int
-  employee     Employee   @relation(fields: [employeeId], references: [id])
-}
-
-model AuditItem {
-  id             Int                @id @default(autoincrement())
-  organizationId Int
-  organization   Organization       @relation(fields: [organizationId], references: [id])
-
-  auditCycleId   Int
-  auditCycle     AuditCycle         @relation(fields: [auditCycleId], references: [id])
-  assetId        Int
-  asset          Asset              @relation(fields: [assetId], references: [id])
-  verification   AuditVerification?
-  notes          String?
-}
-
-model Notification {
-  id             Int          @id @default(autoincrement())
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  employeeId     Int
-  employee       Employee     @relation(fields: [employeeId], references: [id])
-  type           String
-  message        String
-  isRead         Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-}
-
-model ActivityLog {
-  id             Int          @id @default(autoincrement())
-  organizationId Int
-  organization   Organization @relation(fields: [organizationId], references: [id])
-
-  employeeId     Int
-  employee       Employee     @relation(fields: [employeeId], references: [id])
-  action         String
-  entityType     String
-  entityId       Int?
-  createdAt      DateTime     @default(now())
-}
-
-model AssetIntelligence {
-  id                 Int      @id @default(autoincrement())
-  assetId            Int      @unique
-  asset              Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  
-  healthScore        Float    @default(100.0)
-  failureProbability Float    @default(0.0)
-  carbonFootprintKg  Float    @default(0.0)
-  lastCalculatedAt   DateTime @default(now())
 }
