@@ -190,11 +190,19 @@ try:
     query = 'SELECT id, "issueDescription", "priority", "issueCategory" FROM "MaintenanceRequest" LIMIT 5'
     df = pd.read_sql(query, engine)
     
-    print("\\n✅ Connected to Supabase DB! Here is live dynamic data:")
-    print(df.head())
+    if df.empty:
+        print("\\n⚠️ Your live database is currently empty (No Maintenance Requests found).")
+        print("Using sample text to demonstrate functionality...")
+        df = pd.DataFrame([
+            {"id": 998, "issueDescription": "My MacBook Pro screen is shattered after dropping it.", "priority": "Unknown", "issueCategory": "Unknown"},
+            {"id": 999, "issueDescription": "I need Microsoft Office installed on my PC.", "priority": "Unknown", "issueCategory": "Unknown"}
+        ])
+    else:
+        print("\\n✅ Connected to Supabase DB! Here is live dynamic data:")
+        print(df.head())
     
-    # Run predictions directly on live DB data
-    print("\\nRunning AI on Live DB Data:")
+    # Run predictions directly on the data
+    print("\\nRunning AI on DB Data (or Sample Data):")
     for index, row in df.iterrows():
         cat = classifier(row['issueDescription'], ["Hardware", "Software", "Network"])['labels'][0]
         pri = classifier(row['issueDescription'], ["High", "Medium", "Low"])['labels'][0]
