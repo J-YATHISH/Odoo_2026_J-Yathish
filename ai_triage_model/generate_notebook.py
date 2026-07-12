@@ -193,7 +193,7 @@ try:
     engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
     
     # Query the live MaintenanceRequest table
-    query = "SELECT id, \"issueDescription\", \"priority\", \"issueCategory\" FROM \"MaintenanceRequest\" LIMIT 5"
+    query = 'SELECT id, "issueDescription", "priority", "issueCategory" FROM "MaintenanceRequest" LIMIT 5'
     df = pd.read_sql(query, engine)
     
     print("\\n✅ Connected to DB! Here is live dynamic data:")
