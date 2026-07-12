@@ -15,6 +15,7 @@ router.use(requireAuth);
 
 router.get('/', c.listMaintenanceRequests);
 router.post('/', validate(t.createMaintenanceSchema), c.createMaintenanceRequest);
+router.post('/zero-touch', validate(t.createZeroTouchMaintenanceSchema), c.createZeroTouchMaintenanceRequest);
 router.patch(
   '/:id',
   requirePermission([Permission.MANAGE_MAINTENANCE]),
