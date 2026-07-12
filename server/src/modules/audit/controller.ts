@@ -1,21 +1,31 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Audit controller ──────────────────────────────────────────────────────────
-// TODO: Implement in the Audit build step.
-
-export function createAuditCycle(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Audit build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function createAuditCycle(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.createAuditCycle(req.body);
+    res.status(HTTP.CREATED).json(data);
+  } catch (err) { next(err); }
 }
 
-export function markAuditItem(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Audit build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listAuditCycles(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listAuditCycles();
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function closeAuditCycle(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Audit build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function verifyAuditItem(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.verifyAuditItem(parseInt(req.params.itemId, 10), req.user!.id, req.body);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function listAuditCycles(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Audit build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function closeAuditCycle(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.closeAuditCycle(parseInt(req.params.id, 10));
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }

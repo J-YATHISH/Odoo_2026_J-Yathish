@@ -1,19 +1,20 @@
 import { Router } from 'express';
+import * as c from './controller';
+import { validate } from '../../middleware/validate';
 import { requireAuth, requireRole } from '../../middleware/auth';
 import { Role } from '../../utils/constants';
-import { createAuditCycle, markAuditItem, closeAuditCycle, listAuditCycles } from './controller';
+import * as t from './types';
 
 const router = Router();
 
-// ─── Audit routes ──────────────────────────────────────────────────────────────
+router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'audit' }); });
 
-router.get('/health', (_req, res) => {
-  res.json({ status: 'ok', module: 'audit' });
-});
+router.use(requireAuth);
 
-router.get('/', requireAuth, listAuditCycles);
-router.post('/', requireAuth, requireRole([Role.ADMIN, Role.ASSET_MANAGER]), createAuditCycle);
-router.patch('/items/:id', requireAuth, markAuditItem);
-router.post('/:id/close', requireAuth, requireRole([Role.ADMIN, Role.ASSET_MANAGER]), closeAuditCycle);
+router.get('/cycles', c.listAuditCycles);
+router.post('/cycles', requireRole([Role.ADMIN, Role.ASSET_MANAGER]), validate(t.createAuditCycleSchema), c.createAuditCycle);
+router.post('/cycles/:id/close', requireRole([Role.ADMIN, Role.ASSET_MANAGER]), c.closeAuditCycle);
+
+router.patch('/items/:itemId/verify', validate(t.updateAuditItemSchema), c.verifyAuditItem);
 
 export default router;
