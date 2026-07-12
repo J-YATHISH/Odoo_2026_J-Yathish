@@ -63,6 +63,6 @@ ALTER TABLE "Booking"
   ADD CONSTRAINT no_overlapping_bookings
   EXCLUDE USING gist (
     "assetId" WITH =,
-    tstzrange("startTime", "endTime", '[)') WITH &&
+    tsrange("startTime", "endTime", '[)') WITH &&
   )
   WHERE (status IN ('UPCOMING', 'ONGOING'));
