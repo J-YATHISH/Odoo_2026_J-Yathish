@@ -256,6 +256,8 @@ model MaintenanceRequest {
   raisedBy         Employee          @relation("RaisedBy", fields: [raisedById], references: [id])
   issueDescription String
   priority         String            @default("Medium")
+  issueCategory    String?           // To store the AI's prediction (e.g., "Hardware", "Software")
+  aiAssessed       Boolean           @default(false)
   photoUrl         String?
   status           MaintenanceStatus @default(PENDING)
   technicianName   String?
