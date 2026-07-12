@@ -1,173 +1,204 @@
-# AssetFlow
+# AssetFlow & Zero-Touch AI Triage
 
-**Enterprise Asset & Resource Management System**
+**Enterprise Asset & Maintenance Management System with Autonomous AI**
 
-> A full-stack web application for managing physical assets, tracking allocations,
-> scheduling resource bookings, and running audit cycles — built with
-> Node.js + Express + TypeScript + Prisma + PostgreSQL on the backend
-> and React + Vite + TypeScript + Tailwind CSS on the frontend.
+> A full-stack web application for managing physical assets, tracking allocations, and running an autonomous Zero-Touch AI maintenance ticketing system. 
+> Built with **React + Vite** (Frontend), **Node.js + Prisma + PostgreSQL** (Backend), and **Python + HuggingFace** (AI Model).
 
 ---
 
-## Project Structure
+## 🏗️ System Architecture & Workflow
 
-```
-assetflow/
-├── server/    ← Express + TypeScript + Prisma backend
-└── client/    ← React + Vite + TypeScript + Tailwind frontend (Step 2)
+Below is the architecture and data flow of the entire system, showing how the Client, Server, and AI Model interact seamlessly.
+
+```mermaid
+flowchart TD
+    %% Define Nodes
+    User([fa:fa-user Employee / Admin])
+    Frontend[Frontend - React/Vite]
+    Backend[Backend - Node.js/Express]
+    DB[(PostgreSQL - Supabase)]
+    AI[AI Model - Python/FastAPI]
+    
+    %% Flow
+    User -- "Types natural language issue" --> Frontend
+    Frontend -- "POST /maintenance/zero-touch" --> Backend
+    
+    Backend -- "1. Fetch Employee's Active Assets" --> DB
+    DB -- "Returns Assigned Devices" --> Backend
+    
+    Backend -- "2. POST /predict (Issue + Asset Info)" --> AI
+    
+    subgraph AI Model Server
+        AI -- "HuggingFace facebook/bart-large-mnli" --> NLP
+        NLP -- "Zero-Shot Text Classification" --> NLP
+    end
+    
+    AI -- "Returns Priority & Category" --> Backend
+    
+    Backend -- "3. Save categorized Maintenance Request" --> DB
+    Backend -- "4. Return created request to User" --> Frontend
+    Frontend -- "Success Notification" --> User
+
+    classDef client fill:#3b82f6,stroke:#2563eb,color:#fff;
+    classDef server fill:#10b981,stroke:#059669,color:#fff;
+    classDef db fill:#f59e0b,stroke:#d97706,color:#fff;
+    classDef ai fill:#8b5cf6,stroke:#7c3aed,color:#fff;
+    
+    class Frontend client;
+    class Backend server;
+    class DB db;
+    class AI ai;
 ```
 
 ---
 
-## Quick Start
+## 🗄️ Database Structure (ERD)
+
+The system uses a highly normalized PostgreSQL database structure, managed by Prisma.
+
+```mermaid
+erDiagram
+    ORGANIZATION ||--o{ EMPLOYEE : employs
+    ORGANIZATION ||--o{ ASSET : owns
+    ORGANIZATION ||--o{ ASSET_CATEGORY : categorizes
+    ORGANIZATION ||--o{ DEPARTMENT : structures
+    
+    DEPARTMENT ||--o{ EMPLOYEE : contains
+    DEPARTMENT ||--o| DEPARTMENT : "parent/child hierarchy"
+    
+    ASSET_CATEGORY ||--o{ ASSET : classifies
+    
+    EMPLOYEE ||--o{ ALLOCATION : "holds (active devices)"
+    ASSET ||--o{ ALLOCATION : "assigned via"
+    
+    ASSET ||--o| ASSET_INTELLIGENCE : "AI Metrics (Health & Carbon)"
+    
+    EMPLOYEE ||--o{ MAINTENANCE_REQUEST : "raises tickets"
+    ASSET ||--o{ MAINTENANCE_REQUEST : "needs repair"
+    
+    EMPLOYEE ||--o{ BOOKING : makes
+    ASSET ||--o{ BOOKING : reserved
+
+    ASSET {
+        int id
+        string tag
+        string condition
+        string status
+    }
+    
+    ASSET_INTELLIGENCE {
+        float healthScore
+        float failureProbability
+        float carbonFootprintKg
+    }
+```
+
+---
+
+## 🌟 Innovations & Advanced Features
+
+What makes this project fundamentally different from standard CRUD ticketing systems?
+
+### 1. Zero-Touch AI Ticketing (NLP Classification)
+Instead of forcing users to fill out long forms, select asset IDs, guess categories, and assign priorities, employees simply type what is wrong in plain English (e.g., *"My screen shattered after I dropped my laptop"*). 
+- **Fuzzy Matching Context:** The backend automatically queries the user's actively assigned devices and cross-references them with the text to figure out *which* device is broken.
+- **Predictive Algorithm:** The text is sent to a local Python server running **HuggingFace's `facebook/bart-large-mnli` (a Zero-Shot Text Classification model)**. This NLP model natively understands the context of the sentence to automatically predict the correct **Issue Category** (Hardware, Software, Network) and calculate the **Priority Level** (High, Medium, Low).
+
+### 2. Eco-Sustainability & Carbon Footprint Tracking
+AssetFlow doesn't just track where laptops are; it tracks their environmental impact. 
+- The database includes native fields for `baseCarbonFootprintKg` and `powerDrawWatts` at the Category level.
+- The `AssetIntelligence` table continuously tracks the accumulated `carbonFootprintKg` for every single asset in the company, allowing IT to make eco-friendly purchasing and lifecycle decisions.
+
+### 3. PostgreSQL GiST EXCLUDE Constraints for Resource Booking
+Standard web apps often suffer from race conditions when two employees try to book a projector at the exact same time. AssetFlow uses a raw **PostgreSQL GiST EXCLUDE constraint** on the `Booking` table. This guarantees at the database-engine level that no two bookings for the same asset can ever have overlapping `startTime` and `endTime` ranges. 
+
+### 4. Local, Privacy-Preserving AI
+Unlike modern wrappers that just send user data to OpenAI or Claude APIs, this project runs a **local Python FastAPI server** hosting the HuggingFace model. This means the AI inference happens locally, saving API costs and ensuring 100% data privacy for enterprise environments. No proprietary company ticketing data is ever sent to third-party LLM providers.
+
+### 5. Hierarchical Departments & Granular RBAC
+- **Hierarchical structure:** Departments can have parent and child relationships to mirror real-world corporate structures.
+- **Role-Based Access Control (RBAC):** The database utilizes Prisma and robust Express middleware to enforce strict roles (ADMIN, ASSET_MANAGER, DEPARTMENT_HEAD, EMPLOYEE). Every API request cryptographically verifies the JWT token signatures.
+
+---
+
+## 🚀 How to Run the Entire System
+
+You will need to open **3 separate terminal windows** to run the frontend, backend, and AI model simultaneously.
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL 14+ (local install or hosted connection string)
-- npm 9+
+- Python 3.10+
+- PostgreSQL Database (Locally or via Supabase)
 
 ---
 
-### Backend (Step 1 — available now)
+### Step 1: Run the Backend (Terminal 1)
+The backend is an Express/TypeScript server that connects to the database.
 
 ```bash
-# 1. Go into the server folder
 cd server
 
-# 2. Copy the environment template and fill in your values
-cp .env.example .env
-
-# 3. Install dependencies
+# 1. Install dependencies
 npm install
 
-# 4. Run the initial database migration (creates all tables)
-npm run db:migrate
-# When prompted: enter "init" as the migration name
+# 2. Make sure your .env is set up with DATABASE_URL
+# Generate the Prisma client & sync DB
+npm run db:generate
+npm run db:push
 
-# 5. Start the development server
+# 3. Start the server
 npm run dev
 ```
-
-The API will be running at **http://localhost:3001**
-
-**Verify the database connection:**
-```bash
-curl http://localhost:3001/health
-# {"status":"ok","db":"connected","timestamp":"..."}
-```
+> The API will be running at **http://localhost:3001**
 
 ---
 
-### Frontend (Step 2 — available now)
+### Step 2: Run the Frontend (Terminal 2)
+The frontend is a React application built with Vite and styled with Tailwind CSS.
 
 ```bash
-# 1. Go into the client folder
 cd client
 
-# 2. Copy the environment template and fill in your values
-cp .env.example .env
-
-# 3. Install dependencies
+# 1. Install dependencies
 npm install
 
-# 4. Start the development server
+# 2. Start the Vite dev server
 npm run dev
 ```
-
-The UI will be running at **http://localhost:5173**
-
----
-
-## Required Environment Variables
-
-### Backend (`server/.env`)
-
-| Variable | Description | Example |
-|---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:pass@localhost:5432/assetflow` |
-| `PORT` | API server port | `3001` |
-| `JWT_SECRET` | Strong random string for signing JWTs | Run: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `JWT_EXPIRES_IN` | Token lifetime | `8h` |
-| `CORS_ORIGIN` | Allowed frontend origin | `http://localhost:5173` |
-| `NODE_ENV` | Environment mode | `development` |
-
-### Frontend (`client/.env`) — Step 2
-
-| Variable | Description | Example |
-|---|---|---|
-| `VITE_API_BASE_URL` | Backend API base URL | `http://localhost:3001` |
+> The UI will be running at **http://localhost:5173**
 
 ---
 
-## Database Migrations
+### Step 3: Run the AI Model (Terminal 3)
+The AI Model is a Python FastAPI server that uses PyTorch and HuggingFace Transformers.
 
-All migrations live in `server/prisma/migrations/` and are tracked in Git.
-
-| Migration | What it does |
-|---|---|
-| `001_init` | Creates all tables from the Prisma schema |
-| `002_add_raw_constraints` | Adds partial unique index (one active allocation per asset) + GiST EXCLUDE constraint (no overlapping bookings) |
-
-To run all pending migrations:
 ```bash
-cd server
-npm run db:migrate
-```
+cd ai_triage_model
 
-To reset the database entirely (dev only):
+# Run the provided batch script (Windows)
+# NOTE: In PowerShell, you must prefix it with .\
+.\start_model.bat
+```
+*(If the `.bat` file doesn't work, you can manually run it):*
 ```bash
-cd server
-npm run db:reset
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+python run_model.py
 ```
+> The AI Model API will be running at **http://localhost:8000**
 
 ---
 
-## Architecture
+## 🛠️ Tech Stack
 
-```
-React (Vite + TS) Frontend
-  - Role-based routing
-  - AuthContext (JWT in memory, never localStorage)
-  - API layer (one file per module, typed error shapes)
-        |
-        | REST JSON, JWT in Authorization header
-        v
-Express (TS) Backend
-  routes → controllers → services → Prisma Client
-  middleware: requireAuth, requireRole, validate(zod), globalErrorHandler
-        |
-        | Prisma ORM
-        v
-PostgreSQL
-  - EXCLUDE constraint on Booking (no overlapping time ranges)
-  - Partial unique index on Allocation (one active allocation per asset)
-```
-
----
-
-## Tech Stack
-
-| Layer | Technology | Why |
+| Layer | Technology | Purpose |
 |---|---|---|
-| Backend framework | Express + TypeScript | Explicit, fully explainable — no DI magic |
-| ORM | Prisma | Type-safe, readable schema file, clean migrations |
-| Database | PostgreSQL | Relational, supports GiST EXCLUDE constraint |
-| Auth | JWT + bcrypt (self-implemented) | Own every line — no Auth0 / Supabase Auth |
-| Validation | Zod (shared schemas) | One schema, used on both backend and frontend |
-| Frontend | React + Vite + TypeScript | Fast dev server, strict typing |
-| Styling | Tailwind CSS | Consistent design system, one config |
-| Data fetching | React Query | Cache + refetch, simple to explain |
-
----
-
-## What's intentionally deferred (honest scope notes)
-
-- `/auth/signup` and `/auth/login` return 501 until the Auth build step (Step 2)
-- All module controllers return 501 — business logic comes module by module
-- Forgot-password email delivery — demo shows token on screen; real SMTP needs more time
-- Socket.io realtime notifications — polling every 8-10s is the baseline; Socket.io is a documented stretch goal
-- AI/ML prediction layer — planned after the full system is working:
-  - Predictive maintenance (when will this asset next need repair?)
-  - Resource demand forecasting (seasonal booking pattern prediction)
-  - Anomaly detection (unusual allocation patterns)
-  - These will be a separate service consuming data from the live system
+| **AI NLP Model** | Python, FastAPI, HuggingFace (`facebook/bart-large-mnli`) | Local Zero-Shot Classification for Ticket Routing |
+| **Backend** | Node.js, Express, TypeScript | REST API and Business Logic |
+| **Database ORM** | Prisma | Type-safe queries and schema migrations |
+| **Database** | PostgreSQL | Relational data storage, GiST EXCLUDE ranges |
+| **Frontend** | React, Vite, TypeScript | Lightning-fast development and UI rendering |
+| **Styling** | Tailwind CSS | Modern, responsive, utility-first design system |
+| **Auth** | JWT, bcrypt | Custom cryptographic stateless authentication |
