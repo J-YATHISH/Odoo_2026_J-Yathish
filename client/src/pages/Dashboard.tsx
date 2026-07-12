@@ -64,12 +64,20 @@ export const Dashboard: React.FC = () => {
       const dbLogs = await fetchActivityLogs(10);
       formatLogs(dbLogs);
 
-      // 4. Fetch Intelligence Data
-      const eco = await intelligenceApi.getEcoPredictive();
-      setEcoData(eco);
+      // 4. Fetch Intelligence Data (Wrapped safely for RBAC / Standard Users)
+      try {
+        const eco = await intelligenceApi.getEcoPredictive();
+        setEcoData(eco);
 
-      const bench = await intelligenceApi.getBenchmarks();
-      setBenchmarksData(bench);
+        const bench = await intelligenceApi.getBenchmarks();
+        setBenchmarksData(bench);
+      } catch (intelErr: any) {
+        // If 403 Forbidden, the user just doesn't have MANAGE_ORGANIZATION permissions.
+        // We gracefully ignore it and just don't render the intelligence panels for them.
+        if (intelErr?.status !== 403 && intelErr?.response?.status !== 403) {
+          console.error("Intelligence Engine API Error:", intelErr);
+        }
+      }
     } catch (err: unknown) {
       if (err instanceof APIException) {
         setError(`${err.message} (Status: ${err.status})`);
