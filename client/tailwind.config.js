@@ -17,6 +17,13 @@ export default {
         'neutral-muted': 'rgb(var(--color-neutral-muted) / <alpha-value>)',
         border: 'rgb(var(--color-border) / <alpha-value>)',
       },
+      fontFamily: {
+        'label-sm': ['"IBM Plex Sans Condensed"', 'sans-serif'],
+        'body-md': ['"IBM Plex Sans"', 'sans-serif'],
+        'headline-md': ['"IBM Plex Sans Condensed"', 'sans-serif'],
+        'headline-lg': ['"IBM Plex Sans Condensed"', 'sans-serif'],
+        'data-mono': ['"IBM Plex Mono"', 'monospace'],
+      },
     },
   },
   plugins: [],
