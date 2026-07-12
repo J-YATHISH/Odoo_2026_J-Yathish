@@ -21,11 +21,11 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       {/* Modal Dialog Box */}
       <div className="relative bg-neutral-card border border-border w-full max-w-lg rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 flex flex-col z-10">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border bg-slate-900/20">
+        <div className="flex items-center justify-between p-4 border-b border-border bg-neutral-bg/40">
           <h3 className="text-base font-semibold text-neutral-text">{title}</h3>
           <button
             onClick={onClose}
-            className="text-neutral-muted hover:text-neutral-text text-2xl font-light transition-colors focus:outline-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-800"
+            className="text-neutral-muted hover:text-neutral-text text-2xl font-light transition-colors focus:outline-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-muted/10"
             aria-label="Close modal"
           >
             &times;

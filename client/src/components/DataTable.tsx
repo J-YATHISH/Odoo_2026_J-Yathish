@@ -21,7 +21,7 @@ export function DataTable<T>({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-border bg-slate-900/30">
+            <tr className="border-b border-border bg-neutral-bg/60">
               {columns.map((col, idx) => (
                 <th
                   key={idx}
@@ -41,7 +41,7 @@ export function DataTable<T>({
               </tr>
             ) : (
               data.map((row, rowIdx) => (
-                <tr key={rowIdx} className="hover:bg-slate-800/10 transition-colors">
+                <tr key={rowIdx} className="hover:bg-neutral-muted/10 transition-colors">
                   {columns.map((col, colIdx) => (
                     <td key={colIdx} className="p-4 text-sm text-neutral-text">
                       {typeof col.accessor === 'function'

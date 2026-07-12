@@ -12,14 +12,14 @@ export const Layout: React.FC<LayoutProps> = ({ title, children }) => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="flex min-h-screen bg-neutral-bg text-neutral-text transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-neutral-bg text-neutral-text transition-colors duration-200">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="h-16 border-b border-border bg-neutral-card/40 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-30 transition-colors duration-200">
+        <header className="h-16 border-b border-border bg-neutral-card/40 backdrop-blur-md flex items-center justify-between px-8 shrink-0 z-30 transition-colors duration-200">
           <h2 className="text-md font-semibold text-neutral-text tracking-wide m-0">
             {title}
           </h2>
@@ -48,7 +48,7 @@ export const Layout: React.FC<LayoutProps> = ({ title, children }) => {
         </header>
 
         {/* Content Body */}
-        <main className="flex-1 p-8 bg-neutral-bg overflow-y-auto transition-colors duration-200">
+        <main className="flex-grow p-8 bg-neutral-bg overflow-y-auto transition-colors duration-200">
           {children}
         </main>
       </div>
