@@ -2,8 +2,13 @@
 
 **Enterprise Asset & Maintenance Management System with Autonomous AI**
 
-> A full-stack web application for managing physical assets, tracking allocations, and running an autonomous Zero-Touch AI maintenance ticketing system. 
-> Built with **React + Vite** (Frontend), **Node.js + Prisma + PostgreSQL** (Backend), and **Python + HuggingFace** (AI Model).
+AssetFlow is an enterprise-grade, multi-tenant Full-Stack web application architected for large-scale physical asset lifecycle management, dynamic allocation tracking, and advanced resource booking. It integrates a cutting-edge **Zero-Touch AI Maintenance Ticketing System** designed to eliminate manual triage overhead in modern IT and facilities departments. 
+
+By bridging standard CRUD operations with **Local Edge Machine Learning (NLP)**, AssetFlow intelligently parses unstructured natural language reports from employees and autonomously categorizes issues, assigns priority levels, and predicts hardware failure probabilities before they occur. 
+
+**Industry Application:** At an enterprise scale, IT Helpdesks waste thousands of hours manually routing, categorizing, and prioritizing hardware tickets. AssetFlow's AI-driven pipeline acts as a fully autonomous Level-1 IT Dispatcher. Combined with its PostgreSQL GiST constraints for mathematical double-booking prevention and dynamic carbon footprint telemetry, AssetFlow provides CTOs and Asset Managers with a highly robust, scalable, and eco-conscious system to optimize hardware longevity and reduce operational bottlenecks.
+
+Built with **React + Vite** (Frontend), **Node.js + Prisma + PostgreSQL** (Backend), and **Python + HuggingFace** (AI Model).
 
 ---
 
