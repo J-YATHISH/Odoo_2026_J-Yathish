@@ -20,6 +20,17 @@ export interface DashboardReportResponse {
       lastActivityAt: string;
     }>;
   };
+  activeBookingsCount: number;
+  pendingTransfersCount: number;
+  upcomingReturnsCount: number;
+  overdueItems: Array<{
+    id: string;
+    status: string;
+    name: string;
+    sub: string;
+    color: string;
+    textColor: string;
+  }>;
 }
 
 export async function fetchDashboardReport(departmentId?: number): Promise<DashboardReportResponse> {

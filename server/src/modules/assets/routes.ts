@@ -1,19 +1,22 @@
 import { Router } from 'express';
 import * as c from './controller';
 import { validate } from '../../middleware/validate';
-import { requireAuth, requirePermission } from '../../middleware/auth';
-import { Permission } from '../../utils/constants';
+import { requireAuth, requireRole, scopeToOrg } from '../../middleware/auth';
 import * as t from './types';
 
 const router = Router();
 
 router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'assets' }); });
 
-router.use(requireAuth);
+// All asset routes require authentication and tenant organization scoping
+router.use(requireAuth, scopeToOrg);
 
+// Asset view: all 4 roles
 router.get('/', validate(t.searchAssetsSchema), c.listAssets);
-router.post('/', requirePermission([Permission.MANAGE_ASSETS]), validate(t.createAssetSchema), c.createAsset);
 router.get('/:id', c.getAsset);
-router.patch('/:id', requirePermission([Permission.MANAGE_ASSETS]), validate(t.updateAssetSchema), c.updateAsset);
+
+// Asset create/edit: ADMIN and ASSET_MANAGER only
+router.post('/', requireRole(['ADMIN', 'ASSET_MANAGER']), validate(t.createAssetSchema), c.createAsset);
+router.patch('/:id', requireRole(['ADMIN', 'ASSET_MANAGER']), validate(t.updateAssetSchema), c.updateAsset);
 
 export default router;

@@ -7,6 +7,7 @@ import { fetchDashboardReport } from '../api/reports';
 import type { DashboardReportResponse } from '../api/reports';
 import { fetchActivityLogs } from '../api/notifications';
 import type { ActivityLogItem } from '../api/notifications';
+import { fetchOrganizationInfo } from '../api/organization';
 import { APIException } from '../api/client';
 import { RefreshCw, Server, Database, AlertCircle } from 'lucide-react';
 
@@ -37,6 +38,7 @@ export const Dashboard: React.FC = () => {
   const [activityLogs, setActivityLogs] = useState<ActivityRow[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [orgName, setOrgName] = useState<string | null>(null);
 
   // Time state
   const [sysTime, setSysTime] = useState<string>('00:00:00');
@@ -57,16 +59,17 @@ export const Dashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Fetch backend health
-      const healthRes = await checkHealth();
+      // Run all fetches in parallel for speed
+      const [healthRes, reportRes, dbLogs, orgInfo] = await Promise.all([
+        checkHealth(),
+        fetchDashboardReport(),
+        fetchActivityLogs(10),
+        fetchOrganizationInfo(),
+      ]);
+
       setHealth(healthRes);
-
-      // 2. Fetch reports dashboard KPIs
-      const reportRes = await fetchDashboardReport();
       setReport(reportRes);
-
-      // 3. Fetch activity logs
-      const dbLogs = await fetchActivityLogs(10);
+      setOrgName(orgInfo.name);
       formatLogs(dbLogs);
     } catch (err: unknown) {
       if (err instanceof APIException) {
@@ -145,10 +148,37 @@ export const Dashboard: React.FC = () => {
       let icon = 'info';
       let iconColor = 'text-primary';
 
-      if (log.action === 'LOGGED_IN') {
-        desc = `Operator ${log.employee.name} initialized session.`;
-        icon = 'login';
-        iconColor = 'text-[#4FBF9F]';
+      switch (log.action) {
+        case 'LOGGED_IN':
+          desc = `Operator ${log.employee.name} initialized session.`;
+          icon = 'login';
+          iconColor = 'text-[#4FBF9F]';
+          break;
+        case 'CREATED_ORGANIZATION':
+          desc = `Organization registered by ${log.employee.name}.`;
+          icon = 'domain';
+          iconColor = 'text-[#4FBF9F]';
+          break;
+        case 'ALLOCATED_ASSET':
+          desc = `Asset ${log.entityId ? `AF-${log.entityId.toString().padStart(4, '0')}` : ''} allocated to employee by ${log.employee.name}.`;
+          icon = 'swap_horiz';
+          iconColor = 'text-[#5C8FC2]';
+          break;
+        case 'RAISED_MAINTENANCE':
+          desc = `Maintenance request raised for asset ${log.entityId ? `AF-${log.entityId.toString().padStart(4, '0')}` : ''} by ${log.employee.name}.`;
+          icon = 'build';
+          iconColor = 'text-[#F0A030]';
+          break;
+        case 'CREATED_ASSET':
+          desc = `New asset registered by ${log.employee.name}.`;
+          icon = 'add_box';
+          iconColor = 'text-[#5C8FC2]';
+          break;
+        case 'RETURNED_ASSET':
+          desc = `Asset ${log.entityId ? `AF-${log.entityId.toString().padStart(4, '0')}` : ''} returned. Condition verified by ${log.employee.name}.`;
+          icon = 'check_circle';
+          iconColor = 'text-[#4FBF9F]';
+          break;
       }
 
       const logTime = new Date(log.createdAt).toLocaleTimeString('en-US', {
@@ -159,51 +189,61 @@ export const Dashboard: React.FC = () => {
         id: `db-${log.id}`,
         icon,
         iconColor,
-        assetId: log.entityId ? `AF-${log.entityId.toString().padStart(4, '0')}` : 'SYS',
+        // Entity IDs for org/employee-level events are NOT asset IDs — show SYS for those
+        assetId: (log.entityType === 'Asset' && log.entityId)
+          ? `AF-${log.entityId.toString().padStart(4, '0')}`
+          : 'SYS',
         description: desc,
         timestamp: logTime,
       };
     });
 
-    // Merge: show DB logs first, then mock logs
-    setActivityLogs([...formattedDbLogs, ...mockLogs]);
+    // If there are real DB logs, display only those (no mock mixin).
+    // Otherwise fallback to showing the default mock items.
+    if (formattedDbLogs.length > 0) {
+      setActivityLogs(formattedDbLogs);
+    } else {
+      setActivityLogs(mockLogs);
+    }
   };
 
-  // Mock overdue list from mockup
-  const overdueItems: OverdueItem[] = [
-    {
-      id: 'AF-9932',
-      status: 'OVERDUE 2D',
-      name: 'Heavy Lifter Forklift H2',
-      sub: 'Return Pending - WH B2',
-      color: 'bg-[#C25D4E]',
-      textColor: 'text-[#C25D4E]',
-    },
-    {
-      id: 'AF-8411',
-      status: 'OVERDUE 1D',
-      name: 'Calibration Sensor Array X',
-      sub: 'Maint. Inspection - Lab 4',
-      color: 'bg-[#C25D4E]',
-      textColor: 'text-[#C25D4E]',
-    },
-    {
-      id: 'AF-1002',
-      status: 'LATE START',
-      name: 'Mobile Generator Unit M1',
-      sub: 'Booking Allocation - Site C',
-      color: 'bg-[#F0A030]',
-      textColor: 'text-[#F0A030]',
-    },
-  ];
+  // Dynamic overdue list or mock defaults
+  const overdueItems: OverdueItem[] = report && report.overdueItems && report.overdueItems.length > 0
+    ? report.overdueItems
+    : [
+        {
+          id: 'AF-9932',
+          status: 'OVERDUE 2D',
+          name: 'Heavy Lifter Forklift H2',
+          sub: 'Return Pending - WH B2',
+          color: 'bg-[#C25D4E]',
+          textColor: 'text-[#C25D4E]',
+        },
+        {
+          id: 'AF-8411',
+          status: 'OVERDUE 1D',
+          name: 'Calibration Sensor Array X',
+          sub: 'Maint. Inspection - Lab 4',
+          color: 'bg-[#C25D4E]',
+          textColor: 'text-[#C25D4E]',
+        },
+        {
+          id: 'AF-1002',
+          status: 'LATE START',
+          name: 'Mobile Generator Unit M1',
+          sub: 'Booking Allocation - Site C',
+          color: 'bg-[#F0A030]',
+          textColor: 'text-[#F0A030]',
+        },
+      ];
 
-  // Dynamic values or mock defaults
-  const availableCount = report?.utilization.availableAssets || 1492;
-  const allocatedCount = report?.utilization.allocatedAssets || 348;
-  const maintenanceCount = report?.maintenance.assetsCurrentlyUnderMaintenance || 12;
-  const activeBookingsCount = 87; // Fallback
-  const pendingTransfersCount = 45; // Fallback
-  const upcomingReturnsCount = 19; // Fallback
+  // Gate KPI values behind loading — show 0 (not fake numbers) while fetching
+  const availableCount = loading ? 0 : (report?.utilization.availableAssets ?? 0);
+  const allocatedCount = loading ? 0 : (report?.utilization.allocatedAssets ?? 0);
+  const maintenanceCount = loading ? 0 : (report?.maintenance.assetsCurrentlyUnderMaintenance ?? 0);
+  const activeBookingsCount = loading ? 0 : (report?.activeBookingsCount ?? 0);
+  const pendingTransfersCount = loading ? 0 : (report?.pendingTransfersCount ?? 0);
+  const upcomingReturnsCount = loading ? 0 : (report?.upcomingReturnsCount ?? 0);
 
   const statusLabel = health && health.db === 'connected' ? 'NOMINAL' : 'DEGRADED';
   const statusColor = statusLabel === 'NOMINAL' ? 'text-[#4FBF9F]' : 'text-[#C25D4E]';
@@ -213,7 +253,13 @@ export const Dashboard: React.FC = () => {
       <div className="space-y-6">
         {/* Top Control Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border pb-4 stagger-item">
-          <div>
+        <div>
+            {orgName && (
+              <div className="font-label-sm text-[11px] text-neutral-muted uppercase tracking-widest font-semibold mb-0.5">
+                <span className="material-symbols-outlined text-[11px] align-middle mr-1">domain</span>
+                {orgName}
+              </div>
+            )}
             <div className="font-data-mono text-xs text-neutral-muted mt-1 uppercase tracking-wider">
               SYS-TIME: <span className="text-neutral-text font-semibold">{sysTime}</span> | STATUS:{' '}
               <span className={`font-bold ${statusColor}`}>{statusLabel}</span>

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { fetchOrganizationInfo } from '../api/organization';
 import {
   LayoutDashboard,
   Users,
@@ -23,6 +24,17 @@ interface SidebarItem {
 
 export const Sidebar: React.FC = () => {
   const { logout } = useAuth();
+  const [orgName, setOrgName] = useState<string>('Enterprise Asset');
+
+  useEffect(() => {
+    fetchOrganizationInfo()
+      .then((info) => {
+        setOrgName(info.name);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch organization info:', err);
+      });
+  }, []);
 
   const menuItems: SidebarItem[] = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={18} /> },
@@ -47,8 +59,8 @@ export const Sidebar: React.FC = () => {
           <h1 className="text-lg font-bold text-neutral-text tracking-wide m-0 p-0 leading-none">
             AssetFlow
           </h1>
-          <span className="text-[10px] text-neutral-muted uppercase tracking-wider font-semibold">
-            Enterprise Asset
+          <span className="text-[10px] text-neutral-muted uppercase tracking-wider font-semibold truncate block max-w-[150px]" title={orgName}>
+            {orgName}
           </span>
         </div>
       </div>

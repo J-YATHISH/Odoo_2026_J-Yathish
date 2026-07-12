@@ -33,6 +33,7 @@ export const LoginSignup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Password strength calculation
@@ -110,6 +111,7 @@ export const LoginSignup: React.FC = () => {
               email: email,
               role: 'ADMIN',
               departmentId: null,
+              organizationId: 1,
             },
           };
           notify('Session initialized (Local Bypass Enabled).', 'info');
@@ -123,11 +125,12 @@ export const LoginSignup: React.FC = () => {
           name: response.employee.name,
           email: response.employee.email,
           role: response.employee.role,
+          organizationId: response.employee.organizationId,
         });
         navigate('/', { replace: true });
       } else {
-        await apiSignup({ name, email, password });
-        notify('Registration request submitted. You may now login.', 'success');
+        await apiSignup({ name, email, password, joinCode });
+        notify('Registration successful. You may now login.', 'success');
         setMode('login');
         setPassword('');
       }
@@ -181,25 +184,47 @@ export const LoginSignup: React.FC = () => {
         {/* Dynamic Forms Panel */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'signup' && (
-            <div className="space-y-2">
-              <label
-                className="font-label-sm text-xs text-neutral-muted uppercase flex items-center gap-2"
-                htmlFor="name"
-              >
-                <span className="material-symbols-outlined text-sm">person</span>
-                Operator Name
-              </label>
-              <input
-                className="w-full input-technical font-data-mono text-sm p-3 rounded-none focus:border-primary placeholder-neutral-muted/40"
-                id="name"
-                placeholder="John Doe"
-                required
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={loading}
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <label
+                  className="font-label-sm text-xs text-neutral-muted uppercase flex items-center gap-2"
+                  htmlFor="name"
+                >
+                  <span className="material-symbols-outlined text-sm">person</span>
+                  Operator Name
+                </label>
+                <input
+                  className="w-full input-technical font-data-mono text-sm p-3 rounded-none focus:border-primary placeholder-neutral-muted/40"
+                  id="name"
+                  placeholder="John Doe"
+                  required
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  className="font-label-sm text-xs text-neutral-muted uppercase flex items-center gap-2"
+                  htmlFor="joinCode"
+                >
+                  <span className="material-symbols-outlined text-sm">key</span>
+                  Organization Join Code
+                </label>
+                <input
+                  className="w-full input-technical font-data-mono text-sm p-3 rounded-none focus:border-primary placeholder-neutral-muted/40"
+                  id="joinCode"
+                  placeholder="AF-XXXX"
+                  required
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  disabled={loading}
+                />
+              </div>
+            </>
           )}
 
           <div className="space-y-2">
@@ -313,12 +338,25 @@ export const LoginSignup: React.FC = () => {
             )}
           </button>
 
+          {mode === 'login' && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => navigate('/setup-org')}
+                className="font-data-mono text-[10px] text-primary hover:underline uppercase tracking-wider focus:outline-none"
+                type="button"
+                disabled={loading}
+              >
+                Register New Organization
+              </button>
+            </div>
+          )}
+
           {/* Context Advisory Box */}
           <div className="bg-neutral-bg/60 p-3 mt-4 border border-border flex items-start gap-3 transition-colors duration-200">
             <span className="material-symbols-outlined text-sm text-neutral-muted mt-0.5">info</span>
             <p className="font-data-mono text-[10px] text-neutral-muted leading-relaxed">
               {mode === 'login'
-                ? 'Note: New registrations create Employee accounts. Role assignment is handled via Admin flow.'
+                ? 'Note: New registrations require a join code. To set up a new tenant, use the "Register New Organization" flow.'
                 : 'Note: Authorized Department clearance is required to register an Operator ID. Unauthorized requests will be audited.'}
             </p>
           </div>

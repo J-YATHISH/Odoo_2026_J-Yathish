@@ -4,9 +4,25 @@ import * as t from './types';
 import { AppError } from '../../utils/AppError';
 import { HTTP, ErrorCode } from '../../utils/constants';
 
-export async function listActivityLogs(organizationId: number, query: z.infer<typeof t.getNotificationsSchema>) {
+export async function listActivityLogs(
+  organizationId: number,
+  userRole: string,
+  userEmployeeId: number,
+  userDepartmentId: number | null,
+  query: z.infer<typeof t.getNotificationsSchema>
+) {
+  const whereClause: any = { organizationId };
+
+  // Apply scoping depending on the role
+  if (userRole === 'DEPARTMENT_HEAD') {
+    whereClause.employee = { departmentId: userDepartmentId || -1 };
+  } else if (userRole === 'EMPLOYEE') {
+    whereClause.employeeId = userEmployeeId;
+  }
+  // ADMIN and ASSET_MANAGER see all logs for their organization
+
   return prisma.activityLog.findMany({
-    where: { organizationId },
+    where: whereClause,
     take: query.limit,
     orderBy: { createdAt: 'desc' },
     include: {

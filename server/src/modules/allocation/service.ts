@@ -5,7 +5,21 @@ import * as t from './types';
 import { z } from 'zod';
 import { transitionAssetStatus } from '../assets/service';
 
-export async function createAllocation(organizationId: number, data: z.infer<typeof t.createAllocationSchema>) {
+export async function createAllocation(
+  organizationId: number,
+  data: z.infer<typeof t.createAllocationSchema>,
+  reqUser?: { role: string; departmentId: number | null }
+) {
+  if (reqUser && reqUser.role === 'DEPARTMENT_HEAD') {
+    const holder = await prisma.employee.findUnique({
+      where: { id: data.holderId },
+      select: { departmentId: true }
+    });
+    if (!holder || holder.departmentId !== reqUser.departmentId) {
+      throw new AppError('Department Heads can only allocate assets within their own department.', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+    }
+  }
+
   try {
     return await prisma.$transaction(async (tx) => {
       // 1. Create the allocation.
@@ -67,13 +81,26 @@ export async function createAllocation(organizationId: number, data: z.infer<typ
   }
 }
 
-export async function returnAsset(organizationId: number, allocationId: number, reqEmployeeId: number, data: z.infer<typeof t.returnAssetSchema>) {
+export async function returnAsset(
+  organizationId: number,
+  allocationId: number,
+  reqEmployeeId: number,
+  data: z.infer<typeof t.returnAssetSchema>,
+  reqUser?: { role: string; departmentId: number | null }
+) {
   const allocation = await prisma.allocation.findUnique({ where: { id: allocationId } });
   if (!allocation || allocation.organizationId !== organizationId) throw new AppError('Allocation not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
   if (!allocation.isActive) throw new AppError('Allocation is already returned', HTTP.BAD_REQUEST, ErrorCode.BAD_REQUEST);
   
-  // Ensure the person returning it is the holder, or they are an admin
-  // (In a real app, we'd check roles here, but we'll allow the holder for now)
+  if (reqUser && reqUser.role === 'DEPARTMENT_HEAD') {
+    const holder = await prisma.employee.findUnique({
+      where: { id: allocation.holderId },
+      select: { departmentId: true }
+    });
+    if (!holder || holder.departmentId !== reqUser.departmentId) {
+      throw new AppError('Department Heads can only return assets allocated within their own department.', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+    }
+  }
 
   return prisma.$transaction(async (tx) => {
     const updated = await tx.allocation.update({

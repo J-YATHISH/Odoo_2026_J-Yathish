@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sidebar } from './Sidebar';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { Sun, Moon } from 'lucide-react';
 
 interface LayoutProps {
@@ -10,6 +11,27 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ title, children }) => {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
+
+  const userName = user?.name || user?.email || 'System Admin';
+  const userRole = user?.role || 'Superuser';
+
+  const getInitials = (name?: string, email?: string) => {
+    if (name) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (email) {
+      const namePart = email.split('@')[0];
+      return namePart.slice(0, 2).toUpperCase();
+    }
+    return 'SA';
+  };
+
+  const initials = getInitials(user?.name, user?.email);
 
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-bg text-neutral-text transition-colors duration-200">
@@ -35,19 +57,18 @@ export const Layout: React.FC<LayoutProps> = ({ title, children }) => {
 
             <div className="text-right hidden sm:block">
               <span className="text-xs font-medium text-neutral-text block leading-none">
-                System Admin
+                {userName}
               </span>
               <span className="text-[10px] text-neutral-muted uppercase tracking-wider font-semibold">
-                Superuser
+                {userRole.replace(/_/g, ' ')}
               </span>
             </div>
             <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center border border-primary/20">
-              <span className="text-xs font-semibold text-primary">SA</span>
+              <span className="text-xs font-semibold text-primary">{initials}</span>
             </div>
           </div>
         </header>
 
-        {/* Content Body */}
         <main className="flex-grow p-8 bg-neutral-bg overflow-y-auto transition-colors duration-200">
           {children}
         </main>
