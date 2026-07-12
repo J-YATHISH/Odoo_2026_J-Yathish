@@ -33,6 +33,7 @@ export const LoginSignup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [organizationName, setOrganizationName] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Password strength calculation
@@ -90,24 +91,9 @@ export const LoginSignup: React.FC = () => {
 
     try {
       if (mode === 'login') {
-        let response;
-        if (password === 'admin123' || password === 'bypass') {
-          response = {
-            token: 'mock-jwt-token-bypass',
-            employee: {
-              id: 9999,
-              name: 'Demo Operator',
-              email: email,
-              role: 'ADMIN',
-              departmentId: null,
-            },
-          };
-          notify('Session initialized (Local Bypass Enabled).', 'info');
-        } else {
-          response = await apiLogin({ email, password });
-          notify('Session initialized successfully.', 'success');
-        }
-
+        const response = await apiLogin({ email, password });
+        notify('Session initialized successfully.', 'success');
+        
         login(response.token, {
           id: response.employee.id,
           name: response.employee.name,
@@ -116,8 +102,8 @@ export const LoginSignup: React.FC = () => {
         });
         navigate('/', { replace: true });
       } else {
-        await apiSignup({ name, email, password });
-        notify('Registration request submitted. You may now login.', 'success');
+        await apiSignup({ name, email, password, organizationName });
+        notify('Registration successful. You may now login.', 'success');
         setMode('login');
         setPassword('');
       }
@@ -187,6 +173,26 @@ export const LoginSignup: React.FC = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label
+                className="font-label-sm text-xs text-neutral-muted uppercase flex items-center gap-2"
+                htmlFor="organizationName"
+              >
+                <span className="material-symbols-outlined text-sm">domain</span>
+                Organization Name
+              </label>
+              <input
+                className="w-full input-technical font-data-mono text-sm p-3 rounded-none focus:border-primary placeholder-neutral-muted/40"
+                id="organizationName"
+                placeholder="Atlas Industrial"
+                required
+                type="text"
+                value={organizationName}
+                onChange={(e) => setOrganizationName(e.target.value)}
                 disabled={loading}
               />
             </div>

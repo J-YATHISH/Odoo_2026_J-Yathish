@@ -1,40 +1,56 @@
 :root {
-  --color-primary: 240 160 48;       /* Industrial Gold: #f0a030 */
-  --color-success: 114 224 190;      /* Industrial Teal: #72e0be */
-  --color-warning: 255 193 118;      /* Warm Yellow: #ffc176 */
-  --color-danger: 255 180 171;       /* Rose Red: #ffb4ab */
-  --color-neutral-bg: 21 23 26;       /* Deep main background: #15171A */
-  --color-neutral-card: 29 32 35;     /* Panel background: #1D2023 */
-  --color-neutral-text: 226 226 230;  /* Main text: #e2e2e6 */
-  --color-neutral-muted: 160 142 123; /* Muted border outline: #a08e7b */
-  --color-border: 44 48 51;          /* Panel borders: #2C3033 */
-
-  /* Button specific colors (Dark theme defaults) */
-  --color-btn-primary-bg: 240 160 48;
-  --color-btn-primary-text: 17 19 22;
-  --color-btn-primary-hover: 229 152 46;
-}
-
-:root.light {
-  --color-primary: 217 119 6;         /* Slightly darker gold for readability: #d97706 */
-  --color-success: 5 150 105;        /* Emerald-600: #059669 */
-  --color-warning: 217 119 6;         /* Amber-600 */
-  --color-danger: 220 38 38;          /* Red-600: #dc2626 */
-  --color-neutral-bg: 240 241 243;    /* Light industrial grey bg: #f0f1f3 */
-  --color-neutral-card: 255 255 255;  /* White panel bg */
-  --color-neutral-text: 17 24 39;     /* Deep gray text: #111827 */
-  --color-neutral-muted: 107 114 128; /* Gray-500: #6b7280 */
-  --color-border: 209 213 219;        /* Gray-300: #d1d5db */
-
-  /* Button specific colors (Light theme overrides) */
-  --color-btn-primary-bg: 17 24 39;    /* Dark slate button for sharp contrast: #111827 */
-  --color-btn-primary-text: 255 255 255; /* White text */
-  --color-btn-primary-hover: 240 160 48; /* Highlight gold on hover: #f0a030 */
+  --color-surface: 17 19 22;
+  --color-surface-dim: 17 19 22;
+  --color-surface-bright: 55 57 61;
+  --color-surface-container-lowest: 12 14 17;
+  --color-surface-container-low: 26 28 31;
+  --color-surface-container: 30 32 35;
+  --color-surface-container-high: 40 42 45;
+  --color-surface-container-highest: 51 53 56;
+  --color-on-surface: 226 226 230;
+  --color-on-surface-variant: 215 195 175;
+  --color-inverse-surface: 226 226 230;
+  --color-inverse-on-surface: 47 48 52;
+  --color-outline: 160 142 123;
+  --color-outline-variant: 82 68 53;
+  --color-surface-tint: 255 185 97;
+  --color-primary: 255 193 118;
+  --color-on-primary: 71 42 0;
+  --color-primary-container: 240 160 48;
+  --color-on-primary-container: 97 59 0;
+  --color-inverse-primary: 134 83 0;
+  --color-secondary: 154 203 255;
+  --color-on-secondary: 0 51 85;
+  --color-secondary-container: 2 74 121;
+  --color-on-secondary-container: 135 185 239;
+  --color-tertiary: 114 224 190;
+  --color-on-tertiary: 0 56 43;
+  --color-tertiary-container: 84 196 164;
+  --color-on-tertiary-container: 0 78 61;
+  --color-error: 255 180 171;
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+  --color-primary-fixed: 255 221 184;
+  --color-primary-fixed-dim: 255 185 97;
+  --color-on-primary-fixed: 43 23 0;
+  --color-on-primary-fixed-variant: 102 62 0;
+  --color-secondary-fixed: 208 228 255;
+  --color-secondary-fixed-dim: 154 203 255;
+  --color-on-secondary-fixed: 0 29 52;
+  --color-on-secondary-fixed-variant: 2 74 121;
+  --color-tertiary-fixed: 137 247 212;
+  --color-tertiary-fixed-dim: 108 218 184;
+  --color-on-tertiary-fixed: 0 33 24;
+  --color-on-tertiary-fixed-variant: 0 81 63;
+  --color-background: 17 19 22;
+  --color-on-background: 226 226 230;
+  --color-surface-variant: 51 53 56;
 }
 
 body {
-  background-color: rgb(var(--color-neutral-bg));
-  color: rgb(var(--color-neutral-text));
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-on-surface));
   font-family: 'IBM Plex Sans', sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
