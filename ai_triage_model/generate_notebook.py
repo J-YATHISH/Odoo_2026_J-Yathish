@@ -171,32 +171,26 @@ except Exception as e:
 
 code_db = """\
 # --- CELL 7: LIVE DATABASE CONNECTION (Dynamic Postgres Test) ---
-# To test this with your actual DB, you must expose your local Postgres port (5432) 
-# to the internet using ngrok, or host the DB on AWS/Render.
-!pip install psycopg2-binary SQLAlchemy
+!pip install psycopg2-binary SQLAlchemy pandas
 
 import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
 
-print("Template: Connecting to live PostgreSQL Database...")
+print("Connecting to live Supabase PostgreSQL Database...")
 
-# Replace with your actual DB credentials (or ngrok tcp URL)
-DB_HOST = "localhost" # If using ngrok, this will be something like 0.tcp.ngrok.io
-DB_PORT = "5432"      # ngrok port
-DB_USER = "postgres"
-DB_PASS = "password"
-DB_NAME = "assetflow"
+# Using your exact Supabase URL from your server/.env file
+DATABASE_URL = "postgresql://postgres.pvdnhsencmubjtbescta:Odoo_hackathon%40123@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
 
 try:
     # Create DB Engine
-    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+    engine = create_engine(DATABASE_URL)
     
     # Query the live MaintenanceRequest table
     query = 'SELECT id, "issueDescription", "priority", "issueCategory" FROM "MaintenanceRequest" LIMIT 5'
     df = pd.read_sql(query, engine)
     
-    print("\\n✅ Connected to DB! Here is live dynamic data:")
+    print("\\n✅ Connected to Supabase DB! Here is live dynamic data:")
     print(df.head())
     
     # Run predictions directly on live DB data
@@ -207,7 +201,7 @@ try:
         print(f"ID {row['id']} - Text: '{row['issueDescription']}' --> Pred: [{pri}, {cat}]")
 
 except Exception as e:
-    print("⚠️ Connection skipped. (Configure DB_HOST/PORT to point to your live database to run this).")
+    print("❌ Connection failed.")
     print("Error:", e)
 """
 
