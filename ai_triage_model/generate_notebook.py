@@ -9,13 +9,13 @@ This notebook runs a free, open-source Zero-Shot NLP model (`facebook/bart-large
 **Instructions:**
 1. Upload this file to Google Colab.
 2. Sign up for a free account at [ngrok.com](https://ngrok.com) and get your Authtoken.
-3. Paste your Authtoken in Cell 4.
+3. Paste your Authtoken in the API cell at the bottom.
 4. Click **Run All**.
 5. Copy the public `ngrok.io` URL at the bottom and paste it into your Node.js backend `.env` file as `AI_MODEL_URL`!
 """
 
 code_install = """\
-!pip install transformers torch fastapi uvicorn pyngrok nest-asyncio pydantic
+!pip install transformers torch fastapi uvicorn pyngrok nest-asyncio pydantic scikit-learn matplotlib seaborn pandas
 """
 
 code_model = """\
@@ -28,13 +28,64 @@ print("Model loaded successfully!")
 """
 
 code_test = """\
-# Let's test the model's intelligence!
-text = "My MacBook Pro 2022 screen is glitching."
-candidate_labels = ["Hardware Issue", "Software Issue", "Network Issue", "High Priority", "Low Priority"]
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, classification_report
 
-result = classifier(text, candidate_labels)
-print(f"Test Text: {text}")
-print("Predictions:", list(zip(result['labels'], result['scores'])))
+print("Running Dynamic Data Testing & Accuracy Metrics...")
+
+# Dynamic Mock Database of IT Tickets
+# In a real scenario, this dynamic list can be populated directly from your Postgres DB via pandas/SQLAlchemy!
+test_data = [
+    {"text": "My MacBook Pro 2022 screen is glitching.", "true_category": "Hardware", "true_priority": "High"},
+    {"text": "The warehouse forklift is leaking oil on the floor.", "true_category": "Hardware", "true_priority": "High"},
+    {"text": "I can't access my email account, it says password incorrect.", "true_category": "Software", "true_priority": "Low"},
+    {"text": "The wifi in conference room B keeps disconnecting.", "true_category": "Network", "true_priority": "Medium"},
+    {"text": "My laptop keyboard has a stuck key.", "true_category": "Hardware", "true_priority": "Low"},
+    {"text": "The main server rack is smoking!", "true_category": "Hardware", "true_priority": "High"},
+    {"text": "VPN is down for the entire remote team.", "true_category": "Network", "true_priority": "High"},
+    {"text": "Microsoft Word keeps crashing when I save.", "true_category": "Software", "true_priority": "Low"}
+]
+
+predicted_categories = []
+true_categories = [d["true_category"] for d in test_data]
+predicted_priorities = []
+true_priorities = [d["true_priority"] for d in test_data]
+
+# Run predictions dynamically against the AI Model
+for item in test_data:
+    # Category Prediction
+    cat_res = classifier(item["text"], ["Hardware", "Software", "Network"])
+    predicted_categories.append(cat_res['labels'][0])
+    
+    # Priority Prediction
+    pri_res = classifier(item["text"], ["High", "Medium", "Low"])
+    predicted_priorities.append(pri_res['labels'][0].capitalize())
+
+# --- Generate Category Confusion Matrix ---
+plt.figure(figsize=(6, 4))
+cm_cat = confusion_matrix(true_categories, predicted_categories, labels=["Hardware", "Software", "Network"])
+sns.heatmap(cm_cat, annot=True, fmt='d', cmap='Blues', xticklabels=["Hardware", "Software", "Network"], yticklabels=["Hardware", "Software", "Network"])
+plt.title('Confusion Matrix: Issue Category (Zero-Shot AI)')
+plt.xlabel('Predicted Category')
+plt.ylabel('True Category')
+plt.show()
+
+print("\\nClassification Report (Category):")
+print(classification_report(true_categories, predicted_categories, zero_division=0))
+
+# --- Generate Priority Confusion Matrix ---
+plt.figure(figsize=(6, 4))
+cm_pri = confusion_matrix(true_priorities, predicted_priorities, labels=["High", "Medium", "Low"])
+sns.heatmap(cm_pri, annot=True, fmt='d', cmap='Oranges', xticklabels=["High", "Medium", "Low"], yticklabels=["High", "Medium", "Low"])
+plt.title('Confusion Matrix: Priority (Zero-Shot AI)')
+plt.xlabel('Predicted Priority')
+plt.ylabel('True Priority')
+plt.show()
+
+print("\\nClassification Report (Priority):")
+print(classification_report(true_priorities, predicted_priorities, zero_division=0))
 """
 
 code_api = """\
@@ -66,9 +117,9 @@ async def predict(data: TriageRequest):
     cat_result = classifier(context_text, ["Hardware", "Software", "Network"])
     predicted_category = cat_result['labels'][0]
     
-    # Predict Priority (Adding organization context could influence this in fine-tuned models)
+    # Predict Priority
     pri_result = classifier(context_text, ["High", "Medium", "Low"])
-    predicted_priority = pri_result['labels'][0].upper()
+    predicted_priority = pri_result['labels'][0].capitalize()
     
     return {
         "priority": predicted_priority,
@@ -97,4 +148,4 @@ nb['cells'] = [
 
 with open('AssetFlow_AI_Triage.ipynb', 'w', encoding='utf-8') as f:
     nbf.write(nb, f)
-print("Notebook generated successfully!")
+print("Notebook generated successfully with Confusion Matrices!")
