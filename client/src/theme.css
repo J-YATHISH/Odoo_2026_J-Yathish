@@ -1,45 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&family=IBM+Plex+Mono:wght@400;450;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+:root {
+  --color-primary: 240 160 48;       /* Industrial Gold: #f0a030 */
+  --color-success: 114 224 190;      /* Industrial Teal: #72e0be */
+  --color-warning: 255 193 118;      /* Warm Yellow: #ffc176 */
+  --color-danger: 255 180 171;       /* Rose Red: #ffb4ab */
+  --color-neutral-bg: 21 23 26;       /* Deep main background: #15171A */
+  --color-neutral-card: 29 32 35;     /* Panel background: #1D2023 */
+  --color-neutral-text: 226 226 230;  /* Main text: #e2e2e6 */
+  --color-neutral-muted: 160 142 123; /* Muted border outline: #a08e7b */
+  --color-border: 44 48 51;          /* Panel borders: #2C3033 */
 
-@layer base {
-  :root {
-    --color-primary: 240 160 48;       /* Industrial Gold: #f0a030 */
-    --color-success: 114 224 190;      /* Industrial Teal: #72e0be */
-    --color-warning: 255 193 118;      /* Warm Yellow: #ffc176 */
-    --color-danger: 255 180 171;       /* Rose Red: #ffb4ab */
-    --color-neutral-bg: 21 23 26;       /* Deep main background: #15171A */
-    --color-neutral-card: 29 32 35;     /* Panel background: #1D2023 */
-    --color-neutral-text: 226 226 230;  /* Main text: #e2e2e6 */
-    --color-neutral-muted: 160 142 123; /* Muted border outline: #a08e7b */
-    --color-border: 44 48 51;          /* Panel borders: #2C3033 */
+  /* Button specific colors (Dark theme defaults) */
+  --color-btn-primary-bg: 240 160 48;
+  --color-btn-primary-text: 17 19 22;
+  --color-btn-primary-hover: 229 152 46;
+}
 
-    /* Button specific colors (Dark theme defaults) */
-    --color-btn-primary-bg: 240 160 48;
-    --color-btn-primary-text: 17 19 22;
-    --color-btn-primary-hover: 229 152 46;
-  }
+:root.light {
+  --color-primary: 217 119 6;         /* Slightly darker gold for readability: #d97706 */
+  --color-success: 5 150 105;        /* Emerald-600: #059669 */
+  --color-warning: 217 119 6;         /* Amber-600 */
+  --color-danger: 220 38 38;          /* Red-600: #dc2626 */
+  --color-neutral-bg: 240 241 243;    /* Light industrial grey bg: #f0f1f3 */
+  --color-neutral-card: 255 255 255;  /* White panel bg */
+  --color-neutral-text: 17 24 39;     /* Deep gray text: #111827 */
+  --color-neutral-muted: 107 114 128; /* Gray-500: #6b7280 */
+  --color-border: 209 213 219;        /* Gray-300: #d1d5db */
 
-  :root.light {
-    --color-primary: 217 119 6;         /* Slightly darker gold for readability: #d97706 */
-    --color-success: 5 150 105;        /* Emerald-600: #059669 */
-    --color-warning: 217 119 6;         /* Amber-600 */
-    --color-danger: 220 38 38;          /* Red-600: #dc2626 */
-    --color-neutral-bg: 240 241 243;    /* Light industrial grey bg: #f0f1f3 */
-    --color-neutral-card: 255 255 255;  /* White panel bg */
-    --color-neutral-text: 17 24 39;     /* Deep gray text: #111827 */
-    --color-neutral-muted: 107 114 128; /* Gray-500: #6b7280 */
-    --color-border: 209 213 219;        /* Gray-300: #d1d5db */
+  /* Button specific colors (Light theme overrides) */
+  --color-btn-primary-bg: 17 24 39;    /* Dark slate button for sharp contrast: #111827 */
+  --color-btn-primary-text: 255 255 255; /* White text */
+  --color-btn-primary-hover: 240 160 48; /* Highlight gold on hover: #f0a030 */
+}
 
-    /* Button specific colors (Light theme overrides) */
-    --color-btn-primary-bg: 17 24 39;    /* Dark slate button for sharp contrast: #111827 */
-    --color-btn-primary-text: 255 255 255; /* White text */
-    --color-btn-primary-hover: 240 160 48; /* Highlight gold on hover: #f0a030 */
-  }
-
-  body {
-    background-color: rgb(var(--color-neutral-bg));
-    color: rgb(var(--color-neutral-text));
-    font-family: 'IBM Plex Sans', sans-serif;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
+body {
+  background-color: rgb(var(--color-neutral-bg));
+  color: rgb(var(--color-neutral-text));
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
