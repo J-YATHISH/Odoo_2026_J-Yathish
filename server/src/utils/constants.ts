@@ -8,7 +8,6 @@
 // to update. TypeScript enforces that every usage is still valid at compile time.
 
 export {
-  Role,
   AssetStatus,
   TransferStatus,
   BookingStatus,
@@ -50,3 +49,18 @@ export const ErrorCode = {
 } as const;
 
 export type ErrorCodeType = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+// ─── RBAC Permissions ────────────────────────────────────────────────────────
+// Define the granular permissions that can be assigned to a Role.
+export const Permission = {
+  MANAGE_ORGANIZATION: 'MANAGE_ORGANIZATION', // Departments, roles, employees, categories
+  MANAGE_ASSETS: 'MANAGE_ASSETS', // Create, update, delete assets
+  MANAGE_MAINTENANCE: 'MANAGE_MAINTENANCE', // Approve/reject/update maintenance
+  MANAGE_AUDITS: 'MANAGE_AUDITS', // Create and close audit cycles
+  // Basic permissions implicitly granted or explicitly checked
+  VIEW_ASSETS: 'VIEW_ASSETS',
+  REQUEST_MAINTENANCE: 'REQUEST_MAINTENANCE',
+  BOOK_ASSETS: 'BOOK_ASSETS',
+} as const;
+
+export type PermissionType = (typeof Permission)[keyof typeof Permission];

@@ -19,12 +19,6 @@ datasource db {
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-enum Role {
-  ADMIN
-  ASSET_MANAGER
-  DEPARTMENT_HEAD
-  EMPLOYEE
-}
 
 enum AssetStatus {
   AVAILABLE
@@ -72,9 +66,33 @@ enum Status {
 
 // ─── Models ──────────────────────────────────────────────────────────────────
 
+model Organization {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  // Relationships
+  departments        Department[]
+  categories         AssetCategory[]
+  roles              Role[]
+  employees          Employee[]
+  assets             Asset[]
+  allocations        Allocation[]
+  transferRequests   TransferRequest[]
+  bookings           Booking[]
+  maintenanceReqs    MaintenanceRequest[]
+  auditCycles        AuditCycle[]
+  auditItems         AuditItem[]
+  notifications      Notification[]
+  activityLogs       ActivityLog[]
+}
+
 model Department {
-  id        Int          @id @default(autoincrement())
-  name      String       @unique
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  name      String
   headId    Int?
   head      Employee?    @relation("DepartmentHead", fields: [headId], references: [id])
   parentId  Int?
@@ -83,21 +101,49 @@ model Department {
   status    Status       @default(ACTIVE)
   employees Employee[]   @relation("EmployeeDept")
   createdAt DateTime     @default(now())
+
+  @@unique([organizationId, name]) // Name must be unique per organization
+}
+
+model Role {
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  name           String
+  permissions    String[]
+  employees      Employee[]
+
+  @@unique([organizationId, name])
 }
 
 model AssetCategory {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  extraFields Json?    // e.g. { "warrantyPeriodMonths": 24 } - avoids a migration per category
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  
+  name        String
+  extraFields Json?
+  
+  expectedLifespanMonths Int   @default(36)
+  baseCarbonFootprintKg  Float @default(100.0)
+  powerDrawWatts         Float @default(50.0)
+
   assets      Asset[]
+
+  @@unique([organizationId, name]) // Name unique per organization
 }
 
 model Employee {
-  id           Int          @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
   name         String
-  email        String       @unique
+  email        String       @unique // Email globally unique for easy login
   passwordHash String
-  role         Role         @default(EMPLOYEE)
+  roleId       Int
+  role         Role         @relation(fields: [roleId], references: [id])
   departmentId Int?
   department   Department?  @relation("EmployeeDept", fields: [departmentId], references: [id])
   status       Status       @default(ACTIVE)
@@ -116,92 +162,94 @@ model Employee {
 
 model Asset {
   id              Int           @id @default(autoincrement())
-  tag             String        @unique   // AF-0001, server-generated inside a transaction
+  organizationId  Int
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  tag             String        // AF-0001, server-generated
   name            String
   categoryId      Int
   category        AssetCategory @relation(fields: [categoryId], references: [id])
-  serialNumber    String?       @unique
+  serialNumber    String?
   acquisitionDate DateTime?
   acquisitionCost Decimal?
   condition       String        @default("Good")
   location        String?
   isBookable      Boolean       @default(false)
-  isLendable      Boolean       @default(false)   // innovation: marketplace flag
+  isLendable      Boolean       @default(false)
   photoUrl        String?
-  qrPayload       String?       @unique           // innovation: QR audit sync
+  qrPayload       String?
   status          AssetStatus   @default(AVAILABLE)
-  lastActivityAt  DateTime      @default(now())   // innovation: ghost-asset detection
+  lastActivityAt  DateTime      @default(now())
   createdAt       DateTime      @default(now())
 
   allocations     Allocation[]
   bookings        Booking[]
   maintenanceReqs MaintenanceRequest[]
   auditItems      AuditItem[]
+  intelligence    AssetIntelligence?
+
+  @@unique([organizationId, tag])
+  @@unique([organizationId, serialNumber])
+  @@unique([organizationId, qrPayload])
 }
 
 model Allocation {
-  id                 Int       @id @default(autoincrement())
+  id                 Int          @id @default(autoincrement())
+  organizationId     Int
+  organization       Organization @relation(fields: [organizationId], references: [id])
+
   assetId            Int
-  asset              Asset     @relation(fields: [assetId], references: [id])
+  asset              Asset        @relation(fields: [assetId], references: [id])
   holderId           Int
-  holder             Employee  @relation("CurrentHolder", fields: [holderId], references: [id])
-  allocatedAt        DateTime  @default(now())
+  holder             Employee     @relation("CurrentHolder", fields: [holderId], references: [id])
+  allocatedAt        DateTime     @default(now())
   expectedReturnDate DateTime?
   returnedAt         DateTime?
   conditionAtReturn  String?
-  isActive           Boolean   @default(true)
+  isActive           Boolean      @default(true)
   transferRequests   TransferRequest[]
-
-  // Enforced in Postgres, not just app code:
-  // CREATE UNIQUE INDEX one_active_allocation_per_asset
-  //   ON "Allocation" ("assetId") WHERE "isActive" = true;
-  // See: migrations/002_add_raw_constraints
 }
 
 model TransferRequest {
-  id           Int            @id @default(autoincrement())
-  allocationId Int
-  allocation   Allocation     @relation(fields: [allocationId], references: [id])
-  fromId       Int
-  from         Employee       @relation("TransferFrom", fields: [fromId], references: [id])
-  toId         Int
-  to           Employee       @relation("TransferTo", fields: [toId], references: [id])
-  reason       String?
-  status       TransferStatus @default(REQUESTED)
-  isCrossDept  Boolean        @default(false)   // innovation: marketplace-originated transfer
-  requestedAt  DateTime       @default(now())
-  resolvedAt   DateTime?
+  id             Int            @id @default(autoincrement())
+  organizationId Int
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+
+  allocationId   Int
+  allocation     Allocation     @relation(fields: [allocationId], references: [id])
+  fromId         Int
+  from           Employee       @relation("TransferFrom", fields: [fromId], references: [id])
+  toId           Int
+  to             Employee       @relation("TransferTo", fields: [toId], references: [id])
+  reason         String?
+  status         TransferStatus @default(REQUESTED)
+  isCrossDept    Boolean        @default(false)
+  requestedAt    DateTime       @default(now())
+  resolvedAt     DateTime?
 }
 
 model Booking {
-  id         Int           @id @default(autoincrement())
-  assetId    Int
-  asset      Asset         @relation(fields: [assetId], references: [id])
-  bookedById Int
-  bookedBy   Employee      @relation(fields: [bookedById], references: [id])
-  startTime  DateTime
-  endTime    DateTime
-  status     BookingStatus @default(UPCOMING)
-  createdAt  DateTime      @default(now())
+  id             Int           @id @default(autoincrement())
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  assetId        Int
+  asset          Asset         @relation(fields: [assetId], references: [id])
+  bookedById     Int
+  bookedBy       Employee      @relation(fields: [bookedById], references: [id])
+  startTime      DateTime
+  endTime        DateTime
+  status         BookingStatus @default(UPCOMING)
+  createdAt      DateTime      @default(now())
 
   @@index([assetId, startTime, endTime])
-
-  // Postgres-level guarantee against overlap races (raw SQL migration —
-  // Prisma doesn't model EXCLUDE constraints natively):
-  //
-  // ALTER TABLE "Booking" ADD CONSTRAINT no_overlapping_bookings
-  //   EXCLUDE USING gist (
-  //     "assetId" WITH =,
-  //     tstzrange("startTime", "endTime") WITH &&
-  //   ) WHERE (status IN ('UPCOMING','ONGOING'));
-  //
-  // The single strongest "we understand databases" line in the project —
-  // demo it explicitly: even a bug in app-layer validation cannot create an overlap.
-  // See: migrations/002_add_raw_constraints
 }
 
 model MaintenanceRequest {
   id               Int               @id @default(autoincrement())
+  organizationId   Int
+  organization     Organization      @relation(fields: [organizationId], references: [id])
+
   assetId          Int
   asset            Asset             @relation(fields: [assetId], references: [id])
   raisedById       Int
@@ -216,15 +264,18 @@ model MaintenanceRequest {
 }
 
 model AuditCycle {
-  id        Int                 @id @default(autoincrement())
-  scopeDept Int?
-  scopeLoc  String?
-  startDate DateTime
-  endDate   DateTime
-  closed    Boolean             @default(false)
-  auditors  AuditCycleAuditor[]
-  items     AuditItem[]
-  createdAt DateTime            @default(now())
+  id             Int                 @id @default(autoincrement())
+  organizationId Int
+  organization   Organization        @relation(fields: [organizationId], references: [id])
+
+  scopeDept      Int?
+  scopeLoc       String?
+  startDate      DateTime
+  endDate        DateTime
+  closed         Boolean             @default(false)
+  auditors       AuditCycleAuditor[]
+  items          AuditItem[]
+  createdAt      DateTime            @default(now())
 }
 
 model AuditCycleAuditor {
@@ -236,31 +287,51 @@ model AuditCycleAuditor {
 }
 
 model AuditItem {
-  id           Int                @id @default(autoincrement())
-  auditCycleId Int
-  auditCycle   AuditCycle         @relation(fields: [auditCycleId], references: [id])
-  assetId      Int
-  asset        Asset              @relation(fields: [assetId], references: [id])
-  verification AuditVerification?
-  notes        String?
+  id             Int                @id @default(autoincrement())
+  organizationId Int
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+
+  auditCycleId   Int
+  auditCycle     AuditCycle         @relation(fields: [auditCycleId], references: [id])
+  assetId        Int
+  asset          Asset              @relation(fields: [assetId], references: [id])
+  verification   AuditVerification?
+  notes          String?
 }
 
 model Notification {
-  id         Int      @id @default(autoincrement())
-  employeeId Int
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  type       String
-  message    String
-  isRead     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  employeeId     Int
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  type           String
+  message        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
 }
 
 model ActivityLog {
-  id         Int      @id @default(autoincrement())
-  employeeId Int
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  action     String
-  entityType String
-  entityId   Int?
-  createdAt  DateTime @default(now())
+  id             Int          @id @default(autoincrement())
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  employeeId     Int
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  action         String
+  entityType     String
+  entityId       Int?
+  createdAt      DateTime     @default(now())
+}
+
+model AssetIntelligence {
+  id                 Int      @id @default(autoincrement())
+  assetId            Int      @unique
+  asset              Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  
+  healthScore        Float    @default(100.0)
+  failureProbability Float    @default(0.0)
+  carbonFootprintKg  Float    @default(0.0)
+  lastCalculatedAt   DateTime @default(now())
 }

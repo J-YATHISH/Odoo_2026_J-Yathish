@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'ASSET_MANAGER', 'DEPARTMENT_HEAD', 'EMPLOYEE');
 
 -- CreateEnum
@@ -20,8 +20,18 @@ CREATE TYPE "AuditVerification" AS ENUM ('VERIFIED', 'MISSING', 'DAMAGED');
 CREATE TYPE "Status" AS ENUM ('ACTIVE', 'INACTIVE');
 
 -- CreateTable
+CREATE TABLE "Organization" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Department" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "headId" INTEGER,
     "parentId" INTEGER,
@@ -34,6 +44,7 @@ CREATE TABLE "Department" (
 -- CreateTable
 CREATE TABLE "AssetCategory" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "extraFields" JSONB,
 
@@ -43,6 +54,7 @@ CREATE TABLE "AssetCategory" (
 -- CreateTable
 CREATE TABLE "Employee" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
@@ -57,6 +69,7 @@ CREATE TABLE "Employee" (
 -- CreateTable
 CREATE TABLE "Asset" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "tag" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "categoryId" INTEGER NOT NULL,
@@ -79,6 +92,7 @@ CREATE TABLE "Asset" (
 -- CreateTable
 CREATE TABLE "Allocation" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "assetId" INTEGER NOT NULL,
     "holderId" INTEGER NOT NULL,
     "allocatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -93,6 +107,7 @@ CREATE TABLE "Allocation" (
 -- CreateTable
 CREATE TABLE "TransferRequest" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "allocationId" INTEGER NOT NULL,
     "fromId" INTEGER NOT NULL,
     "toId" INTEGER NOT NULL,
@@ -108,6 +123,7 @@ CREATE TABLE "TransferRequest" (
 -- CreateTable
 CREATE TABLE "Booking" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "assetId" INTEGER NOT NULL,
     "bookedById" INTEGER NOT NULL,
     "startTime" TIMESTAMP(3) NOT NULL,
@@ -121,6 +137,7 @@ CREATE TABLE "Booking" (
 -- CreateTable
 CREATE TABLE "MaintenanceRequest" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "assetId" INTEGER NOT NULL,
     "raisedById" INTEGER NOT NULL,
     "issueDescription" TEXT NOT NULL,
@@ -137,6 +154,7 @@ CREATE TABLE "MaintenanceRequest" (
 -- CreateTable
 CREATE TABLE "AuditCycle" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "scopeDept" INTEGER,
     "scopeLoc" TEXT,
     "startDate" TIMESTAMP(3) NOT NULL,
@@ -159,6 +177,7 @@ CREATE TABLE "AuditCycleAuditor" (
 -- CreateTable
 CREATE TABLE "AuditItem" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "auditCycleId" INTEGER NOT NULL,
     "assetId" INTEGER NOT NULL,
     "verification" "AuditVerification",
@@ -170,6 +189,7 @@ CREATE TABLE "AuditItem" (
 -- CreateTable
 CREATE TABLE "Notification" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "employeeId" INTEGER NOT NULL,
     "type" TEXT NOT NULL,
     "message" TEXT NOT NULL,
@@ -182,6 +202,7 @@ CREATE TABLE "Notification" (
 -- CreateTable
 CREATE TABLE "ActivityLog" (
     "id" SERIAL NOT NULL,
+    "organizationId" INTEGER NOT NULL,
     "employeeId" INTEGER NOT NULL,
     "action" TEXT NOT NULL,
     "entityType" TEXT NOT NULL,
@@ -192,25 +213,31 @@ CREATE TABLE "ActivityLog" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Department_name_key" ON "Department"("name");
+CREATE UNIQUE INDEX "Organization_name_key" ON "Organization"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AssetCategory_name_key" ON "AssetCategory"("name");
+CREATE UNIQUE INDEX "Department_organizationId_name_key" ON "Department"("organizationId", "name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AssetCategory_organizationId_name_key" ON "AssetCategory"("organizationId", "name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Employee_email_key" ON "Employee"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Asset_tag_key" ON "Asset"("tag");
+CREATE UNIQUE INDEX "Asset_organizationId_tag_key" ON "Asset"("organizationId", "tag");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Asset_serialNumber_key" ON "Asset"("serialNumber");
+CREATE UNIQUE INDEX "Asset_organizationId_serialNumber_key" ON "Asset"("organizationId", "serialNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Asset_qrPayload_key" ON "Asset"("qrPayload");
+CREATE UNIQUE INDEX "Asset_organizationId_qrPayload_key" ON "Asset"("organizationId", "qrPayload");
 
 -- CreateIndex
 CREATE INDEX "Booking_assetId_startTime_endTime_idx" ON "Booking"("assetId", "startTime", "endTime");
+
+-- AddForeignKey
+ALTER TABLE "Department" ADD CONSTRAINT "Department_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Department" ADD CONSTRAINT "Department_headId_fkey" FOREIGN KEY ("headId") REFERENCES "Employee"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -219,16 +246,31 @@ ALTER TABLE "Department" ADD CONSTRAINT "Department_headId_fkey" FOREIGN KEY ("h
 ALTER TABLE "Department" ADD CONSTRAINT "Department_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "AssetCategory" ADD CONSTRAINT "AssetCategory_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Employee" ADD CONSTRAINT "Employee_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Employee" ADD CONSTRAINT "Employee_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Asset" ADD CONSTRAINT "Asset_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Asset" ADD CONSTRAINT "Asset_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "AssetCategory"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Allocation" ADD CONSTRAINT "Allocation_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Allocation" ADD CONSTRAINT "Allocation_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "Asset"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Allocation" ADD CONSTRAINT "Allocation_holderId_fkey" FOREIGN KEY ("holderId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TransferRequest" ADD CONSTRAINT "TransferRequest_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TransferRequest" ADD CONSTRAINT "TransferRequest_allocationId_fkey" FOREIGN KEY ("allocationId") REFERENCES "Allocation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -240,10 +282,16 @@ ALTER TABLE "TransferRequest" ADD CONSTRAINT "TransferRequest_fromId_fkey" FOREI
 ALTER TABLE "TransferRequest" ADD CONSTRAINT "TransferRequest_toId_fkey" FOREIGN KEY ("toId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Booking" ADD CONSTRAINT "Booking_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Booking" ADD CONSTRAINT "Booking_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "Asset"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Booking" ADD CONSTRAINT "Booking_bookedById_fkey" FOREIGN KEY ("bookedById") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MaintenanceRequest" ADD CONSTRAINT "MaintenanceRequest_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "MaintenanceRequest" ADD CONSTRAINT "MaintenanceRequest_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "Asset"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -252,10 +300,16 @@ ALTER TABLE "MaintenanceRequest" ADD CONSTRAINT "MaintenanceRequest_assetId_fkey
 ALTER TABLE "MaintenanceRequest" ADD CONSTRAINT "MaintenanceRequest_raisedById_fkey" FOREIGN KEY ("raisedById") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "AuditCycle" ADD CONSTRAINT "AuditCycle_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "AuditCycleAuditor" ADD CONSTRAINT "AuditCycleAuditor_auditCycleId_fkey" FOREIGN KEY ("auditCycleId") REFERENCES "AuditCycle"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AuditCycleAuditor" ADD CONSTRAINT "AuditCycleAuditor_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AuditItem" ADD CONSTRAINT "AuditItem_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AuditItem" ADD CONSTRAINT "AuditItem_auditCycleId_fkey" FOREIGN KEY ("auditCycleId") REFERENCES "AuditCycle"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -264,8 +318,13 @@ ALTER TABLE "AuditItem" ADD CONSTRAINT "AuditItem_auditCycleId_fkey" FOREIGN KEY
 ALTER TABLE "AuditItem" ADD CONSTRAINT "AuditItem_assetId_fkey" FOREIGN KEY ("assetId") REFERENCES "Asset"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+-- AddForeignKey
+ALTER TABLE "ActivityLog" ADD CONSTRAINT "ActivityLog_employeeId_fkey" FOREIGN KEY ("employeeId") REFERENCES "Employee"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

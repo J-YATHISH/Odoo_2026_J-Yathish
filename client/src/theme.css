@@ -1,0 +1,56 @@
+:root {
+  --color-surface: 17 19 22;
+  --color-surface-dim: 17 19 22;
+  --color-surface-bright: 55 57 61;
+  --color-surface-container-lowest: 12 14 17;
+  --color-surface-container-low: 26 28 31;
+  --color-surface-container: 30 32 35;
+  --color-surface-container-high: 40 42 45;
+  --color-surface-container-highest: 51 53 56;
+  --color-on-surface: 226 226 230;
+  --color-on-surface-variant: 215 195 175;
+  --color-inverse-surface: 226 226 230;
+  --color-inverse-on-surface: 47 48 52;
+  --color-outline: 160 142 123;
+  --color-outline-variant: 82 68 53;
+  --color-surface-tint: 255 185 97;
+  --color-primary: 255 193 118;
+  --color-on-primary: 71 42 0;
+  --color-primary-container: 240 160 48;
+  --color-on-primary-container: 97 59 0;
+  --color-inverse-primary: 134 83 0;
+  --color-secondary: 154 203 255;
+  --color-on-secondary: 0 51 85;
+  --color-secondary-container: 2 74 121;
+  --color-on-secondary-container: 135 185 239;
+  --color-tertiary: 114 224 190;
+  --color-on-tertiary: 0 56 43;
+  --color-tertiary-container: 84 196 164;
+  --color-on-tertiary-container: 0 78 61;
+  --color-error: 255 180 171;
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+  --color-primary-fixed: 255 221 184;
+  --color-primary-fixed-dim: 255 185 97;
+  --color-on-primary-fixed: 43 23 0;
+  --color-on-primary-fixed-variant: 102 62 0;
+  --color-secondary-fixed: 208 228 255;
+  --color-secondary-fixed-dim: 154 203 255;
+  --color-on-secondary-fixed: 0 29 52;
+  --color-on-secondary-fixed-variant: 2 74 121;
+  --color-tertiary-fixed: 137 247 212;
+  --color-tertiary-fixed-dim: 108 218 184;
+  --color-on-tertiary-fixed: 0 33 24;
+  --color-on-tertiary-fixed-variant: 0 81 63;
+  --color-background: 17 19 22;
+  --color-on-background: 226 226 230;
+  --color-surface-variant: 51 53 56;
+}
+
+body {
+  background-color: rgb(var(--color-surface));
+  color: rgb(var(--color-on-surface));
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
