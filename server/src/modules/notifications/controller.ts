@@ -1,17 +1,24 @@
-import { Request, Response } from 'express';
-import { HTTP, ErrorCode } from '../../utils/constants';
+import { Request, Response, NextFunction } from 'express';
+import * as service from './service';
+import { HTTP } from '../../utils/constants';
 
-// ─── Notifications controller ──────────────────────────────────────────────────
-// TODO: Implement in the Notifications build step.
-
-export function getNotifications(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Notifications build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listActivityLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listActivityLogs(req.query as any);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function markNotificationsRead(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Notifications build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function listMyNotifications(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.listMyNotifications(req.user!.id);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }
 
-export function getActivityLog(_req: Request, res: Response): void {
-  res.status(HTTP.NOT_IMPLEMENTED).json({ error: { message: 'Coming in Notifications build step.', code: ErrorCode.NOT_IMPLEMENTED } });
+export async function markNotificationRead(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data = await service.markNotificationRead(parseInt(req.params.id, 10), req.user!.id);
+    res.status(HTTP.OK).json(data);
+  } catch (err) { next(err); }
 }

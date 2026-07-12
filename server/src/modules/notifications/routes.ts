@@ -1,21 +1,17 @@
 import { Router } from 'express';
+import * as c from './controller';
+import { validate } from '../../middleware/validate';
 import { requireAuth } from '../../middleware/auth';
-import { getNotifications, markNotificationsRead, getActivityLog } from './controller';
+import * as t from './types';
 
 const router = Router();
 
-// ─── Notifications routes ──────────────────────────────────────────────────────
+router.get('/health', (_req, res) => { res.json({ status: 'ok', module: 'notifications' }); });
 
-router.get('/health', (_req, res) => {
-  res.json({ status: 'ok', module: 'notifications' });
-});
+router.use(requireAuth);
 
-// Notifications — polled by the frontend every 8-10s.
-// ?unread=true filters to only unread notifications for the badge count.
-router.get('/', requireAuth, getNotifications);
-router.patch('/read', requireAuth, markNotificationsRead);
-
-// Activity log with type filter: all | alerts | approvals | bookings
-router.get('/activity-log', requireAuth, getActivityLog);
+router.get('/activity', validate(t.getNotificationsSchema), c.listActivityLogs);
+router.get('/', c.listMyNotifications);
+router.patch('/:id/read', c.markNotificationRead);
 
 export default router;

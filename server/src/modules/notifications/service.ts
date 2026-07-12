@@ -1,12 +1,34 @@
-// ─── Notifications service ─────────────────────────────────────────────────────
-//
-// TODO: Implement in the Notifications build step:
-//   - createNotification(): used internally by other services — always inside a transaction
-//   - getNotifications(): for the polling endpoint, filter by employeeId + isRead
-//   - markAsRead(): mark one or all notifications read for the current user
-//   - getActivityLog(): paginated, with type filter (all/alerts/approvals/bookings)
-//     matching the Screen 10 mockup filter tabs exactly
-//
-// Socket.io upgrade is documented as a stretch innovation item — polling every
-// 8-10s is the baseline implementation. Keep this service independent of the
-// transport so upgrading to push is just a change in the route layer.
+import prisma from '../../prisma/client';
+import { z } from 'zod';
+import * as t from './types';
+import { AppError } from '../../utils/AppError';
+import { HTTP, ErrorCode } from '../../utils/constants';
+
+export async function listActivityLogs(query: z.infer<typeof t.getNotificationsSchema>) {
+  return prisma.activityLog.findMany({
+    take: query.limit,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      employee: { select: { name: true } },
+    }
+  });
+}
+
+export async function listMyNotifications(employeeId: number) {
+  return prisma.notification.findMany({
+    where: { employeeId },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+}
+
+export async function markNotificationRead(notificationId: number, employeeId: number) {
+  const notif = await prisma.notification.findUnique({ where: { id: notificationId } });
+  if (!notif) throw new AppError('Notification not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  if (notif.employeeId !== employeeId) throw new AppError('Forbidden', HTTP.FORBIDDEN, ErrorCode.FORBIDDEN);
+
+  return prisma.notification.update({
+    where: { id: notificationId },
+    data: { isRead: true },
+  });
+}
