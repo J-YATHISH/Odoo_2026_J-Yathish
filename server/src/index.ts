@@ -27,15 +27,27 @@ const PORT = parseInt(process.env.PORT ?? '3001', 10);
 // We never use wildcard * in a real config — only .env.example documents it
 // as a placeholder to explain what the variable does.
 const corsOrigin = process.env.CORS_ORIGIN;
-if (!corsOrigin) {
-  console.warn(
-    '[WARN] CORS_ORIGIN is not set in .env. Defaulting to http://localhost:5173 for development.',
-  );
-}
+const allowedOrigins = corsOrigin 
+  ? corsOrigin.split(',').map(o => o.trim()) 
+  : ['http://localhost:5173', 'http://localhost:5174'];
 
 app.use(
   cors({
-    origin: corsOrigin ?? 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, postman)
+      if (!origin) return callback(null, true);
+      
+      // Allow configured origins or any local development origin
+      if (
+        allowedOrigins.includes(origin) || 
+        origin.startsWith('http://localhost:') || 
+        origin.startsWith('http://127.0.0.1:')
+      ) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -79,6 +91,13 @@ app.get('/health', async (_req, res) => {
     });
   }
 });
+
+// ─── Public routes ────────────────────────────────────────────────────────────
+import { createOrganization } from './modules/auth/controller';
+import { validate } from './middleware/validate';
+import { createOrganizationSchema } from './modules/auth/types';
+
+app.post('/organizations', validate(createOrganizationSchema), createOrganization);
 
 // ─── Module routers ───────────────────────────────────────────────────────────
 //

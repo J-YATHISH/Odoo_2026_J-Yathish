@@ -7,6 +7,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Import Pages
 import { LoginSignup } from './pages/LoginSignup';
+import { SetupOrganization } from './pages/SetupOrganization';
 import { Dashboard } from './pages/Dashboard';
 import { OrganizationSetup } from './pages/OrganizationSetup';
 import { AssetRegistration } from './pages/AssetRegistration';
@@ -26,6 +27,7 @@ const App: React.FC = () => {
             <Routes>
               {/* Public authentication portal */}
               <Route path="/login" element={<LoginSignup />} />
+              <Route path="/setup-org" element={<SetupOrganization />} />
 
               {/* Protected dashboard and operations portals */}
               <Route

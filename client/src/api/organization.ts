@@ -11,9 +11,16 @@ export interface Employee {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: string | { id: number; name: string };
+  department?: { id: number; name: string };
   departmentId?: number;
   status: string;
+}
+
+export interface OrganizationInfo {
+  id: number;
+  name: string;
+  joinCode: string;
 }
 
 export async function fetchDepartments(): Promise<Department[]> {
@@ -22,4 +29,8 @@ export async function fetchDepartments(): Promise<Department[]> {
 
 export async function fetchEmployees(): Promise<Employee[]> {
   return apiFetch<Employee[]>('/organization/employees');
+}
+
+export async function fetchOrganizationInfo(): Promise<OrganizationInfo> {
+  return apiFetch<OrganizationInfo>('/organization/info');
 }

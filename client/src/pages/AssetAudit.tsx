@@ -35,12 +35,6 @@ export const AssetAudit: React.FC = () => {
   return (
     <Layout title="Asset Audit">
       <div className="max-w-5xl mx-auto flex flex-col gap-6 w-full">
-        
-        {/* Title */}
-        <h1 className="text-2xl font-bold font-headline-md tracking-wider uppercase text-neutral-text">
-          Asset Audit Cycle: AUD-2024-05-12
-        </h1>
-
         {/* Audit Metadata Bar */}
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4 px-6 py-4 bg-neutral-card/40 border border-border rounded-lg text-sm">
           <div className="flex items-center gap-2">

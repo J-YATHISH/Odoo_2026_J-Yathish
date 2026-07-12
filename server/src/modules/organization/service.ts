@@ -182,3 +182,12 @@ export async function deleteRole(organizationId: number, id: number) {
 
   await prisma.role.delete({ where: { id } });
 }
+
+export async function getOrganizationInfo(organizationId: number) {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { id: true, name: true, joinCode: true },
+  });
+  if (!org) throw new AppError('Organization not found', HTTP.NOT_FOUND, ErrorCode.NOT_FOUND);
+  return org;
+}

@@ -13,6 +13,7 @@ export interface AuthResponse {
     email: string;
     role: string;
     departmentId: number | null;
+    organizationId: number;
   };
 }
 
@@ -20,7 +21,8 @@ export interface SignupPayload {
   name: string;
   email: string;
   password: string;
-  organizationName: string;
+  joinCode?: string;
+  organizationName?: string;
   departmentId?: number;
 }
 
@@ -31,6 +33,26 @@ export interface SignupResponse {
   role: string;
   departmentId: number | null;
   status: string;
+}
+
+export interface CreateOrgPayload {
+  orgName: string;
+  adminName: string;
+  adminEmail: string;
+  adminPassword: string;
+}
+
+export interface CreateOrgResponse {
+  token: string;
+  joinCode: string;
+  employee: {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    departmentId: number | null;
+    organizationId: number;
+  };
 }
 
 export async function login(payload: LoginPayload): Promise<AuthResponse> {
@@ -45,6 +67,16 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
 
 export async function signup(payload: SignupPayload): Promise<SignupResponse> {
   return apiFetch<SignupResponse>('/auth/signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function createOrganization(payload: CreateOrgPayload): Promise<CreateOrgResponse> {
+  return apiFetch<CreateOrgResponse>('/organizations', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

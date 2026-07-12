@@ -55,6 +55,9 @@ async function main() {
   }
 
   // 5. Create or find an Employee
+  const bcrypt = require('bcrypt');
+  const hash = await bcrypt.hash('Odoo@123', 10);
+  
   let employee = await prisma.employee.findFirst({ where: { organizationId: org.id } });
   if (!employee) {
     employee = await prisma.employee.create({
@@ -62,11 +65,32 @@ async function main() {
         organizationId: org.id,
         name: 'John Doe',
         email: 'john@seed.com',
-        passwordHash: 'dummy_hash',
+        passwordHash: hash,
         roleId: role.id
       }
     });
     console.log("Created Employee:", employee.name);
+  } else {
+    // Update password to known value
+    await prisma.employee.update({
+        where: { id: employee.id },
+        data: { passwordHash: hash }
+    });
+    console.log("Updated Employee Password");
+  }
+
+  // 5.5 Create an allocation so John owns the MacBook
+  let allocation = await prisma.allocation.findFirst({ where: { holderId: employee.id, assetId: asset.id }});
+  if (!allocation) {
+      await prisma.allocation.create({
+          data: {
+              organizationId: org.id,
+              assetId: asset.id,
+              holderId: employee.id,
+              isActive: true
+          }
+      });
+      console.log("Created Allocation for John to MacBook");
   }
 
   // 6. Create Maintenance Requests (The data Colab is looking for!)

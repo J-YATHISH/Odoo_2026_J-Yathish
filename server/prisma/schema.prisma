@@ -68,7 +68,8 @@ enum Status {
 
 model Organization {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
+  name      String
+  joinCode  String   @unique   // short human-typeable code, e.g. "AF-7K2M"
   createdAt DateTime @default(now())
 
   // Relationships

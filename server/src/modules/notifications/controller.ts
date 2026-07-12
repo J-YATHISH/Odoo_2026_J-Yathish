@@ -8,7 +8,13 @@ export async function listActivityLogs(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const data = await service.listActivityLogs(req.user!.organizationId, req.query as any);
+    const data = await service.listActivityLogs(
+      req.orgId!,
+      req.user!.role,
+      req.user!.id,
+      req.user!.departmentId,
+      req.query as any
+    );
     res.status(HTTP.OK).json(data);
   } catch (err) {
     next(err);
@@ -21,7 +27,7 @@ export async function listMyNotifications(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const data = await service.listMyNotifications(req.user!.organizationId, req.user!.id);
+    const data = await service.listMyNotifications(req.orgId!, req.user!.id);
     res.status(HTTP.OK).json(data);
   } catch (err) {
     next(err);
@@ -34,11 +40,7 @@ export async function markNotificationRead(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const data = await service.markNotificationRead(
-      req.user!.organizationId,
-      parseInt(req.params.id as string, 10),
-      req.user!.id,
-    );
+    const data = await service.markNotificationRead(req.orgId!, parseInt(req.params.id as string, 10), req.user!.id);
     res.status(HTTP.OK).json(data);
   } catch (err) {
     next(err);

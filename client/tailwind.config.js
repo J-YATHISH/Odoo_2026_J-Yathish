@@ -78,6 +78,13 @@ export default {
         'headline-lg': ['"IBM Plex Sans Condensed"', 'sans-serif'],
         'data-mono': ['"IBM Plex Mono"', 'monospace'],
       },
+      fontSize: {
+        'label-sm': ['11px', { lineHeight: '12px', letterSpacing: '0.05em', fontWeight: '600' }],
+        'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'headline-md': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+        'headline-lg': ['24px', { lineHeight: '32px', fontWeight: '600' }],
+        'data-mono': ['13px', { lineHeight: '16px', fontWeight: '450' }],
+      },
       borderRadius: {
         sm: '0.125rem',
         DEFAULT: '0.25rem', // 4px max standard radius per spec

@@ -8,7 +8,7 @@ export async function createBooking(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const data = await service.createBooking(req.user!.organizationId, req.user!.id, req.body);
+    const data = await service.createBooking(req.orgId!, req.user!.id, req.body);
     res.status(HTTP.CREATED).json(data);
   } catch (err) {
     next(err);
@@ -17,7 +17,7 @@ export async function createBooking(
 
 export async function listBookings(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const data = await service.listBookings(req.user!.organizationId, req.query as any);
+    const data = await service.listBookings(req.orgId!, req.query as any);
     res.status(HTTP.OK).json(data);
   } catch (err) {
     next(err);
@@ -30,11 +30,7 @@ export async function cancelBooking(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const data = await service.cancelBooking(
-      req.user!.organizationId,
-      parseInt(req.params.id as string, 10),
-      req.user!.id,
-    );
+    const data = await service.cancelBooking(req.orgId!, parseInt(req.params.id as string, 10), req.user!.id);
     res.status(HTTP.OK).json(data);
   } catch (err) {
     next(err);

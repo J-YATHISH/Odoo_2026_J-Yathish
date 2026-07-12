@@ -6,6 +6,7 @@ export interface User {
   email: string;
   role: string;
   name?: string;
+  organizationId: number;
 }
 
 interface AuthContextType {
@@ -19,18 +20,30 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  const [user, setUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('user');
+    try { return saved ? JSON.parse(saved) : null; } catch { return null; }
+  });
+
+  // Ensure client token is set if we load with a token
+  React.useEffect(() => {
+    if (token) setClientToken(token);
+  }, [token]);
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
     setUser(newUser);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(newUser));
     setClientToken(newToken);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setClientToken(null);
   };
 
