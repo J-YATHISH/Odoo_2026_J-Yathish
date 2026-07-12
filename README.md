@@ -270,8 +270,12 @@ AssetFlow mathematically predicts when devices will break.
 ### 4. Mathematical Collision Prevention via PostgreSQL GiST
 AssetFlow innovates by pushing validation directly to the Database Engine using a raw **PostgreSQL GiST EXCLUDE constraint**. This mathematically guarantees that no two `Booking` records can ever have overlapping `startTime` and `endTime` ranges.
 
-### 5. Local, Privacy-Preserving AI
-This project runs a **local Python FastAPI server** hosting the HuggingFace model. This means the AI inference happens locally, saving API costs and ensuring 100% data privacy for enterprise environments. No proprietary company ticketing data is ever sent to third-party LLM providers.
+### 5. Machine Learning Pipeline & Key Technical Terms
+This project does not rely on simple wrapper APIs (like sending data to ChatGPT). It runs a **Custom ML Pipeline** on a **Local Python FastAPI Edge Server**, ensuring 100% data privacy for enterprise environments. The core ML features include:
+- **Zero-Shot Classification (NLI):** The system uses Natural Language Inference (NLI) to categorize text *without* needing thousands of rows of labeled training data. It dynamically adapts to new categories (e.g., Hardware, Software, Network) on the fly.
+- **Transformer Architecture (BART):** The model powering the triage system is `facebook/bart-large-mnli`. BART (Bidirectional and Auto-Regressive Transformers) is a highly advanced Deep Learning neural network that understands the semantic context and sentiment of an employee's issue, rather than just doing basic keyword matching.
+- **Natural Language Processing (NLP):** Converts unstructured, messy human language ("my laptop is completely fried") into structured relational database metrics (`priority: HIGH`, `category: HARDWARE`).
+- **Edge Inference:** By running the HuggingFace PyTorch model locally (or via an internal company microservice), the platform avoids the high latency, high cost, and catastrophic security risks of sending proprietary corporate ticketing data to third-party Cloud LLM providers.
 
 ### 6. Hierarchical Departments & Granular RBAC
 - **Hierarchical structure:** Departments can have parent and child relationships to mirror real-world corporate structures.
