@@ -15,6 +15,7 @@ import auditRouter from './modules/audit/routes';
 import reportsRouter from './modules/reports/routes';
 import notificationsRouter from './modules/notifications/routes';
 import intelligenceRouter from './modules/intelligence/routes';
+import { initIntelligenceCron } from './modules/intelligence/cron';
 
 // ─── App configuration ────────────────────────────────────────────────────────
 
@@ -111,6 +112,9 @@ app.use((_req, res) => {
 // Must be the LAST middleware registered — Express identifies it by the
 // four-argument signature (err, req, res, next).
 app.use(globalErrorHandler);
+
+// ─── Initialize Background Tasks ──────────────────────────────────────────────
+initIntelligenceCron();
 
 // ─── Start server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
