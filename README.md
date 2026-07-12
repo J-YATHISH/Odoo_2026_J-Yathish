@@ -7,7 +7,7 @@
 
 ---
 
-## 🏗️ High-Level System Architecture
+## High-Level System Architecture
 
 The application is split into three main tiers, cleanly separating the user interface, business logic, and artificial intelligence layer.
 
@@ -43,7 +43,7 @@ flowchart LR
 
 ---
 
-## 🤖 Detailed Workflow Sequences
+## Detailed Workflow Sequences
 
 ### 1. AI-Assisted Maintenance Triage
 This sequence demonstrates how the AI processes natural language into structured database tickets without user intervention, while allowing an Asset Manager to review the output.
@@ -120,7 +120,7 @@ sequenceDiagram
 
 ---
 
-## 🏢 Multi-Tenant & Role-Based Access Architecture (RBAC)
+## Multi-Tenant & Role-Based Access Architecture (RBAC)
 
 The system is designed as a secure, multi-tenant B2B SaaS platform.
 
@@ -131,7 +131,9 @@ The system is designed as a secure, multi-tenant B2B SaaS platform.
    - **DEPARTMENT_HEAD:** Can view and manage assets within their department hierarchy.
    - **EMPLOYEE:** Can only view their own allocated assets and create maintenance tickets.
 
-## 🗄️ Database Structure (ERD)
+---
+
+## Database Structure (ERD)
 
 The system uses a highly normalized PostgreSQL database structure, managed by Prisma.
 
@@ -235,33 +237,31 @@ erDiagram
 
 ---
 
-## 🌟 AI/ML + Full Stack: The Novelty & Innovation
+## AI/ML + Full Stack: Architecture
 
-What makes AssetFlow fundamentally different from legacy CRUD IT systems (like ServiceNow, Snipe-IT, or Jira)? AssetFlow bridges the gap between **Enterprise Full-Stack Architecture** and **Machine Learning Edge Computing**.
+AssetFlow bridges the gap between **Enterprise Full-Stack Architecture** and **Machine Learning Edge Computing**.
 
-### 1. The Paradigm Shift: Zero-Touch AI Ticketing
-Legacy platforms force users into "Decision Fatigue"—forcing them to fill out long forms, select complex Asset IDs from dropdowns, guess IT categories, and manually assign priorities. 
+### 1. Zero-Touch AI Ticketing
 AssetFlow introduces **Zero-Touch Ticketing**:
-- **Fuzzy Contextual Matching:** Employees simply type what is wrong in natural English (*"My screen shattered after I dropped my laptop"*). The Node.js backend automatically queries the relational database for the user's actively assigned devices and mathematically fuzzy-matches the context to figure out *which* device they are talking about.
-- **Local AI/ML Predictive NLP:** Instead of making expensive, latency-heavy, and privacy-violating calls to 3rd-party Cloud LLMs (like OpenAI/ChatGPT), AssetFlow routes the text to a **Local Python FastAPI Edge Server**.
+- **Fuzzy Contextual Matching:** Employees type issues in natural English (*"My screen shattered after I dropped my laptop"*). The Node.js backend automatically queries the relational database for the user's actively assigned devices and mathematically fuzzy-matches the context to figure out *which* device they are talking about.
+- **Local AI/ML Predictive NLP:** AssetFlow routes the text to a **Local Python FastAPI Edge Server**.
 - **The Algorithm:** The ML server runs **HuggingFace's `facebook/bart-large-mnli`**, an advanced Zero-Shot Text Classification Neural Network. It natively understands the semantic context of the sentence to automatically predict the correct **Issue Category** (Hardware vs Software) and calculates the **Priority Level** (High, Medium, Low) in milliseconds.
 
 ### 2. Eco-Sustainability & Predictive Carbon Tracking
-Traditional IT software stops at tracking *where* a laptop is. AssetFlow pioneers **Eco-Sustainability Tracking**:
+AssetFlow provides **Eco-Sustainability Tracking**:
 - The database includes native telemetry for `baseCarbonFootprintKg` and `powerDrawWatts`.
-- The `AssetIntelligence` module actively monitors the lifecycle of the device, continuously tracking the accumulated `carbonFootprintKg` for every single asset across the company. This AI/ML data helps IT administrators make data-driven, eco-friendly hardware purchasing decisions to achieve Carbon Net-Zero goals.
+- The `AssetIntelligence` module actively monitors the lifecycle of the device, continuously tracking the accumulated `carbonFootprintKg` for every single asset across the company. 
 
 ### 3. Algorithmic Risk & Failure Prediction Models
-AssetFlow doesn't just react to broken devices—it mathematically predicts when they will break. 
+AssetFlow mathematically predicts when devices will break.
 - **Health Score Decay:** A deterministic mathematical algorithm calculates a live `healthScore` for every asset, derived dynamically from the device's exact `acquisitionDate` versus its category's `expectedLifespanMonths`.
-- **Risk Prediction:** The system leverages historical maintenance frequencies and live condition degradation inputs to calculate a live `failureProbability` percentage. This empowers IT teams to shift from *Reactive Repair* to **Proactive Replacement**, minimizing catastrophic hardware downtime before it ever happens.
+- **Risk Prediction:** The system leverages historical maintenance frequencies and live condition degradation inputs to calculate a live `failureProbability` percentage. This shifts operations from *Reactive Repair* to **Proactive Replacement**.
 
 ### 4. Mathematical Collision Prevention via PostgreSQL GiST
-Standard web apps rely on "Application-Level" logic to prevent double-booking of resources (like meeting rooms or projectors), which frequently results in race-condition bugs during high traffic. 
-AssetFlow innovates by pushing this validation directly to the Database Engine using a raw **PostgreSQL GiST EXCLUDE constraint**. This mathematically guarantees that no two `Booking` records can ever have overlapping `startTime` and `endTime` ranges—ensuring zero data corruption.
+AssetFlow innovates by pushing validation directly to the Database Engine using a raw **PostgreSQL GiST EXCLUDE constraint**. This mathematically guarantees that no two `Booking` records can ever have overlapping `startTime` and `endTime` ranges.
 
 ### 5. Local, Privacy-Preserving AI
-Unlike modern wrappers that just send user data to OpenAI or Claude APIs, this project runs a **local Python FastAPI server** hosting the HuggingFace model. This means the AI inference happens locally, saving API costs and ensuring 100% data privacy for enterprise environments. No proprietary company ticketing data is ever sent to third-party LLM providers.
+This project runs a **local Python FastAPI server** hosting the HuggingFace model. This means the AI inference happens locally, saving API costs and ensuring 100% data privacy for enterprise environments. No proprietary company ticketing data is ever sent to third-party LLM providers.
 
 ### 6. Hierarchical Departments & Granular RBAC
 - **Hierarchical structure:** Departments can have parent and child relationships to mirror real-world corporate structures.
@@ -269,9 +269,9 @@ Unlike modern wrappers that just send user data to OpenAI or Claude APIs, this p
 
 ---
 
-## 🏢 Core Product Modules
+## Core Product Modules
 
-AssetFlow is a fully comprehensive ERP for IT assets, encompassing several distinct workflows:
+AssetFlow is an ERP for IT assets, encompassing several distinct workflows:
 
 - **AI Maintenance Triage**: Employees submit issues in natural language. AI automatically assigns priority (High, Medium, Low) and categorization. Technicians pick up tickets and resolve them, transitioning the underlying asset to "Under Maintenance" state.
 - **Resource Booking System**: Employees can book projectors, company cars, or meeting rooms. PostgreSQL guarantees double-bookings are mathematically impossible.
@@ -280,7 +280,7 @@ AssetFlow is a fully comprehensive ERP for IT assets, encompassing several disti
 
 ---
 
-## 🔒 Database Connection & Security Architecture
+## Database Connection & Security Architecture
 
 The backbone of the application relies on an enterprise-grade security standard:
 
@@ -290,7 +290,7 @@ The backbone of the application relies on an enterprise-grade security standard:
 
 ---
 
-## 🚀 How to Run the Entire System
+## How to Run the Entire System
 
 You will need to open **3 separate terminal windows** to run the frontend, backend, and AI model simultaneously.
 
@@ -359,7 +359,7 @@ python run_model.py
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology | Purpose |
 |---|---|---|
@@ -369,4 +369,4 @@ python run_model.py
 | **Database** | PostgreSQL | Relational data storage, GiST EXCLUDE ranges |
 | **Frontend** | React, Vite, TypeScript | Lightning-fast development and UI rendering |
 | **Styling** | Tailwind CSS | Modern, responsive, utility-first design system |
-| **Auth** | JWT, bcrypt | Custom cryptographic stateless authentication |
+| **Auth** | JWT, bcrypt | Custom cryptographic stateless authentication |ryptographic stateless authentication |
