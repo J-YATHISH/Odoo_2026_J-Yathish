@@ -85,39 +85,100 @@ The system uses a highly normalized PostgreSQL database structure, managed by Pr
 
 ```mermaid
 erDiagram
+    %% Core Entities & Attributes
+    ORGANIZATION {
+        int id PK
+        string name
+        string joinCode "Unique"
+    }
+    
+    EMPLOYEE {
+        int id PK
+        string name
+        string email "Unique"
+        int roleId FK
+        string status "ACTIVE/INACTIVE"
+    }
+
+    DEPARTMENT {
+        int id PK
+        string name
+        int headId FK "Nullable"
+        int parentId FK "Hierarchical"
+    }
+
+    ASSET_CATEGORY {
+        int id PK
+        string name
+        float baseCarbonFootprintKg
+        float powerDrawWatts
+        int expectedLifespanMonths
+    }
+
+    ASSET {
+        int id PK
+        string tag "Unique (e.g. AF-001)"
+        string name
+        string condition
+        string status "AVAILABLE / ALLOCATED"
+        boolean isBookable
+    }
+
+    ALLOCATION {
+        int id PK
+        int assetId FK
+        int holderId FK
+        boolean isActive
+        datetime allocatedAt
+    }
+
+    BOOKING {
+        int id PK
+        int assetId FK
+        int bookedById FK
+        datetime startTime "GiST EXCLUDE Range"
+        datetime endTime "GiST EXCLUDE Range"
+        string status
+    }
+
+    MAINTENANCE_REQUEST {
+        int id PK
+        int assetId FK
+        string issueDescription
+        string priority "High/Med/Low (AI)"
+        string issueCategory "Hardware/Software (AI)"
+        boolean aiAssessed
+        string status
+    }
+
+    ASSET_INTELLIGENCE {
+        int assetId PK,FK
+        float healthScore "0-100 Decay Model"
+        float failureProbability "Risk %"
+        float carbonFootprintKg "Accumulated"
+    }
+
+    %% Relationships
     ORGANIZATION ||--o{ EMPLOYEE : employs
     ORGANIZATION ||--o{ ASSET : owns
     ORGANIZATION ||--o{ ASSET_CATEGORY : categorizes
     ORGANIZATION ||--o{ DEPARTMENT : structures
     
     DEPARTMENT ||--o{ EMPLOYEE : contains
-    DEPARTMENT ||--o| DEPARTMENT : "parent/child hierarchy"
+    DEPARTMENT ||--o| DEPARTMENT : "parent hierarchy"
     
     ASSET_CATEGORY ||--o{ ASSET : classifies
     
     EMPLOYEE ||--o{ ALLOCATION : "holds (active devices)"
     ASSET ||--o{ ALLOCATION : "assigned via"
     
-    ASSET ||--o| ASSET_INTELLIGENCE : "AI Metrics (Health & Carbon)"
+    ASSET ||--o| ASSET_INTELLIGENCE : "predictive telemetry"
     
     EMPLOYEE ||--o{ MAINTENANCE_REQUEST : "raises tickets"
     ASSET ||--o{ MAINTENANCE_REQUEST : "needs repair"
     
     EMPLOYEE ||--o{ BOOKING : makes
     ASSET ||--o{ BOOKING : reserved
-
-    ASSET {
-        int id
-        string tag
-        string condition
-        string status
-    }
-    
-    ASSET_INTELLIGENCE {
-        float healthScore
-        float failureProbability
-        float carbonFootprintKg
-    }
 ```
 
 ---
