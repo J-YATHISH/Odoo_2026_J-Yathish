@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AssetFlow - Activity Logs &amp; Notifications</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: IBM Plex Family -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans+Condensed:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#002118",
+                        "surface": "#111316",
+                        "on-tertiary-container": "#004e3d",
+                        "on-primary-container": "#613b00",
+                        "surface-tint": "#ffb961",
+                        "surface-container-high": "#282a2d",
+                        "tertiary-fixed": "#89f7d4",
+                        "primary-container": "#f0a030",
+                        "surface-bright": "#37393d",
+                        "on-primary-fixed": "#2b1700",
+                        "surface-container": "#1e2023",
+                        "tertiary": "#72e0be",
+                        "on-tertiary": "#00382b",
+                        "surface-container-low": "#1a1c1f",
+                        "secondary-fixed": "#d0e4ff",
+                        "on-secondary": "#003355",
+                        "inverse-on-surface": "#2f3034",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "primary-fixed-dim": "#ffb961",
+                        "inverse-surface": "#e2e2e6",
+                        "primary-fixed": "#ffddb8",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#001d34",
+                        "on-background": "#e2e2e6",
+                        "secondary": "#9acbff",
+                        "tertiary-fixed-dim": "#6cdab8",
+                        "outline-variant": "#524435",
+                        "surface-container-highest": "#333538",
+                        "on-primary": "#472a00",
+                        "on-surface-variant": "#d7c3af",
+                        "primary": "#ffc176",
+                        "secondary-container": "#024a79",
+                        "surface-container-lowest": "#0c0e11",
+                        "inverse-primary": "#865300",
+                        "on-surface": "#e2e2e6",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#54c4a4",
+                        "surface-variant": "#333538",
+                        "on-secondary-container": "#87b9ef",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#111316",
+                        "secondary-fixed-dim": "#9acbff",
+                        "background": "#111316",
+                        "outline": "#a08e7b",
+                        "on-secondary-fixed-variant": "#024a79",
+                        "on-primary-fixed-variant": "#663e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "density-xs": "4px",
+                        "density-md": "16px",
+                        "margin-page": "24px",
+                        "gutter-table": "12px",
+                        "unit": "4px",
+                        "sidebar-width": "240px",
+                        "density-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["IBM Plex Sans Condensed", "sans-serif"],
+                        "body-md": ["IBM Plex Sans", "sans-serif"],
+                        "headline-md": ["IBM Plex Sans Condensed", "sans-serif"],
+                        "label-sm": ["IBM Plex Sans Condensed", "sans-serif"],
+                        "data-mono": ["IBM Plex Mono", "monospace"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "16px", "fontWeight": "450" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Border colors for hairline precision */
+        .border-hairline {
+            border-color: #2C3033; /* Hardcoded from style guidance for strict adherence */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md m-0 p-0 overflow-x-hidden min-h-screen flex selection:bg-primary selection:text-on-primary">
+<!-- Shared Component: SideNavBar -->
+<nav aria-label="Main Navigation" class="bg-surface-container dark:bg-surface-container w-sidebar-width h-full fixed left-0 top-0 border-r border-hairline flex flex-col z-20">
+<!-- Header -->
+<div class="px-density-md py-margin-page border-b border-hairline flex flex-col gap-density-sm">
+<div class="flex items-center gap-density-md">
+<div class="w-8 h-8 bg-surface-container-highest border border-hairline flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px] text-primary">domain</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tighter leading-none">ASSETFLOW</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1">Precision v2.4</span>
+</div>
+</div>
+<button class="mt-density-md w-full bg-primary-container text-on-primary-container font-label-sm text-label-sm uppercase py-2 px-4 rounded-none hover:bg-primary transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                New Asset
+            </button>
+</div>
+<!-- Main Nav Links -->
+<div class="flex-1 overflow-y-auto py-density-sm">
+<ul class="flex flex-col">
+<!-- Intent mapping: Activity Logs isn't an exact match, but fits best under Dashboard or Reports conceptually. Let's make none active, as it's a specific 'Notifications' screen (top nav action). We will highlight Dashboard as home base if forced, but keeping it strict to Intent Fallback. Activity/Notifications isn't in side nav. Will default to no active side nav item to emphasize we are in a top-nav destination. -->
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">dashboard</span>
+<span class="font-label-sm text-label-sm uppercase">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-label-sm text-label-sm uppercase">Asset Ledger</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">build</span>
+<span class="font-label-sm text-label-sm uppercase">Work Orders</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">warehouse</span>
+<span class="font-label-sm text-label-sm uppercase">Inventory</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+<span class="font-label-sm text-label-sm uppercase">Logistics</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+<span class="font-label-sm text-label-sm uppercase">Reports</span>
+</a>
+</li>
+</ul>
+</div>
+<!-- Footer Links -->
+<div class="border-t border-hairline py-density-sm">
+<ul class="flex flex-col">
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+<span class="font-label-sm text-label-sm uppercase">Settings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-density-md py-density-sm px-density-md border-l-4 border-transparent text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-[18px]">help_outline</span>
+<span class="font-label-sm text-label-sm uppercase">Support</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Shared Component: TopNavBar -->
+<header class="bg-surface dark:bg-surface fixed top-0 right-0 left-[240px] h-12 border-b border-hairline flex items-center justify-between px-margin-page z-10 w-[calc(100%-240px)]">
+<div class="flex items-center gap-margin-page">
+<span class="font-headline-md text-headline-md font-semibold text-primary uppercase tracking-wide">OPERATIONS COMMAND</span>
+<!-- Search bar mapped to 'on_left' -->
+<div class="relative flex items-center w-64 hidden lg:flex">
+<span class="material-symbols-outlined absolute left-2 text-on-surface-variant text-[16px]">search</span>
+<input class="w-full bg-surface-container-low border border-hairline rounded-none py-1 pl-8 pr-2 font-data-mono text-data-mono text-on-surface placeholder:text-on-surface-variant focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors h-8" placeholder="Search Ledgers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-density-sm">
+<!-- Active state logic: Since this is the Activity Logs/Notifications screen, the 'notifications' icon is active. -->
+<button aria-label="Notifications" class="p-1.5 flex items-center justify-center text-primary font-bold hover:bg-surface-container-highest transition-colors relative" title="Notifications">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button aria-label="History" class="p-1.5 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-[20px]">history</span>
+</button>
+<button aria-label="Account" class="p-1.5 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-colors ml-2">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[240px] mt-12 w-[calc(100%-240px)] min-h-[calc(100vh-48px)] flex flex-col bg-background">
+<!-- Header & Segmented Control -->
+<div class="px-margin-page py-density-md border-b border-hairline bg-surface sticky top-12 z-10 flex flex-col gap-density-md sm:flex-row sm:items-center sm:justify-between">
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface uppercase tracking-tight">Activity Log</h1>
+<div class="flex border border-hairline rounded-none overflow-hidden bg-surface-container-low">
+<button class="px-4 py-1.5 font-label-sm text-label-sm uppercase bg-surface-container-highest text-on-surface border-r border-hairline transition-colors">All</button>
+<button class="px-4 py-1.5 font-label-sm text-label-sm uppercase text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface border-r border-hairline transition-colors">Alerts</button>
+<button class="px-4 py-1.5 font-label-sm text-label-sm uppercase text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface border-r border-hairline transition-colors">Approvals</button>
+<button class="px-4 py-1.5 font-label-sm text-label-sm uppercase text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-colors">Bookings</button>
+</div>
+</div>
+<!-- Ledger List -->
+<div class="flex-1 w-full bg-surface flex flex-col">
+<!-- Log Items container -->
+<div class="flex flex-col w-full border-b border-hairline" id="log-container">
+<!-- Item 1: Unread, Alert, Overdue -->
+<div class="stagger-item group border-b border-hairline bg-surface relative flex items-center px-margin-page py-3 hover:bg-[#25282C] transition-colors" style="animation-delay: 0.05s;">
+<!-- Unread Accent -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-center justify-center w-8 h-8 shrink-0 mr-density-md">
+<span class="material-symbols-outlined text-error text-[20px]">warning</span>
+</div>
+<div class="flex-1 min-w-0 pr-margin-page">
+<div class="flex items-baseline gap-2">
+<span class="font-data-mono text-data-mono text-error uppercase">[TAG-8902]</span>
+<span class="font-body-md text-body-md text-on-surface truncate">Overdue return for <strong class="font-medium text-on-surface">Thermal Imager Pro</strong> assigned to <span class="text-on-surface-variant">J. Vance</span></span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-data-mono text-[11px] text-on-surface-variant">2m ago</span>
+</div>
+</div>
+<!-- Item 2: Unread, Approval -->
+<div class="stagger-item group border-b border-hairline bg-surface relative flex items-center px-margin-page py-3 hover:bg-[#25282C] transition-colors" style="animation-delay: 0.1s;">
+<!-- Unread Accent -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-center justify-center w-8 h-8 shrink-0 mr-density-md">
+<span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
+</div>
+<div class="flex-1 min-w-0 pr-margin-page">
+<div class="flex items-baseline gap-2">
+<span class="font-data-mono text-data-mono text-primary uppercase">[REQ-441A]</span>
+<span class="font-body-md text-body-md text-on-surface truncate">Approval required for transfer of <strong class="font-medium text-on-surface">Generator Set Beta</strong> to Site C.</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-data-mono text-[11px] text-on-surface-variant">15m ago</span>
+</div>
+</div>
+<!-- Item 3: Passive, Transfer -->
+<div class="stagger-item group border-b border-hairline bg-surface relative flex items-center px-margin-page py-3 hover:bg-[#25282C] transition-colors" style="animation-delay: 0.15s;">
+<div class="flex items-center justify-center w-8 h-8 shrink-0 mr-density-md">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">sync_alt</span>
+</div>
+<div class="flex-1 min-w-0 pr-margin-page text-on-surface-variant">
+<div class="flex items-baseline gap-2">
+<span class="font-data-mono text-data-mono text-on-surface-variant uppercase">[TAG-3312]</span>
+<span class="font-body-md text-body-md truncate">Transfer completed. <strong class="font-medium text-on-surface-variant">Diagnostic Kit V3</strong> moved from Hub A to Lab 2 by <span class="text-on-surface-variant">System Auto</span>.</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-data-mono text-[11px] text-on-surface-variant">1h ago</span>
+</div>
+</div>
+<!-- Item 4: Passive, Booking -->
+<div class="stagger-item group border-b border-hairline bg-surface relative flex items-center px-margin-page py-3 hover:bg-[#25282C] transition-colors" style="animation-delay: 0.2s;">
+<div class="flex items-center justify-center w-8 h-8 shrink-0 mr-density-md">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">calendar_add_on</span>
+</div>
+<div class="flex-1 min-w-0 pr-margin-page text-on-surface-variant">
+<div class="flex items-baseline gap-2">
+<span class="font-data-mono text-data-mono text-on-surface-variant uppercase">[TAG-1055]</span>
+<span class="font-body-md text-body-md truncate">Booking confirmed. <strong class="font-medium text-on-surface-variant">Drone Quadcopter Array</strong> reserved by <span class="text-on-surface-variant">S. Mitchell</span> for Oct 12-14.</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-data-mono text-[11px] text-on-surface-variant">3h ago</span>
+</div>
+</div>
+<!-- Item 5: Actionable, Discrepancy -->
+<div class="stagger-item group border-b border-hairline bg-surface relative flex items-center px-margin-page py-3 hover:bg-[#25282C] transition-colors" style="animation-delay: 0.25s;">
+<div class="flex items-center justify-center w-8 h-8 shrink-0 mr-density-md">
+<span class="material-symbols-outlined text-primary text-[20px]">policy</span>
+</div>
+<div class="flex-1 min-w-0 pr-margin-page">
+<div class="flex items-baseline gap-2">
+<span class="font-data-mono text-data-mono text-primary uppercase">[AUD-77X]</span>
+<span class="font-body-md text-body-md text-on-surface truncate">Audit discrepancy detected in Zone B storage. Expected qty: 45. Scanned: 44. <a class="text-primary hover:underline ml-1" href="#">Review Report</a></span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-data-mono text-[11px] text-on-surface-variant">5h ago</span>
+</div>
+</div>
+<!-- Item 6: Passive, Maintenance -->
+<div class="stagger-item group border-b border-hairline bg-surface relative flex items-center px-margin-page py-3 hover:bg-[#25282C] transition-colors" style="animation-delay: 0.3s;">
+<div class="flex items-center justify-center w-8 h-8 shrink-0 mr-density-md">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">handyman</span>
+</div>
+<div class="flex-1 min-w-0 pr-margin-page text-on-surface-variant">
+<div class="flex items-baseline gap-2">
+<span class="font-data-mono text-data-mono text-on-surface-variant uppercase">[TAG-9011]</span>
+<span class="font-body-md text-body-md truncate">Maintenance logged. <strong class="font-medium text-on-surface-variant">Heavy Lift Crane M4</strong> routine service completed by <span class="text-on-surface-variant">Tech Ops Dept</span>.</span>
+</div>
+</div>
+<div class="shrink-0 text-right">
+<span class="font-data-mono text-[11px] text-on-surface-variant">1d ago</span>
+</div>
+</div>
+</div>
+<!-- Load More Indicator -->
+<div class="py-6 flex justify-center w-full stagger-item" style="animation-delay: 0.4s;">
+<button class="font-label-sm text-label-sm uppercase text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">expand_more</span>
+                    Load Historical Records
+                </button>
+</div>
+</div>
+</main>
+</body></html>

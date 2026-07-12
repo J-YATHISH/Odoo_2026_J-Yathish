@@ -12,6 +12,11 @@
     --color-neutral-text: 226 226 230;  /* Main text: #e2e2e6 */
     --color-neutral-muted: 160 142 123; /* Muted border outline: #a08e7b */
     --color-border: 44 48 51;          /* Panel borders: #2C3033 */
+
+    /* Button specific colors (Dark theme defaults) */
+    --color-btn-primary-bg: 240 160 48;
+    --color-btn-primary-text: 17 19 22;
+    --color-btn-primary-hover: 229 152 46;
   }
 
   :root.light {
@@ -24,6 +29,11 @@
     --color-neutral-text: 17 24 39;     /* Deep gray text: #111827 */
     --color-neutral-muted: 107 114 128; /* Gray-500: #6b7280 */
     --color-border: 209 213 219;        /* Gray-300: #d1d5db */
+
+    /* Button specific colors (Light theme overrides) */
+    --color-btn-primary-bg: 17 24 39;    /* Dark slate button for sharp contrast: #111827 */
+    --color-btn-primary-text: 255 255 255; /* White text */
+    --color-btn-primary-hover: 240 160 48; /* Highlight gold on hover: #f0a030 */
   }
 
   body {

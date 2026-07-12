@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AssetFlow - Maintenance Kanban</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400&amp;family=IBM+Plex+Sans+Condensed:wght@600&amp;family=IBM+Plex+Mono:wght@450&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#54c4a4",
+                        "surface-bright": "#37393d",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#1e2023",
+                        "on-surface": "#e2e2e6",
+                        "on-secondary-fixed-variant": "#024a79",
+                        "on-tertiary-fixed": "#002118",
+                        "error": "#ffb4ab",
+                        "primary-container": "#f0a030",
+                        "error-container": "#93000a",
+                        "primary": "#ffc176",
+                        "on-primary-fixed": "#2b1700",
+                        "tertiary-fixed": "#89f7d4",
+                        "tertiary": "#72e0be",
+                        "on-primary": "#472a00",
+                        "on-primary-container": "#613b00",
+                        "secondary-fixed-dim": "#9acbff",
+                        "surface": "#111316",
+                        "tertiary-fixed-dim": "#6cdab8",
+                        "on-tertiary-container": "#004e3d",
+                        "on-secondary": "#003355",
+                        "surface-container-highest": "#333538",
+                        "secondary": "#9acbff",
+                        "outline-variant": "#524435",
+                        "on-secondary-container": "#87b9ef",
+                        "primary-fixed": "#ffddb8",
+                        "on-secondary-fixed": "#001d34",
+                        "background": "#111316",
+                        "surface-container-low": "#1a1c1f",
+                        "on-tertiary-fixed-variant": "#00513f",
+                        "on-surface-variant": "#d7c3af",
+                        "surface-container-lowest": "#0c0e11",
+                        "on-background": "#e2e2e6",
+                        "outline": "#a08e7b",
+                        "on-error": "#690005",
+                        "surface-container-high": "#282a2d",
+                        "secondary-fixed": "#d0e4ff",
+                        "inverse-on-surface": "#2f3034",
+                        "surface-variant": "#333538",
+                        "on-tertiary": "#00382b",
+                        "surface-tint": "#ffb961",
+                        "inverse-surface": "#e2e2e6",
+                        "on-primary-fixed-variant": "#663e00",
+                        "inverse-primary": "#865300",
+                        "secondary-container": "#024a79",
+                        "surface-dim": "#111316",
+                        "primary-fixed-dim": "#ffb961"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "density-sm": "8px",
+                        "sidebar-width": "240px",
+                        "density-md": "16px",
+                        "unit": "4px",
+                        "gutter-table": "12px",
+                        "margin-page": "24px",
+                        "density-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["IBM Plex Mono"],
+                        "body-md": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans Condensed"],
+                        "headline-lg": ["IBM Plex Sans Condensed"],
+                        "label-sm": ["IBM Plex Sans Condensed"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["13px", { "lineHeight": "16px", "fontWeight": "450" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "12px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for Kanban columns */
+        .kanban-col::-webkit-scrollbar { width: 4px; }
+        .kanban-col::-webkit-scrollbar-track { background: transparent; }
+        .kanban-col::-webkit-scrollbar-thumb { background: #524435; border-radius: 0; }
+        
+        .highlight-flash {
+            animation: flash-amber 1s ease-out;
+        }
+        @keyframes flash-amber {
+            0% { background-color: #f0a030; border-color: #f0a030; }
+            100% { background-color: #1d2023; border-color: #524435; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen flex overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<nav class="hidden md:flex flex-col h-full w-sidebar-width border-r border-outline-variant bg-surface py-density-md shrink-0">
+<div class="px-density-md mb-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="font-headline-md text-headline-md font-black text-on-primary bg-primary px-2 py-1">AssetFlow Monogram AF</span>
+<div>
+<div class="font-headline-md text-headline-md">AF_CORE_V1</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">OPERATIONAL_UNIT_01</div>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-density-md text-on-surface-variant px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm">Inventory</span>
+</a>
+<a class="flex items-center gap-density-md text-on-surface-variant px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-sm text-label-sm">Logistics</span>
+</a>
+<a class="flex items-center gap-density-md bg-surface-container-high border-l-4 border-primary text-primary font-bold px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</a>
+<a class="flex items-center gap-density-md text-on-surface-variant px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-sm text-label-sm">Personnel</span>
+</a>
+<a class="flex items-center gap-density-md text-on-surface-variant px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">Reports</span>
+</a>
+</div>
+<div class="flex flex-col gap-1 mt-auto pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-density-md text-on-surface-variant px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-sm text-label-sm">System Status</span>
+</a>
+<a class="flex items-center gap-density-md text-on-surface-variant px-density-md py-density-sm hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-sm text-label-sm">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col h-full overflow-hidden">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-margin-page h-12 bg-surface-container border-b border-outline-variant shrink-0">
+<div class="flex items-center gap-4">
+<div class="font-headline-lg text-headline-lg font-bold text-primary tracking-tighter md:hidden">AssetFlow</div>
+<div class="font-headline-md text-headline-md">Maintenance Tracker</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:bg-surface-bright transition-colors p-1">settings</button>
+<button class="material-symbols-outlined text-primary hover:bg-surface-bright transition-colors p-1">notifications</button>
+<button class="material-symbols-outlined text-primary hover:bg-surface-bright transition-colors p-1">account_circle</button>
+<button class="bg-primary-container text-on-primary-container font-headline-md text-headline-md px-4 py-1 flex items-center gap-2 rounded-none hover:opacity-90">
+<span class="material-symbols-outlined">add</span> Raise Request
+                </button>
+</div>
+</header>
+<!-- Kanban Board -->
+<main class="flex-1 p-margin-page flex gap-density-md overflow-x-auto bg-surface-dim">
+<!-- Column 1: Pending -->
+<div class="flex flex-col w-72 shrink-0 border-r border-outline-variant pr-density-md">
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-outline-variant">
+<h2 class="font-headline-md text-headline-md">Pending (3)</h2>
+</div>
+<div class="flex-1 overflow-y-auto kanban-col flex flex-col gap-density-sm pr-1">
+<!-- Card -->
+<div class="bg-surface-container border border-outline-variant p-3 relative hover:bg-surface-variant transition-colors cursor-pointer">
+<div class="absolute top-0 right-0 w-3 h-3 bg-error border-l border-b border-outline-variant"></div>
+<div class="font-data-mono text-data-mono text-on-surface-variant mb-1">AF-9932</div>
+<div class="font-body-md text-body-md text-on-surface mb-3 line-clamp-2">Hydraulic Leak - Main Arm</div>
+<div class="flex justify-between items-end">
+<span class="font-label-sm text-label-sm text-error px-1 border border-error">HIGH</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">more_horiz</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: Approved -->
+<div class="flex flex-col w-72 shrink-0 border-r border-outline-variant px-density-md">
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-outline-variant">
+<h2 class="font-headline-md text-headline-md">Approved (2)</h2>
+</div>
+<div class="flex-1 overflow-y-auto kanban-col flex flex-col gap-density-sm pr-1">
+<div class="bg-surface-container border border-outline-variant p-3 relative hover:bg-surface-variant transition-colors cursor-pointer highlight-flash">
+<div class="absolute top-0 right-0 w-3 h-3 bg-primary-container border-l border-b border-outline-variant"></div>
+<div class="font-data-mono text-data-mono text-on-surface-variant mb-1">AF-4100</div>
+<div class="font-body-md text-body-md text-on-surface mb-2 line-clamp-2">Conveyor Belt Misalignment</div>
+<div class="font-label-sm text-label-sm text-tertiary-container mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">engineering</span> Under Maintenance
+                        </div>
+<div class="flex justify-between items-end">
+<span class="font-label-sm text-label-sm text-primary-container px-1 border border-primary-container">MED</span>
+<div class="w-6 h-6 border border-outline-variant bg-surface flex items-center justify-center font-label-sm text-label-sm text-on-surface-variant">UN</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

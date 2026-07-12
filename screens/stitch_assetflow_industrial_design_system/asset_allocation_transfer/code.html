@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AssetFlow ERP - Asset Allocation &amp; Transfer</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;450;500&amp;family=IBM+Plex+Sans+Condensed:wght@400;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#613b00",
+                      "inverse-primary": "#865300",
+                      "outline": "#a08e7b",
+                      "secondary-fixed": "#d0e4ff",
+                      "on-tertiary-container": "#004e3d",
+                      "secondary-fixed-dim": "#9acbff",
+                      "surface-variant": "#333538",
+                      "surface-container-highest": "#333538",
+                      "surface-container-low": "#1a1c1f",
+                      "on-tertiary-fixed-variant": "#00513f",
+                      "error": "#ffb4ab",
+                      "primary": "#ffc176",
+                      "tertiary-fixed-dim": "#6cdab8",
+                      "tertiary-fixed": "#89f7d4",
+                      "inverse-on-surface": "#2f3034",
+                      "on-tertiary": "#00382b",
+                      "on-secondary-fixed-variant": "#024a79",
+                      "surface-container-lowest": "#0c0e11",
+                      "on-secondary-fixed": "#001d34",
+                      "on-primary-fixed-variant": "#663e00",
+                      "on-error-container": "#ffdad6",
+                      "surface-tint": "#ffb961",
+                      "tertiary-container": "#54c4a4",
+                      "surface": "#111316",
+                      "on-tertiary-fixed": "#002118",
+                      "on-surface-variant": "#d7c3af",
+                      "on-surface": "#e2e2e6",
+                      "on-secondary-container": "#87b9ef",
+                      "error-container": "#93000a",
+                      "background": "#111316",
+                      "surface-bright": "#37393d",
+                      "outline-variant": "#524435",
+                      "tertiary": "#72e0be",
+                      "surface-container": "#1e2023",
+                      "primary-fixed-dim": "#ffb961",
+                      "on-primary": "#472a00",
+                      "on-primary-fixed": "#2b1700",
+                      "surface-dim": "#111316",
+                      "on-error": "#690005",
+                      "surface-container-high": "#282a2d",
+                      "secondary-container": "#024a79",
+                      "secondary": "#9acbff",
+                      "on-background": "#e2e2e6",
+                      "inverse-surface": "#e2e2e6",
+                      "primary-container": "#f0a030",
+                      "on-secondary": "#003355",
+                      "primary-fixed": "#ffddb8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "sidebar-width": "240px",
+                      "margin-page": "24px",
+                      "density-xs": "4px",
+                      "density-sm": "8px",
+                      "density-md": "16px",
+                      "gutter-table": "12px"
+              },
+              "fontFamily": {
+                      "data-mono": [
+                              "IBM Plex Mono"
+                      ],
+                      "headline-md": [
+                              "IBM Plex Sans Condensed"
+                      ],
+                      "label-sm": [
+                              "IBM Plex Sans Condensed"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-lg": [
+                              "IBM Plex Sans Condensed"
+                      ]
+              },
+              "fontSize": {
+                      "data-mono": [
+                              "13px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "450"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "12px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #15171A; /* Hardcoded fallback if tailwind fails */
+        }
+        /* Hide scrollbar for clean industrial look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111316; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333538; 
+            border-radius: 0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #524435; 
+        }
+        .flash-effect {
+            animation: flashHighlight 0.5s ease-out;
+        }
+        @keyframes flashHighlight {
+            0% { background-color: #f0a030; color: #111316; }
+            100% { background-color: transparent; }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen w-full overflow-hidden flex">
+<!-- SideNavBar -->
+<aside class="w-sidebar-width h-full fixed left-0 top-0 border-r border-outline-variant bg-surface flex flex-col z-50">
+<div class="h-14 border-b border-outline-variant bg-surface flex items-center px-margin-page">
+<span class="font-headline-lg text-headline-lg font-bold text-primary tracking-tighter">AssetFlow</span>
+</div>
+<nav class="flex-1 py-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-margin-page py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-headline-md text-headline-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-margin-page py-2 border-l-4 border-primary bg-surface-container-high text-on-surface font-bold transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-headline-md text-headline-md">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-margin-page py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">precision_manufacturing</span>
+<span class="font-headline-md text-headline-md">Operations</span>
+</a>
+<a class="flex items-center gap-3 px-margin-page py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">build</span>
+<span class="font-headline-md text-headline-md">Maintenance</span>
+</a>
+<a class="flex items-center gap-3 px-margin-page py-2 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors duration-150 border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+<span class="font-headline-md text-headline-md">Reports</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant bg-surface">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+<div>
+<div class="font-headline-md text-[14px] leading-tight">Admin User</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">System</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="ml-sidebar-width flex-1 flex flex-col h-full bg-[#15171A]">
+<!-- TopNavBar -->
+<header class="docked full-width top-0 h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center w-full px-margin-page z-40 transition-all duration-200 ease-in-out">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Asset Allocation &amp; Transfer</span>
+</div>
+<div class="flex items-center gap-4 text-primary">
+<button class="hover:bg-surface-variant p-2 rounded-none transition-colors duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:bg-surface-variant p-2 rounded-none transition-colors duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="hover:bg-surface-variant p-2 rounded-none transition-colors duration-150">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto p-margin-page flex flex-col gap-6">
+<!-- Top Section: Two Zones -->
+<div class="flex flex-col lg:flex-row gap-6 min-h-[400px]">
+<!-- LEFT ZONE (60%) -->
+<div class="lg:w-[60%] flex flex-col gap-6">
+<!-- Asset Selector -->
+<section class="bg-surface border border-[#2C3033] p-4 flex flex-col gap-4">
+<div class="flex justify-between items-center border-b border-[#2C3033] pb-2">
+<h2 class="font-headline-md text-headline-md uppercase">Asset Selection</h2>
+</div>
+<div class="flex gap-2 items-end">
+<div class="flex-1">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase">Asset ID / Tag</label>
+<div class="relative">
+<span class="absolute left-3 top-2.5 material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-[#15171A] border border-[#2C3033] text-on-surface font-data-mono text-data-mono pl-10 pr-3 py-2 rounded-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Scan or type ID..." type="text" value="AF-9932"/>
+</div>
+</div>
+<button class="bg-[#2C3033] text-on-surface font-headline-md text-[14px] px-4 py-2 border border-[#2C3033] hover:bg-surface-variant transition-colors h-[38px] uppercase">Lookup</button>
+</div>
+</section>
+<!-- Conflict Panel (Primary Feature) -->
+<section class="bg-surface border border-[#2C3033] flex relative">
+<div class="w-1 bg-[#C25D4E] absolute left-0 top-0 bottom-0"></div>
+<div class="p-6 pl-8 flex-1 flex flex-col gap-6">
+<div class="flex justify-between items-start border-b border-[#2C3033] pb-4">
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h2 class="font-headline-lg text-headline-lg uppercase text-[#C25D4E]">Allocation Conflict</h2>
+<span class="bg-[#C25D4E] text-[#111316] font-label-sm text-label-sm px-2 py-0.5 uppercase tracking-wider">Already Allocated</span>
+</div>
+<p class="font-data-mono text-data-mono text-on-surface-variant">Asset <span class="text-on-surface">AF-9932</span> (Precision Calibrator X-4) is currently checked out.</p>
+</div>
+<div class="bg-[#15171A] border border-[#2C3033] p-2 text-right">
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Current Custodian</div>
+<div class="font-headline-md text-[16px] uppercase">R. Vance</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant mt-1">Loc: Sector 4B</div>
+</div>
+</div>
+<!-- Transfer Request Form -->
+<div class="bg-[#15171A] border border-[#2C3033] p-4 flex flex-col gap-4">
+<h3 class="font-headline-md text-[16px] uppercase border-b border-[#2C3033] pb-2">Initiate Transfer Request</h3>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase">Transfer From</label>
+<input class="w-full bg-surface border border-[#2C3033] text-on-surface-variant font-data-mono text-data-mono px-3 py-2 rounded-none opacity-70 cursor-not-allowed" disabled="" type="text" value="R. Vance"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase">Transfer To</label>
+<select class="w-full bg-[#15171A] border border-[#2C3033] text-on-surface font-data-mono text-data-mono px-3 py-2 rounded-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none">
+<option>T. Sterling</option>
+<option>M. Chen</option>
+<option>J. Doe</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase">Reason for Transfer</label>
+<textarea class="w-full bg-[#15171A] border border-[#2C3033] text-on-surface font-body-md px-3 py-2 rounded-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary h-20 resize-none" placeholder="Enter justification..."></textarea>
+</div>
+<div class="flex gap-4 mt-2 border-t border-[#2C3033] pt-4">
+<button class="bg-primary-container text-on-primary font-headline-md text-[14px] px-6 py-2 uppercase hover:bg-primary transition-colors flex-1 text-center font-bold tracking-wide">Submit Transfer Request</button>
+<button class="bg-transparent border border-[#2C3033] text-on-surface font-headline-md text-[14px] px-6 py-2 uppercase hover:bg-surface-variant transition-colors">Mark As Returned</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- RIGHT ZONE (40%) -->
+<div class="lg:w-[40%] flex flex-col gap-6">
+<!-- Transfer Status Tracker -->
+<section class="bg-surface border border-[#2C3033] p-4 flex flex-col gap-4">
+<h2 class="font-headline-md text-headline-md uppercase border-b border-[#2C3033] pb-2">Active Request Status</h2>
+<div class="flex flex-col gap-0 relative">
+<div class="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[#2C3033]"></div>
+<!-- Step 1 -->
+<div class="flex gap-4 items-start relative z-10 py-2">
+<div class="w-6 h-6 rounded-none bg-primary flex items-center justify-center mt-0.5 outline outline-2 outline-[#15171A]">
+<span class="material-symbols-outlined text-[#111316] text-[16px] font-bold">check</span>
+</div>
+<div>
+<div class="font-headline-md text-[14px] uppercase text-primary">Requested</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Oct 12, 09:14 AM by T. Sterling</div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex gap-4 items-start relative z-10 py-2">
+<div class="w-6 h-6 rounded-none bg-surface border border-[#2C3033] flex items-center justify-center mt-0.5 outline outline-2 outline-[#15171A]">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">more_horiz</span>
+</div>
+<div>
+<div class="font-headline-md text-[14px] uppercase text-on-surface-variant">Approval Pending</div>
+<div class="font-data-mono text-[11px] text-on-surface-variant">Awaiting Supervisor Authorization</div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex gap-4 items-start relative z-10 py-2">
+<div class="w-6 h-6 rounded-none bg-[#15171A] border border-[#2C3033] flex items-center justify-center mt-0.5 outline outline-2 outline-[#15171A] opacity-50">
+</div>
+<div class="opacity-50">
+<div class="font-headline-md text-[14px] uppercase text-on-surface-variant">Re-Allocated</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Return Condition Form (Hidden by default, shown as example) -->
+<section class="bg-surface border border-[#2C3033] p-4 flex flex-col gap-4 opacity-50 pointer-events-none grayscale">
+<div class="flex justify-between items-center border-b border-[#2C3033] pb-2">
+<h2 class="font-headline-md text-headline-md uppercase">Condition Check-in</h2>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<label class="flex items-center gap-2 p-2 border border-[#2C3033] bg-[#15171A] cursor-not-allowed">
+<input disabled="" name="condition" type="radio"/>
+<span class="font-headline-md text-[14px] uppercase">Nominal</span>
+</label>
+<label class="flex items-center gap-2 p-2 border border-[#2C3033] bg-[#15171A] cursor-not-allowed">
+<input disabled="" name="condition" type="radio"/>
+<span class="font-headline-md text-[14px] uppercase text-[#C25D4E]">Damaged</span>
+</label>
+</div>
+</section>
+</div>
+</div>
+<!-- Bottom Section: Allocation History -->
+<section class="bg-surface border border-[#2C3033] flex flex-col mt-4">
+<div class="p-4 border-b border-[#2C3033] flex justify-between items-center bg-surface-container">
+<h2 class="font-headline-md text-headline-md uppercase">Allocation History Ledger</h2>
+<span class="font-data-mono text-data-mono text-on-surface-variant">Last 5 records</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-[#2C3033]">
+<th class="font-label-sm text-label-sm text-on-surface-variant uppercase py-2 px-4 w-[120px]">Asset Tag</th>
+<th class="font-label-sm text-label-sm text-on-surface-variant uppercase py-2 px-4">Assignee</th>
+<th class="font-label-sm text-label-sm text-on-surface-variant uppercase py-2 px-4">Start Date</th>
+<th class="font-label-sm text-label-sm text-on-surface-variant uppercase py-2 px-4">End Date</th>
+<th class="font-label-sm text-label-sm text-on-surface-variant uppercase py-2 px-4">Status</th>
+<th class="font-label-sm text-label-sm text-on-surface-variant uppercase py-2 px-4">Notes</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono">
+<!-- Current Overdue Record -->
+<tr class="border-b border-[#2C3033] hover:bg-[#25282C] transition-colors">
+<td class="py-2 px-4 text-on-surface">AF-9932</td>
+<td class="py-2 px-4">R. Vance</td>
+<td class="py-2 px-4">2023-10-01</td>
+<td class="py-2 px-4 text-[#C25D4E] font-bold">2023-10-10</td>
+<td class="py-2 px-4">
+<span class="bg-[#333538] text-on-surface border border-[#C25D4E] px-1 py-0.5 uppercase text-[10px] tracking-wider">OVERDUE</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant text-[11px]">Field op extended.</td>
+</tr>
+<!-- Past Records -->
+<tr class="border-b border-[#2C3033] hover:bg-[#25282C] transition-colors">
+<td class="py-2 px-4 text-on-surface">AF-9932</td>
+<td class="py-2 px-4">L. Gomez</td>
+<td class="py-2 px-4">2023-09-15</td>
+<td class="py-2 px-4">2023-09-28</td>
+<td class="py-2 px-4">
+<span class="bg-[#2C3033] text-on-surface px-1 py-0.5 uppercase text-[10px] tracking-wider">RETURNED</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant text-[11px]">Routine maint required.</td>
+</tr>
+<tr class="border-b border-[#2C3033] hover:bg-[#25282C] transition-colors">
+<td class="py-2 px-4 text-on-surface">AF-9932</td>
+<td class="py-2 px-4">T. Sterling</td>
+<td class="py-2 px-4">2023-08-01</td>
+<td class="py-2 px-4">2023-08-14</td>
+<td class="py-2 px-4">
+<span class="bg-[#2C3033] text-on-surface px-1 py-0.5 uppercase text-[10px] tracking-wider">RETURNED</span>
+</td>
+<td class="py-2 px-4 text-on-surface-variant text-[11px]">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+</body></html>

@@ -26,14 +26,15 @@
   }
 
   .btn-primary-industrial {
-    background-color: rgb(var(--color-primary));
-    color: #111316; /* Keep text color readable dark on golden backgrounds */
+    background-color: rgb(var(--color-btn-primary-bg));
+    color: rgb(var(--color-btn-primary-text));
     border: none;
-    transition: background-color 0.15s ease-in-out;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
   }
 
   .btn-primary-industrial:hover:not(:disabled) {
-    background-color: rgb(229, 152, 46);
+    background-color: rgb(var(--color-btn-primary-hover));
+    color: #111316; /* Keep hover text dark on gold highlight hover */
   }
 
   .btn-secondary-industrial {
